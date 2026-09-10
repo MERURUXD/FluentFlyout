@@ -7,6 +7,7 @@ using FluentFlyout.Classes.Settings;
 using FluentFlyout.Classes.Utils;
 using FluentFlyout.Controls;
 using FluentFlyoutWPF.Classes;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Models;
 using FluentFlyoutWPF.Windows;
 using System.Collections.ObjectModel;
@@ -989,6 +990,14 @@ public partial class UserSettings : ObservableObject
         UpdateTaskbarMarquees();
     }
 
+    partial void OnTaskbarWidgetScrollVolumeModeChanged(int oldValue, int newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+
+        if (newValue == 0 && Application.Current?.MainWindow is MainWindow mainWindow)
+            mainWindow.ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarScroll);
+    }
+
     private void UpdateTaskbarMarquees()
     {
         MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
@@ -1070,7 +1079,26 @@ public partial class UserSettings : ObservableObject
     {
         if (newValue == true || oldValue == newValue || _initializing) return;
 
+        if (Application.Current?.MainWindow is MainWindow mainWindow)
+            mainWindow.OnVolumeControlDisabled();
+
         // re-enable native volume flyout
         VolumeMixerWindow.ShowVolumeOsd();
+    }
+
+    partial void OnVolumeMixerEnabledChanged(bool oldValue, bool newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+
+        if (Application.Current?.MainWindow is MainWindow mainWindow)
+            mainWindow.OnVolumeMixerEnabledChanged(newValue);
+    }
+
+    partial void OnSeekbarEnabledChanged(bool oldValue, bool newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+
+        if (Application.Current?.MainWindow is MainWindow mainWindow)
+            mainWindow.RefreshSeekbarTimer();
     }
 }

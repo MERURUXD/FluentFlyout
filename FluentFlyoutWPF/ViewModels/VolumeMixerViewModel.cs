@@ -22,8 +22,13 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 {
     private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
+    private readonly object _lifecycleLock = new();
+    private readonly VolumeMixerConsumerRegistry _consumers = new();
     private MMDevice? _device;
     private DispatcherTimer? _pollTimer;
+    private int _monitorGeneration;
+    private bool _isDisposed;
+    private bool _isMonitoring;
 
     [ObservableProperty]
     public partial float MasterVolume { get; set; }
@@ -43,13 +48,90 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
     public VolumeMixerViewModel()
     {
         DeviceName = string.Empty;
-        AudioDeviceMonitor.Instance.DefaultDeviceChanged += OnDefaultDeviceChanged;
+    }
 
+    internal bool HasActiveConsumers
+    {
+        get
+        {
+            lock (_lifecycleLock)
+            {
+                return _consumers.HasConsumers;
+            }
+        }
+    }
+
+    internal VolumeMixerConsumer ActiveConsumers
+    {
+        get
+        {
+            lock (_lifecycleLock)
+            {
+                return _consumers.ActiveConsumers;
+            }
+        }
+    }
+
+    internal void AcquireConsumer(VolumeMixerConsumer consumer)
+    {
+        lock (_lifecycleLock)
+        {
+            if (_isDisposed)
+                return;
+
+            bool wasEmpty = !_consumers.HasConsumers;
+            _consumers.Acquire(consumer);
+            if (wasEmpty)
+                StartMonitoringCore();
+        }
+    }
+
+    internal void ReleaseConsumer(VolumeMixerConsumer consumer)
+    {
+        lock (_lifecycleLock)
+        {
+            if (_isDisposed || !_consumers.HasConsumers)
+                return;
+
+            if (_consumers.Release(consumer) && !_consumers.HasConsumers)
+                StopMonitoringCore();
+        }
+    }
+
+    private void StartMonitoringCore()
+    {
+        _monitorGeneration++;
+        _isMonitoring = true;
+        AudioDeviceMonitor.Instance.DefaultDeviceChanged += OnDefaultDeviceChanged;
         AttachDevice(AudioDeviceMonitor.Instance.GetDefaultRenderDevice());
 
         _pollTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000) };
         _pollTimer.Tick += OnPollTick;
         _pollTimer.Start();
+    }
+
+    private void StopMonitoringCore()
+    {
+        _monitorGeneration++;
+        bool wasMonitoring = _isMonitoring;
+        _isMonitoring = false;
+
+        if (_pollTimer != null)
+        {
+            _pollTimer.Tick -= OnPollTick;
+            _pollTimer.Stop();
+            _pollTimer = null;
+        }
+
+        if (wasMonitoring)
+            AudioDeviceMonitor.Instance.DefaultDeviceChanged -= OnDefaultDeviceChanged;
+        ClearSessions();
+
+        _device?.Dispose();
+        _device = null;
+        DeviceName = string.Empty;
+        MasterVolume = 0f;
+        IsMasterMuted = false;
     }
 
     partial void OnIsExpandedChanged(bool oldValue, bool newValue)
@@ -60,6 +142,9 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
     private void AttachDevice(MMDevice? device)
     {
+        if (!ReferenceEquals(_device, device))
+            _device?.Dispose();
+
         _device = device;
 
         if (_device == null)
@@ -80,9 +165,28 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
     {
         Logger.Info("Default render device changed, reattaching volume mixer");
 
-        System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+        int generation;
+        lock (_lifecycleLock)
         {
-            AttachDevice(AudioDeviceMonitor.Instance.GetDeviceById(e.DeviceId));
+            if (_isDisposed || !_consumers.HasConsumers)
+                return;
+
+            generation = _monitorGeneration;
+        }
+
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher == null)
+            return;
+
+        dispatcher.InvokeAsync(() =>
+        {
+            lock (_lifecycleLock)
+            {
+                if (_isDisposed || !_consumers.HasConsumers || generation != _monitorGeneration)
+                    return;
+
+                AttachDevice(AudioDeviceMonitor.Instance.GetDeviceById(e.DeviceId));
+            }
         });
     }
 
@@ -153,7 +257,7 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
     public void SyncMasterFromDevice()
     {
-        if (_device == null) return;
+        if (_isDisposed || !_consumers.HasConsumers || _device == null) return;
 
         var vol = _device.AudioEndpointVolume.MasterVolumeLevelScalar;
         var mute = _device.AudioEndpointVolume.Mute;
@@ -169,6 +273,9 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
     [RelayCommand]
     public void RefreshSessions()
     {
+        if (_isDisposed || !_consumers.HasConsumers)
+            return;
+
         ClearSessions();
 
         if (_device == null)
@@ -244,6 +351,9 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
     public void OnPollTick(object? sender, EventArgs e)
     {
+        if (_isDisposed || !_consumers.HasConsumers)
+            return;
+
         SyncMasterFromDevice();
 
         foreach (var session in Sessions)
@@ -257,16 +367,15 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        if (_pollTimer != null)
+        lock (_lifecycleLock)
         {
-            _pollTimer.Tick -= OnPollTick;
-            _pollTimer.Stop();
-            _pollTimer = null;
+            if (_isDisposed)
+                return;
+
+            _isDisposed = true;
+            _consumers.Clear();
+            StopMonitoringCore();
         }
-
-        AudioDeviceMonitor.Instance.DefaultDeviceChanged -= OnDefaultDeviceChanged;
-
-        ClearSessions();
 
         GC.SuppressFinalize(this);
     }

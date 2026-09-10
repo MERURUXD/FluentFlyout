@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
+// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Portions of this code are derived from:
@@ -10,6 +10,7 @@
 using FluentFlyout.Classes;
 using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF.Classes;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.ViewModels;
 using MicaWPF.Controls;
 using NLog;
@@ -35,9 +36,12 @@ public partial class VolumeMixerWindow : MicaWindow
     private readonly double _collapsedHeight = 50;
     private readonly double _normalWidth;
     private bool _isHiding = true;
+    private bool _resourcesDisposed;
 
     private long _lastFlyoutTime = 0;
     private readonly TimeSpan _flyoutCooldown = TimeSpan.FromMilliseconds(500);
+
+    internal bool IsClosing { get; private set; }
 
     public VolumeMixerWindow()
     {
@@ -62,6 +66,8 @@ public partial class VolumeMixerWindow : MicaWindow
     {
         if (FullscreenDetector.IsFullscreenApplicationRunning())
             return;
+
+        ViewModel.AcquireConsumer(VolumeMixerConsumer.VolumeControl);
 
         long currentTime = Environment.TickCount64;
 
@@ -175,22 +181,37 @@ public partial class VolumeMixerWindow : MicaWindow
     {
         if (e.PropertyName == nameof(VolumeMixerViewModel.IsExpanded))
         {
+            if (ViewModel.IsExpanded)
+                ViewModel.AcquireConsumer(VolumeMixerConsumer.Mixer);
+            else
+                ViewModel.ReleaseConsumer(VolumeMixerConsumer.Mixer);
+
             AnimateExpandCollapse(ViewModel.IsExpanded);
         }
     }
 
     private void OnSessionVolumeChanged(object? sender, EventArgs e)
     {
-        _mainWindow.taskbarWindow?.RefreshAppVolumeTooltip();
+        _mainWindow.RefreshTaskbarVolumeTooltip();
     }
 
-    protected override void OnClosed(EventArgs e)
+    internal void DisposeResources()
     {
+        if (_resourcesDisposed)
+            return;
+
+        _resourcesDisposed = true;
         _cts.Cancel();
         _cts.Dispose();
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
         ViewModel.SessionVolumeChanged -= OnSessionVolumeChanged;
         ViewModel.Dispose();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        IsClosing = true;
+        DisposeResources();
         base.OnClosed(e);
     }
 

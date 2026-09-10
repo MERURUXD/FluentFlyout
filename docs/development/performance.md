@@ -34,6 +34,11 @@ the window and stops its timer; display/Explorer recovery does not recreate a
 disabled window. Existing enable, disable, and recreation entry points remain
 the ownership boundary.
 
+The mixer view model now starts its device subscription and polling timer only
+while at least one concrete consumer is active. A hidden volume flyout keeps
+the resources while Volume Control remains enabled, while disabling the last
+consumer releases the timer, subscription, session handlers, and device.
+
 ### Visualizer
 
 Before Stage 3, `TaskbarVisualizerControl` held a static eager
@@ -49,7 +54,9 @@ Disabling releases the existing instance (including capture, buffers, device,
 watchdog, and system subscriptions) without creating a replacement. Closing
 the taskbar widget releases it as well, and shutdown disposal is idempotent.
 `Visualizer` now refuses restart after disposal or disable, cleans partial
-start failures through `Stop`, and reuses the per-frame bar scratch buffer.
+starts explicitly, rejects a stale in-flight start by generation, drains active
+capture callbacks before external disposal, and ignores queued bitmap work from
+an old generation. It also reuses the per-frame bar scratch buffer.
 The capture, FFT, visual quality, target frame rate, and baseline behavior were
 otherwise left unchanged.
 
