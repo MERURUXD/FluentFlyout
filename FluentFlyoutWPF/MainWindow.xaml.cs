@@ -66,6 +66,7 @@ public partial class MainWindow : MicaWindow
     private MediaSession? nextUpSession;
     private string? nextUpSessionId;
     private string currentTitle = ""; // to prevent NextUpWindow from showing the same song
+    private readonly MediaSessionDisplayOwnership<MediaSession> _mediaSessionDisplayOwnership = new();
 
     private readonly int _seekbarUpdateInterval = 300;
     private readonly Timer _positionTimer;
@@ -187,6 +188,8 @@ public partial class MainWindow : MicaWindow
         mediaManager.OnAnyPlaybackStateChanged += CurrentSession_OnPlaybackStateChanged;
         mediaManager.OnAnyTimelinePropertyChanged += MediaManager_OnAnyTimelinePropertyChanged;
         mediaManager.OnAnySessionClosed += MediaManager_OnAnySessionClosed;
+        mediaManager.OnAnySessionOpened += MediaManager_OnAnySessionOpened;
+        mediaManager.OnFocusedSessionChanged += MediaManager_OnFocusedSessionChanged;
 
         WM_TASKBARCREATED = RegisterWindowMessage("TaskbarCreated");
         WM_SHELLHOOK = RegisterWindowMessage("SHELLHOOK");
@@ -321,8 +324,9 @@ public partial class MainWindow : MicaWindow
             return preferredSession;
         }
 
-        if (focused != null && validSessions.Any(s => s.Id == focused.Id))
-            return focused;
+        if (focused != null
+            && MediaSessionSelectionPolicy.SelectFocusedOrFirst(validSessions, focused, session => session.Id) is { } focusedAllowedSession)
+            return focusedAllowedSession;
 
         return validSessions.FirstOrDefault();
     }
@@ -561,6 +565,12 @@ public partial class MainWindow : MicaWindow
         CloseNextUpWindow(resetCurrentTitle: true);
     }
 
+    private void UpdateMediaSessionDisplayOwnership(MediaSession? activeSession)
+    {
+        if (_mediaSessionDisplayOwnership.SetOwner(activeSession))
+            currentTitle = string.Empty;
+    }
+
     public void RefreshFilteredMedia()
     {
         if (!Dispatcher.CheckAccess())
@@ -573,6 +583,7 @@ public partial class MainWindow : MicaWindow
             StopSeekbarTimer();
 
         var activeSession = GetActiveMediaSession();
+        UpdateMediaSessionDisplayOwnership(activeSession);
         if (activeSession?.ControlSession is not { } activeControlSession)
         {
             CloseStaleNextUpWindow(null);
@@ -972,6 +983,70 @@ public partial class MainWindow : MicaWindow
         }
     }
 
+    private void ApplyPlaybackStateIfCurrent(
+        MediaSession expectedSession,
+        MediaSessionDisplayOwnership<MediaSession>.OwnershipToken ownershipToken,
+        TaskbarWindow? expectedTaskbarWindow,
+        bool hasTaskbarUpdate,
+        string? taskbarTitle,
+        string? taskbarArtist,
+        BitmapImage? taskbarThumbnail,
+        GlobalSystemMediaTransportControlsSessionPlaybackStatus? playbackStatus,
+        GlobalSystemMediaTransportControlsSessionPlaybackControls? playbackControls)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            try
+            {
+                Dispatcher.Invoke(
+                    () => ApplyPlaybackStateIfCurrent(
+                        expectedSession,
+                        ownershipToken,
+                        expectedTaskbarWindow,
+                        hasTaskbarUpdate,
+                        taskbarTitle,
+                        taskbarArtist,
+                        taskbarThumbnail,
+                        playbackStatus,
+                        playbackControls),
+                    DispatcherPriority.Background);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Failed to marshal a playback-state update");
+            }
+
+            return;
+        }
+
+        if (GetActiveMediaSession() is not { } currentSession
+            || !ReferenceEquals(currentSession, expectedSession)
+            || !_mediaSessionDisplayOwnership.IsCurrent(ownershipToken))
+            return;
+
+        if (hasTaskbarUpdate)
+        {
+            TryUpdateTaskbarWindowIfCurrent(
+                expectedTaskbarWindow,
+                taskbarTitle ?? string.Empty,
+                taskbarArtist ?? string.Empty,
+                taskbarThumbnail,
+                playbackStatus,
+                playbackControls);
+        }
+
+        if (GetActiveMediaSession() is not { } currentSessionAfterTaskbar
+            || !ReferenceEquals(currentSessionAfterTaskbar, expectedSession)
+            || !_mediaSessionDisplayOwnership.IsCurrent(ownershipToken))
+            return;
+
+        if (IsVisible && currentSessionAfterTaskbar.ControlSession is { } controlSession)
+        {
+            UpdateUI(expectedSession);
+            HandlePlayBackState(controlSession.GetPlaybackInfo()?.PlaybackStatus);
+        }
+    }
+
     internal void RefreshTaskbarVolumeTooltip()
     {
         if (!Dispatcher.CheckAccess())
@@ -1054,38 +1129,47 @@ public partial class MainWindow : MicaWindow
             return;
         }
 
+        var ownershipToken = _mediaSessionDisplayOwnership.Capture(focusedSession);
+        if (!ownershipToken.IsValid)
+        {
+            RefreshFilteredMedia();
+            return;
+        }
+
         CloseStaleNextUpWindow(focusedSession);
 
         var selectedPlaybackInfo = selectedControlSession.GetPlaybackInfo();
 
         TaskbarWindow? taskbarUpdateTarget = ShouldHaveTaskbarWindow ? taskbarWindow : null;
+        bool hasTaskbarUpdate = false;
+        string? taskbarTitle = null;
+        string? taskbarArtist = null;
+        BitmapImage? taskbarThumbnail = null;
         if (taskbarUpdateTarget != null)
         {
             var tbSongInfo = TryGetMediaProperties(selectedControlSession);
             if (tbSongInfo != null)
             {
-                var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
+                hasTaskbarUpdate = true;
+                taskbarTitle = tbSongInfo.Title;
+                taskbarArtist = tbSongInfo.Artist;
+                taskbarThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
                 BitmapHelper.GetDominantColors(1);
-                TryUpdateTaskbarWindowIfCurrent(
-                    taskbarUpdateTarget,
-                    tbSongInfo.Title,
-                    tbSongInfo.Artist,
-                    tbThumbnail,
-                    selectedPlaybackInfo?.PlaybackStatus,
-                    selectedPlaybackInfo?.Controls);
             }
         }
 
-        if (IsVisible)
-        {
-            UpdateUI(focusedSession);
-            HandlePlayBackState(selectedPlaybackInfo?.PlaybackStatus);
-        }
+        ApplyPlaybackStateIfCurrent(
+            focusedSession,
+            ownershipToken,
+            taskbarUpdateTarget,
+            hasTaskbarUpdate,
+            taskbarTitle,
+            taskbarArtist,
+            taskbarThumbnail,
+            selectedPlaybackInfo?.PlaybackStatus,
+            selectedPlaybackInfo?.Controls);
     }
 
-    // for determining whether MediaPropertyChanged has no changes
-    private string previousMediaProperty = "";
-    private int previousMediaPropertyThumbnail = 0;
     private void MediaManager_OnAnyMediaPropertyChanged(MediaSession mediaSession, GlobalSystemMediaTransportControlsSessionMediaProperties mediaProperties)
     {
         // sometimes mediaSession.ControlSession can be null
@@ -1102,7 +1186,14 @@ public partial class MainWindow : MicaWindow
             return;
         }
 
-        if (!string.Equals(currentActiveSession.Id, mediaSession.Id, StringComparison.Ordinal))
+        var ownershipToken = _mediaSessionDisplayOwnership.Capture(currentActiveSession);
+        if (!ownershipToken.IsValid)
+        {
+            RefreshFilteredMedia();
+            return;
+        }
+
+        if (!ReferenceEquals(currentActiveSession, mediaSession))
         {
             // Keep the independent pause-other-sessions behavior tied to the event source,
             // but never let an unselected session refresh the displayed metadata.
@@ -1132,96 +1223,167 @@ public partial class MainWindow : MicaWindow
         string check = currentActiveSession.Id + "\u001F" + songInfo.Title + "\u001F" + songInfo.Artist + "\u001F" + playbackInfo.PlaybackStatus;
         int checkThumbnail = BitmapHelper.GetStableThumbnailHash(songInfo.Thumbnail);
         bool onlyThumbnailChanged = false;
-        if (previousMediaProperty == check)
+        if (_mediaSessionDisplayOwnership.HasSameSignature(ownershipToken, check))
         {
             onlyThumbnailChanged = true;
-            if (previousMediaPropertyThumbnail == checkThumbnail)
+            if (_mediaSessionDisplayOwnership.IsDuplicate(ownershipToken, check, checkThumbnail))
                 return; // prevent multiple calls for the same song info
         }
 
         var thumbnail = BitmapHelper.GetThumbnailWithHash(songInfo.Thumbnail, checkThumbnail);
         BitmapHelper.GetDominantColors(1);
 
-        bool taskbarUpdated = updateTaskbarTarget != null
-            && TryUpdateTaskbarWindowIfCurrent(
+        pauseOtherMediaSessionsIfNeeded(mediaSession);
+        if (!TryApplyMediaPropertyUpdate(
+                currentActiveSession,
+                ownershipToken,
                 updateTaskbarTarget,
                 songInfo.Title,
                 songInfo.Artist,
                 thumbnail,
                 playbackInfo.PlaybackStatus,
-                playbackInfo.Controls);
-
-        if (!taskbarUpdated && !updateNextUp && !updateMainFlyout)
+                playbackInfo.Controls,
+                check,
+                checkThumbnail,
+                onlyThumbnailChanged))
         {
-            pauseOtherMediaSessionsIfNeeded(mediaSession);
             return;
         }
 
-        previousMediaProperty = check;
-        previousMediaPropertyThumbnail = checkThumbnail;
+    }
 
-        pauseOtherMediaSessionsIfNeeded(mediaSession);
-
-        if (updateNextUp) // show NextUpWindow if enabled in settings
+    private bool TryApplyMediaPropertyUpdate(
+        MediaSession expectedSession,
+        MediaSessionDisplayOwnership<MediaSession>.OwnershipToken ownershipToken,
+        TaskbarWindow? expectedTaskbarWindow,
+        string title,
+        string artist,
+        BitmapImage? thumbnail,
+        GlobalSystemMediaTransportControlsSessionPlaybackStatus playbackStatus,
+        GlobalSystemMediaTransportControlsSessionPlaybackControls playbackControls,
+        string signature,
+        int thumbnailHash,
+        bool onlyThumbnailChanged)
+    {
+        if (!Dispatcher.CheckAccess())
         {
-            void createNewNextUpWindow()
+            try
             {
-                Dispatcher.Invoke(() =>
-                {
-                    if (nextUpWindow == null && playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing) // double-check within the Dispatcher to prevent race conditions
-                    {
-                        var newNextUpWindow = new NextUpWindow(songInfo.Title, songInfo.Artist, thumbnail);
-                        nextUpWindow = newNextUpWindow;
-                        nextUpSession = currentActiveSession;
-                        nextUpSessionId = currentActiveSession.Id;
-                        currentTitle = songInfo.Title;
-                        newNextUpWindow.Closed += (s, e) =>
-                        {
-                            if (ReferenceEquals(nextUpWindow, newNextUpWindow))
-                            {
-                                nextUpWindow = null;
-                                nextUpSession = null;
-                                nextUpSessionId = null;
-                            }
-                        };
-                    }
-                });
+                return Dispatcher.Invoke(
+                    () => TryApplyMediaPropertyUpdate(
+                        expectedSession,
+                        ownershipToken,
+                        expectedTaskbarWindow,
+                        title,
+                        artist,
+                        thumbnail,
+                        playbackStatus,
+                        playbackControls,
+                        signature,
+                        thumbnailHash,
+                        onlyThumbnailChanged),
+                    DispatcherPriority.Background);
             }
-
-            if (nextUpWindow == null && IsVisible == false && songInfo.Thumbnail != null && currentTitle != songInfo.Title)
+            catch (Exception ex)
             {
-                createNewNextUpWindow();
+                Logger.Error(ex, "Failed to marshal a media-session update");
+                return false;
+            }
+        }
+
+        UpdateMediaSessionDisplayOwnership(GetActiveMediaSession());
+        if (!_mediaSessionDisplayOwnership.IsCurrent(ownershipToken)
+            || !ReferenceEquals(GetActiveMediaSession(), expectedSession))
+            return false;
+
+        bool updateNextUp = SettingsManager.Current.NextUpEnabled
+            && !FullscreenDetector.IsFullscreenApplicationRunning();
+        bool updateMainFlyout = IsVisible;
+        bool taskbarUpdated = expectedTaskbarWindow != null
+            && TryUpdateTaskbarWindowIfCurrent(
+                expectedTaskbarWindow,
+                title,
+                artist,
+                thumbnail,
+                playbackStatus,
+                playbackControls);
+
+        if (!taskbarUpdated && !updateNextUp && !updateMainFlyout)
+            return false;
+
+        if (GetActiveMediaSession() is not { } currentSessionAfterTaskbar
+            || !ReferenceEquals(currentSessionAfterTaskbar, expectedSession)
+            || !_mediaSessionDisplayOwnership.IsCurrent(ownershipToken)
+            || !_mediaSessionDisplayOwnership.TryRecord(ownershipToken, signature, thumbnailHash))
+            return false;
+
+        if (updateNextUp)
+        {
+            if (nextUpWindow == null
+                && !IsVisible
+                && thumbnail != null
+                && currentTitle != title
+                && playbackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+            {
+                var newNextUpWindow = new NextUpWindow(title, artist, thumbnail);
+                nextUpWindow = newNextUpWindow;
+                nextUpSession = expectedSession;
+                nextUpSessionId = expectedSession.Id;
+                currentTitle = title;
+                newNextUpWindow.Closed += (s, e) =>
+                {
+                    if (ReferenceEquals(nextUpWindow, newNextUpWindow))
+                    {
+                        nextUpWindow = null;
+                        nextUpSession = null;
+                        nextUpSessionId = null;
+                    }
+                };
             }
             else if (nextUpWindow != null && !onlyThumbnailChanged)
             {
-                Dispatcher.Invoke(() =>
+                CloseNextUpWindow();
+                if (nextUpWindow == null
+                    && playbackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing
+                    && thumbnail != null)
                 {
-                    if (nextUpWindow != null)
+                    var newNextUpWindow = new NextUpWindow(title, artist, thumbnail);
+                    nextUpWindow = newNextUpWindow;
+                    nextUpSession = expectedSession;
+                    nextUpSessionId = expectedSession.Id;
+                    currentTitle = title;
+                    newNextUpWindow.Closed += (s, e) =>
                     {
-                        CloseNextUpWindow();
-                    }
-                });
-                createNewNextUpWindow();
+                        if (ReferenceEquals(nextUpWindow, newNextUpWindow))
+                        {
+                            nextUpWindow = null;
+                            nextUpSession = null;
+                            nextUpSessionId = null;
+                        }
+                    };
+                }
             }
-            else if (nextUpWindow != null && songInfo.Thumbnail != null)
+            else if (nextUpWindow != null && thumbnail != null)
             {
-                Dispatcher.Invoke(() =>
-                {
-                    nextUpWindow?.UpdateThumbnail(thumbnail);
-                });
+                nextUpWindow.UpdateThumbnail(thumbnail);
             }
         }
 
-        if (IsVisible)
+        if (updateMainFlyout)
         {
-            HandlePlayBackState(currentActiveSession.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
-            UpdateUI(currentActiveSession);
+            if (currentSessionAfterTaskbar.ControlSession is not { } controlSession)
+                return false;
+
+            HandlePlayBackState(controlSession.GetPlaybackInfo()?.PlaybackStatus);
+            UpdateUI(currentSessionAfterTaskbar);
         }
+
+        return taskbarUpdated || updateNextUp || updateMainFlyout;
     }
 
     private void MediaManager_OnAnyTimelinePropertyChanged(MediaSession mediaSession, GlobalSystemMediaTransportControlsSessionTimelineProperties timelineProperties)
     {
-        if (GetActiveMediaSession() is not { } session || session.Id != mediaSession.Id) return;
+        if (GetActiveMediaSession() is not { } session || !ReferenceEquals(session, mediaSession)) return;
 
         if (!SettingsManager.Current.SeekbarEnabled)
         {
@@ -1231,15 +1393,22 @@ public partial class MainWindow : MicaWindow
 
         Dispatcher.Invoke(() =>
         {
+            if (GetActiveMediaSession() is not { } currentSession
+                || !ReferenceEquals(currentSession, mediaSession)
+                || currentSession.ControlSession is not { } controlSession)
+                return;
+
+            UpdateMediaSessionDisplayOwnership(currentSession);
+
             if (Visibility != Visibility.Visible || _isHiding || _isDragging)
             {
-                HandlePlayBackState(session.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
+                HandlePlayBackState(controlSession.GetPlaybackInfo()?.PlaybackStatus);
                 return;
             }
 
             _lastSelfUpdateTimestamp = DateTime.Now;
-            UpdateSeekbarCurrentDuration(session.ControlSession.GetTimelineProperties().Position);
-            HandlePlayBackState(session.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
+            UpdateSeekbarCurrentDuration(controlSession.GetTimelineProperties().Position);
+            HandlePlayBackState(controlSession.GetPlaybackInfo()?.PlaybackStatus);
         });
     }
 
@@ -1248,7 +1417,27 @@ public partial class MainWindow : MicaWindow
 #if DEBUG
         Logger.Debug("Session closed: " + (mediaSession.Id).ToString());
 #endif
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() => MediaManager_OnAnySessionClosed(mediaSession), DispatcherPriority.Background);
+            return;
+        }
+
+        if (_mediaSessionDisplayOwnership.Invalidate(mediaSession))
+            currentTitle = string.Empty;
         RefreshFilteredMedia();
+    }
+
+    private void MediaManager_OnAnySessionOpened(MediaSession mediaSession)
+    {
+        if (!_isCleaningUp && mediaManager.IsStarted)
+            RefreshFilteredMedia();
+    }
+
+    private void MediaManager_OnFocusedSessionChanged(MediaSession mediaSession)
+    {
+        if (!_isCleaningUp && mediaManager.IsStarted)
+            RefreshFilteredMedia();
     }
 
     private static IntPtr SetHook(LowLevelKeyboardProc proc) // set the keyboard hook
@@ -1968,6 +2157,8 @@ public partial class MainWindow : MicaWindow
             mediaManager.OnAnyPlaybackStateChanged -= CurrentSession_OnPlaybackStateChanged;
             mediaManager.OnAnyTimelinePropertyChanged -= MediaManager_OnAnyTimelinePropertyChanged;
             mediaManager.OnAnySessionClosed -= MediaManager_OnAnySessionClosed;
+            mediaManager.OnAnySessionOpened -= MediaManager_OnAnySessionOpened;
+            mediaManager.OnFocusedSessionChanged -= MediaManager_OnFocusedSessionChanged;
 
             // dispose managed resources
             StopSeekbarTimer();
