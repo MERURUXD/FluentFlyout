@@ -27,7 +27,7 @@ MainWindow constructor
   - restore settings and startup/run registration
   - create tray icon and cancellation state
   - start media manager and low-level keyboard hook
-  - subscribe media, shell, and display-position events
+  - subscribe media-session open/focus, property/state/timeline/close, shell, and display-position events
   - begin experiment, localization, update, and first-update work
         |
         v
@@ -50,7 +50,7 @@ The application uses `ShutdownMode=OnExplicitShutdown`; the tray and coordinator
 
 ## Media-session flow
 
-The media manager observes Windows media sessions and raises property/state events. `MainWindow.GetActiveMediaSession()` is the single ownership lookup for the downstream as well as the upstream-compatible path:
+The media manager observes Windows media sessions and raises open, focus, property, state, timeline, and close events. Open/focus changes route through `RefreshFilteredMedia()` so a newly registered session can change the selected owner even when its first metadata event is not itself selected. The `MainWindow.Loaded` refresh also provides a post-start snapshot after the manager event subscriptions are installed. `MainWindow.GetActiveMediaSession()` is the single ownership lookup for the downstream as well as the upstream-compatible path:
 
 1. Read `CurrentMediaSessions`.
 2. Filter through `IsSessionAllowed` (the app-filtering policy); a filtered session is never eligible for downstream preference.
@@ -63,7 +63,7 @@ The persisted `MediaSessionSelectionMode` values are deliberately small and clos
 
 The selection policy receives only sessions already accepted by `IsSessionAllowed`. It reevaluates the current manager collection on every lookup and does not cache a selected or Spotify `MediaSession`; closing and restarting a player therefore resolves the currently registered session object naturally. The policy is limited to deciding whether Spotify Preferred has an override; automatic focused-session/first-session fallback remains in `MainWindow`.
 
-The single-session consumers that must continue to use this lookup are the main media flyout (`UpdateUI`), taskbar widget, previous/play/pause/next/repeat/shuffle/seek controls, active-media taskbar volume targeting, open-player activation, timeline/seek updates, Next Up metadata, and playback/property/session-close refresh handlers. Event handlers must verify that the event source is still the selected session before applying metadata, and playback timers must use the selected session's current playback state rather than the event source's state. Session close/restart and setting changes refresh all persistent selected-session surfaces, including stale Next Up content. Next Up may retain only its own origin-session reference plus ID as a short-lived UI ownership token, so a same-ID restart cannot leave an old card visible; this is not a general selected-session cache.
+The single-session consumers that must continue to use this lookup are the main media flyout (`UpdateUI`), taskbar widget, previous/play/pause/next/repeat/shuffle/seek controls, active-media taskbar volume targeting, open-player activation, timeline/seek updates, Next Up metadata, and playback/property/session-close refresh handlers. Event handlers must verify that the event source is still the selected session instance before preparing metadata, then revalidate that ownership on the UI Dispatcher before committing a prepared result to any selected-session surface. A stale callback cannot move the display owner backward when it records deduplication state. Playback timers must use the selected session's current playback state rather than the event source's state. Metadata deduplication is scoped to a short-lived selected `MediaSession` instance and is invalidated on an ownership-changing close/open epoch; it is not a long-term selected-session cache. Session close/restart and setting changes refresh all persistent selected-session surfaces, including stale Next Up content. Next Up may retain only its own origin-session reference plus ID as a short-lived UI ownership token, so a same-ID restart cannot leave an old card visible; this is not a general selected-session cache.
 
 The required transition invariants are:
 
