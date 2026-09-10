@@ -1,0 +1,31 @@
+name: Downstream x64 build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-wpf-x64:
+    name: Build WPF (GitHub Release, x64)
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore WPF project
+        run: dotnet restore FluentFlyoutWPF/FluentFlyout.csproj -p:Platform=x64
+
+      - name: Build WPF project
+        run: dotnet build FluentFlyoutWPF/FluentFlyout.csproj -c "GitHub Release" -p:Platform=x64 --no-restore

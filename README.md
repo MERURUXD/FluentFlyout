@@ -7,7 +7,6 @@
 </p>
 
 <p align="center">
-	<img alt="GitHub Release" src="https://img.shields.io/github/v/release/unchihugo/FluentFlyout">
 	<img alt="Static Badge" src="https://img.shields.io/badge/downloads-500k%2B-blue?color=limegreen">
 	<a href="https://hosted.weblate.org/engage/fluentflyout/"><img src="https://hosted.weblate.org/widget/fluentflyout/svg-badge.svg" alt="Translation status"/></a>
 	<img alt="GitHub contributors" src="https://img.shields.io/github/contributors-anon/unchihugo/fluentflyout?labelColor=midnightblue&color=goldenrod">
@@ -17,14 +16,12 @@
 </p>
 
 ---
-FluentFlyout is the modern Flyout app for Windows, built with Fluent 2 Design principles.  
+> **Downstream notice:** This checkout is a personal downstream fork of [FluentFlyout](https://github.com/unchihugo/FluentFlyout), maintained under the [MERURUXD/FluentFlyout](https://github.com/MERURUXD/FluentFlyout) repository. It is not an official FluentFlyout release, Store listing, or update channel. The downstream build disables the upstream telemetry, experiments, and update infrastructure while preserving upstream attribution and general media support.
+
+FluentFlyout Downstream is a modern Flyout app for Windows, built with Fluent 2 Design principles.
 The UI seemingly blends in with Windows 11, providing you an uninterrupted, clean, and native-like experience when controlling your media, lock keys, and more.  
 
 FluentFlyout features smooth animations, blends with your system's color themes and includes a suite of personalization settings while providing media controls, information and more in nice and modern looking popup flyouts.
-
-<a href="https://apps.microsoft.com/detail/9n45nsm4tnbp?referrer=appbadge&cid=GitHub_README&mode=direct">
-	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
-</a>
 
 <img alt="FluentFlyoutHero-Cinemascope" src="https://github.com/user-attachments/assets/a7c7e2db-e21b-4435-9acc-0b2c5f38eb7d" />
 
@@ -76,20 +73,29 @@ https://github.com/user-attachments/assets/bfc7666f-1d59-4cbf-8d15-3855671cb147
 </div>
 </details>
 
-## How to install 📥
-### Using Microsoft Store (recommended)
+## Downstream build and installation 📥
+This fork does not publish an official Microsoft Store listing or MSIX installer. Its downstream release channel is separate from the official FluentFlyout distribution: `master` can produce a replaceable `dev` prerelease ZIP, while stable releases use manual immutable `vMAJOR.MINOR.PATCH` tags.
+
+### Downstream portable ZIP
+The [downstream release guide](docs/development/release.md) contains the local x64 self-contained build command and the stable-release process. The [downstream Releases page](https://github.com/MERURUXD/FluentFlyout/releases) is the only release destination for this fork.
+
+The in-app updater checks only downstream GitHub stable-release metadata and opens the downstream release page. It does not download, execute, install, or replace application files automatically. The rolling `dev` prerelease is not treated as a stable update.
+
+The following upstream installation instructions are retained only as reference. They install the official FluentFlyout product and are not downstream release instructions.
+
+### Upstream reference: Microsoft Store
 <a href="https://apps.microsoft.com/detail/9n45nsm4tnbp?referrer=appbadge&cid=GitHub_README_2&mode=direct">
 	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="300"/>
 </a>
   
 (Find other download options on our [download page](https://fluentflyout.com/download/))
 
-### Using the manual installer
+### Upstream reference: manual installer
 1. Go to our website's [download page](https://fluentflyout.com/download/)
 2. Download the manual installer *(GitHub release (x64))*
 3. Run the installer (**FluentFlyout_Installer.bat**) and follow the instructions. If you prefer to install without the installer, follow the instructions in the **"Using .msixbundle installer"** section below.
 
-### Using .msixbundle installer
+### Upstream reference: .msixbundle installer
 1. Find and download the **"*.cer"** file
 2. Open the certificate and press **"Install Certificate..."**
 3. On the Certificate Import Wizard, select **"Local Machine"**, press **"Next"** and grant Admin Access
@@ -112,8 +118,8 @@ If you want to help with translations, please visit our [Weblate page](https://h
   <img src="https://contrib.rocks/image?repo=unchihugo/fluentflyout&anon=1" />
 </a>
 
-## Sustainability & The Microsoft Store 💰
-FluentFlyout is and always will be free and open-source. You can download the latest builds from the [Releases](https://github.com/unchihugo/FluentFlyout/releases/latest) tab or compile the project yourself to access the full feature set without restrictions.
+## Upstream sustainability and Microsoft Store notes 💰
+The following notes describe the upstream project, not a downstream release or purchase policy. This fork remains free and open-source, and its compiled GitHub Release configuration retains the upstream premium implementation without enabling the upstream purchase UI.
 
 Maintaining a project of this scale takes time and effort. To support ongoing development, the Microsoft Store version offers a convenient way to install the app and includes a few optional features unlockable via a small payment (€2.99, varies by region).
 

@@ -65,6 +65,18 @@
                     <ComboBoxItem Content="{DynamicResource BackgroundBlurOption4}" />
                 </ComboBox>
             </ui:CardControl>
+            <ui:CardControl x:Name="MediaSessionSelectionModeCard" Tag="Indexable" Grid.Row="3" Icon="{ui:SymbolIcon MusicNote2Play20}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{DynamicResource MediaSessionSelectionModeTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource MediaSessionSelectionModeDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox Name="MediaSessionSelectionModeComboBox" SelectedIndex="{Binding MediaSessionSelectionMode, Mode=TwoWay}" Style="{StaticResource DefaultComboBoxStyle}">
+                    <ComboBoxItem Content="{DynamicResource MediaSessionSelectionModeAutomatic}" />
+                    <ComboBoxItem Content="{DynamicResource MediaSessionSelectionModeSpotifyPreferred}" />
+                </ComboBox>
+            </ui:CardControl>
             <ui:CardControl x:Name="CompactLayoutTitleCard" Tag="Indexable" Grid.Row="4" Icon="{ui:SymbolIcon ArrowAutofitWidth24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">

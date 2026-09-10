@@ -9,12 +9,13 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     mc:Ignorable="d"
     Height="700" MinHeight="300" MinWidth="750" Width="900"
-    Title="FluentFlyout" Icon="/Resources/FluentFlyout2.ico"
+    Title="{x:Static downstream:ProductIdentity.DisplayName}"
     TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Ideal"
     FontFamily="{Binding FontFamily}"
 	FlowDirection="{Binding FlowDirection}"
     Closing="SettingsWindow_Closing"
     xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
+    xmlns:downstream="clr-namespace:FluentFlyoutWPF.Classes.Downstream"
     d:DataContext="{d:DesignInstance viewModels:UserSettings}"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -31,13 +32,13 @@
 
 		<ui:TitleBar
             x:Name="TitleBar"
-            Title="FluentFlyout"
+            Title="{x:Static downstream:ProductIdentity.DisplayName}"
             Grid.Row="0"
             Panel.ZIndex="1"
 			HorizontalContentAlignment="Center"
 			VerticalContentAlignment="Center">
 			<ui:TitleBar.Icon>
-				<ui:ImageIcon Source="/Resources/FluentFlyout2.ico" />
+				<ui:ImageIcon Source="pack://application:,,,/Resources/FluentFlyoutDownstream.ico" />
 			</ui:TitleBar.Icon>
 			<ui:TitleBar.Resources>
 				<Style TargetType="{x:Type ui:TitleBarButton}"

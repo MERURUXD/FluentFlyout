@@ -3,6 +3,7 @@
 
 using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF;
+using FluentFlyoutWPF.Classes.Downstream;
 using MicaWPF.Core.Enums;
 using MicaWPF.Core.Helpers;
 using MicaWPF.Core.Services;
@@ -106,13 +107,13 @@ internal static class ThemeManager
                 {
                     WindowsThemeDetector.GetWindowsTheme(out _, out var systemTheme);
                     var iconUri = new Uri(systemTheme == WindowsThemeDetector.ThemeMode.Dark
-                        ? "pack://application:,,,/Resources/TrayIcons/FluentFlyoutWhite.png"
-                        : "pack://application:,,,/Resources/TrayIcons/FluentFlyoutBlack.png");
+                        ? "pack://application:,,,/Resources/TrayIcons/FluentFlyoutDownstreamWhite.png"
+                        : "pack://application:,,,/Resources/TrayIcons/FluentFlyoutDownstreamBlack.png");
                     nIcon.Icon = new BitmapImage(iconUri);
                 }
                 else
                 {
-                    var iconUi = new Uri("pack://application:,,,/Resources/FluentFlyout2.ico");
+                    var iconUi = new Uri($"pack://application:,,,{ProductIdentity.IconPath}");
                     nIcon.Icon = new BitmapImage(iconUi);
                 }
             }

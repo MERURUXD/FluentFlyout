@@ -2,24 +2,21 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyoutWPF.ViewModels;
+using FluentFlyoutWPF.Classes.Downstream;
 using System.IO;
 using System.Xml.Serialization;
 
 namespace FluentFlyout.Classes.Settings;
 
 /// <summary>
-/// Manages the application settings and saves them to a file in \AppData\FluentFlyout.
+/// Manages the application settings and saves them to the downstream AppData directory.
 /// </summary>
 public class SettingsManager
 {
     private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     private static readonly Lock SettingsFileLock = new();
 
-    private static string SettingsFilePath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "FluentFlyout",
-        "settings.xml"
-    );
+    private static string SettingsFilePath => ProductIdentity.SettingsFilePath;
 
     private static UserSettings? _current;
     private static XmlSerializer? _exportSerializer;
@@ -74,6 +71,7 @@ public class SettingsManager
         bool isImport = filePath != null;
         filePath ??= SettingsFilePath;
         string backupPath = filePath + ".bak";
+        bool downstreamProfileExists = File.Exists(filePath) || File.Exists(backupPath);
 
         try
         {
@@ -116,6 +114,37 @@ public class SettingsManager
         catch (Exception backupEx)
         {
             Logger.Error(backupEx, "Error restoring settings from backup file");
+        }
+
+        // A downstream install may adopt an existing upstream profile once, but
+        // must write the migrated values only to its own settings directory.
+        if (!isImport && !downstreamProfileExists)
+        {
+            foreach (string legacyPath in new[]
+            {
+                ProductIdentity.LegacySettingsFilePath,
+                ProductIdentity.LegacySettingsFilePath + ".bak"
+            })
+            {
+                try
+                {
+                    if (DeserializeSettings(legacyPath, out var legacySettings) && legacySettings != null)
+                    {
+                        legacySettings.Uuid = Guid.NewGuid();
+                        legacySettings.IsStoreVersion = false;
+                        _current = legacySettings;
+                        _current.CompleteInitialization();
+                        SaveSettings();
+
+                        Logger.Info("Legacy FluentFlyout settings migrated to the downstream profile");
+                        return _current;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Error migrating legacy settings from {0}", legacyPath);
+                }
+            }
         }
 
         // if the settings/backup file not found or cannot be read

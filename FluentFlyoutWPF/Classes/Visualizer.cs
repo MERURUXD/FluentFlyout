@@ -28,9 +28,12 @@ namespace FluentFlyoutWPF.Classes
 
         private WasapiLoopbackCapture? _capture;
         private MMDevice? _renderDevice;
-        private static float[]? _barValues;
+        private static Visualizer? _currentInstance;
+        private float[] _barValues = [];
+        private float[] _currentBars = [];
         private WriteableBitmap? _bitmap;
         private bool _isRunning;
+        private bool _isDisposed;
         private readonly object _lock = new();
 
         private readonly int _fftLength = 4096;
@@ -77,6 +80,7 @@ namespace FluentFlyoutWPF.Classes
 
         public Visualizer()
         {
+            _currentInstance = this;
             InitializeBitmap();
 
             _fftBuffer = new Complex[_fftLength];
@@ -161,7 +165,7 @@ namespace FluentFlyoutWPF.Classes
 
         private void RequestRestart(string reason)
         {
-            if (!SettingsManager.Current.TaskbarVisualizerEnabled)
+            if (_isDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
                 return;
 
             if (Interlocked.Exchange(ref _restartInProgress, 1) == 1)
@@ -173,11 +177,21 @@ namespace FluentFlyoutWPF.Classes
             {
                 try
                 {
+                    if (_isDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
+                        return;
+
                     Stop();
 
                     for (int attempt = 0; attempt < 5; attempt++)
                     {
+                        if (_isDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
+                            return;
+
                         await Task.Delay(500);
+
+                        if (_isDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
+                            return;
+
                         Start();
                         if (_isRunning)
                             return;
@@ -198,16 +212,21 @@ namespace FluentFlyoutWPF.Classes
         public static void ResizeBarList(int newBarCount)
         {
             BarCount = newBarCount;
-            _barValues = new float[BarCount];
+            _currentInstance?.ResizeBarListCore(newBarCount);
+        }
+
+        private void ResizeBarListCore(int newBarCount)
+        {
+            _barValues = new float[newBarCount];
+            _currentBars = new float[newBarCount];
         }
 
         public void Start()
         {
-            if (_isRunning)
+            if (_isRunning || _isDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
                 return;
 
-            float barCount = BarCount >= 0 ? BarCount : 8;
-            _barValues = new float[(int)barCount];
+            ResizeBarListCore(BarCount >= 0 ? BarCount : 8);
 
             try
             {
@@ -221,6 +240,12 @@ namespace FluentFlyoutWPF.Classes
 
                 if (_renderDevice == null)
                 {
+                    return;
+                }
+
+                if (_isDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
+                {
+                    Stop();
                     return;
                 }
 
@@ -261,42 +286,54 @@ namespace FluentFlyoutWPF.Classes
             }
             catch (Exception ex)
             {
+                Stop();
                 Logger.Error(ex, "Failed to start visualizer");
             }
         }
 
         public void Stop()
         {
-            if (!_isRunning)
-                return;
-
             _isRunning = false;
 
-            _capture?.DataAvailable -= OnDataAvailable;
-            _capture?.RecordingStopped -= OnRecordingStopped;
-            _capture?.StopRecording();
-            _capture?.Dispose();
+            var capture = _capture;
             _capture = null;
+            if (capture != null)
+            {
+                capture.DataAvailable -= OnDataAvailable;
+                capture.RecordingStopped -= OnRecordingStopped;
+                try
+                {
+                    capture.StopRecording();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Debug(ex, "Visualizer capture was already stopped");
+                }
+
+                capture.Dispose();
+            }
 
             _renderDevice?.Dispose();
             _renderDevice = null;
 
-            _captureWatchdog?.Stop();
-            _captureWatchdog?.Dispose();
+            var watchdog = _captureWatchdog;
             _captureWatchdog = null;
+            watchdog?.Stop();
+            watchdog?.Dispose();
         }
 
         private void OnDataAvailable(object? sender, WaveInEventArgs e)
         {
-            if (!_isRunning || e.BytesRecorded == 0)
+            var capture = _capture;
+            if (!_isRunning || capture == null || e.BytesRecorded == 0)
                 return;
 
             _lastDataAvailableUtc = DateTime.UtcNow;
 
-            _captureWatchdog.Stop();
-            _captureWatchdog.Start();
+            _captureWatchdog?.Stop();
+            _captureWatchdog?.Start();
 
-            int bytesPerSample = _capture!.WaveFormat.BitsPerSample / 8;
+            int bytesPerSample = capture.WaveFormat.BitsPerSample / 8;
             int samplesRecorded = e.BytesRecorded / bytesPerSample;
 
             for (int i = 0; i < samplesRecorded; i++)
@@ -362,9 +399,13 @@ namespace FluentFlyoutWPF.Classes
 
         private void ProcessFftData()
         {
+            var capture = _capture;
+            if (capture == null)
+                return;
+
             FastFourierTransform.FFT(true, (int)Math.Log(_fftLength, 2.0), _fftBuffer);
 
-            int sampleRate = _capture.WaveFormat.SampleRate;
+            int sampleRate = capture.WaveFormat.SampleRate;
             double frequencyPerBin = (double)sampleRate / _fftLength;
 
             double minFreq = 40;   // Hz
@@ -373,8 +414,6 @@ namespace FluentFlyoutWPF.Classes
             //double maxFreq = 120; // Hz
             float minDb = (SettingsManager.Current.TaskbarVisualizerAudioSensitivity * -10f) - 30f;
             float maxDb = (SettingsManager.Current.TaskbarVisualizerAudioPeakLevel * 10f) - 30f;
-
-            float[] currentBars = new float[BarCount];
 
             for (int i = 0; i < BarCount; i++)
             {
@@ -408,23 +447,23 @@ namespace FluentFlyoutWPF.Classes
                 float intensity = (db - minDb) / (maxDb - minDb);
                 intensity = Math.Clamp(intensity, 0f, 1f);
 
-                currentBars[i] = intensity;
+                _currentBars[i] = intensity;
             }
 
             for (int i = 0; i < BarCount; i++)
             {
-                if (currentBars[i] > _barValues[i])
+                if (_currentBars[i] > _barValues[i])
                 {
                     // Jump up quickly
-                    _barValues[i] = currentBars[i];
+                    _barValues[i] = _currentBars[i];
                 }
                 else
                 {
                     // Fall down slowly
-                    //_barValues[i] = (_barValues[i] * 0.9f) + (currentBars[i] * 0.1f);
-                    _barValues[i] = (_barValues[i] * 0.8f) + (currentBars[i] * 0.2f);
-                    //_barValues[i] = (_barValues[i] * 0.7f) + (currentBars[i] * 0.3f); // could be options for smoothening
-                    //_barValues[i] = (_barValues[i] * 0.6f) + (currentBars[i] * 0.4f);
+                    //_barValues[i] = (_barValues[i] * 0.9f) + (_currentBars[i] * 0.1f);
+                    _barValues[i] = (_barValues[i] * 0.8f) + (_currentBars[i] * 0.2f);
+                    //_barValues[i] = (_barValues[i] * 0.7f) + (_currentBars[i] * 0.3f); // could be options for smoothening
+                    //_barValues[i] = (_barValues[i] * 0.6f) + (_currentBars[i] * 0.4f);
                 }
             }
         }
@@ -667,18 +706,14 @@ namespace FluentFlyoutWPF.Classes
 
         public void Dispose()
         {
+            _isDisposed = true;
             Stop();
 
             AudioDeviceMonitor.Instance.DefaultDeviceChanged -= OnDefaultDeviceChanged;
             TryUnregisterSystemEvents();
 
-            if (_capture != null)
-            {
-                _capture.DataAvailable -= OnDataAvailable;
-                _capture.RecordingStopped -= OnRecordingStopped;
-                _capture.Dispose();
-                _capture = null;
-            }
+            if (ReferenceEquals(_currentInstance, this))
+                _currentInstance = null;
 
             GC.SuppressFinalize(this);
         }

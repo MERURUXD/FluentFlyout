@@ -4,6 +4,7 @@
 using FluentFlyout.Classes;
 using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF.Classes.Services;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Classes.Utils;
 using FluentFlyoutWPF.ViewModels;
 using NLog;
@@ -11,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using Windows.ApplicationModel;
 using Wpf.Ui.Controls;
 using MessageBox = Wpf.Ui.Controls.MessageBox;
 
@@ -26,17 +26,22 @@ public partial class HomePage : Page
         InitializeComponent();
         DataContext = SettingsManager.Current;
 
-        try
-        {
-            var version = Package.Current.Id.Version;
-            VersionTextBlock.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
-        }
-        catch
-        {
-            VersionTextBlock.Text = "debug version";
-        }
+        VersionTextBlock.Text = ProductVersion.Display;
 
         UpdateLastCheckedText();
+
+        if (!DownstreamPolicy.UpdateChecksEnabled)
+        {
+            ViewUpdatesButton.Visibility = Visibility.Collapsed;
+            UpdateCheckButton.Visibility = Visibility.Collapsed;
+        }
+
+        if (!DownstreamPolicy.EnableUpstreamPurchaseUi)
+        {
+            PremiumSectionTitle.Visibility = Visibility.Collapsed;
+            PremiumSection.Visibility = Visibility.Collapsed;
+            ViewMicrosoftStoreButton.Visibility = Visibility.Collapsed;
+        }
     }
 
     private void UpdateLastCheckedText()
@@ -55,6 +60,9 @@ public partial class HomePage : Page
 
     private void ViewUpdates_Click(object sender, RoutedEventArgs e)
     {
+        if (!DownstreamPolicy.UpdateChecksEnabled)
+            return;
+
         Notifications.OpenChangelogInBrowser();
     }
 
@@ -62,6 +70,9 @@ public partial class HomePage : Page
 
     private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
     {
+        if (!DownstreamPolicy.UpdateChecksEnabled)
+            return;
+
         // prevent multiple clicks within 1 second
         if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _lastChecked < 1)
         {
@@ -72,7 +83,7 @@ public partial class HomePage : Page
 
         if (UpdateState.Current.IsUpdateAvailable)
         {
-            string url = !string.IsNullOrEmpty(UpdateState.Current.UpdateUrl) ? UpdateState.Current.UpdateUrl : "https://fluentflyout.com/changelog/";
+            string url = UpdateState.Current.UpdateUrl;
             UpdateCheckerService.OpenUpdateUrl(url);
         }
         else
@@ -83,6 +94,9 @@ public partial class HomePage : Page
 
     private async Task CheckForUpdatesAsync()
     {
+        if (!DownstreamPolicy.UpdateChecksEnabled)
+            return;
+
         try
         {
             UpdateStatusText.Text = Application.Current.FindResource("CheckingForUpdates")?.ToString();
@@ -121,7 +135,7 @@ public partial class HomePage : Page
             }
             else
             {
-                UpdateStatusText.Text = Application.Current.FindResource("UpToDate")?.ToString();
+                UpdateStatusText.Text = "Unable to check for updates";
             }
         }
         catch (Exception ex)
@@ -168,6 +182,9 @@ public partial class HomePage : Page
 
     private void ViewMicrosoftStore_Click(object sender, System.Windows.RoutedEventArgs e)
     {
+        if (!DownstreamPolicy.EnableUpstreamPurchaseUi)
+            return;
+
         try
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -200,7 +217,7 @@ public partial class HomePage : Page
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = "https://github.com/unchihugo/FluentFlyout/issues/new/choose",
+                FileName = ProductIdentity.IssuesUrl,
                 UseShellExecute = true
             });
         }

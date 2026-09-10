@@ -15,6 +15,7 @@
     FlowDirection="{Binding FlowDirection}"
     Loaded="MicaWindow_Loaded"
     xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
+    xmlns:downstream="clr-namespace:FluentFlyoutWPF.Classes.Downstream"
     d:DataContext="{d:DesignInstance viewModels:UserSettings}"
     >
     <Window.Triggers>
@@ -186,8 +187,7 @@
             LeftClick="nIcon_LeftClick" FocusOnLeftClick="False"
             x:Name="nIcon"
             MenuOnRightClick="True"
-            TooltipText="FluentFlyout"
-            Icon="/Resources/FluentFlyout2.ico"
+            TooltipText="{x:Static downstream:ProductIdentity.DisplayName}"
             Margin="0,127,0,114" Visibility="Collapsed">
             <tray:NotifyIcon.Menu>
                 <ContextMenu>

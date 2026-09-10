@@ -3,6 +3,7 @@
 
 using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF.Classes.Clients;
+using FluentFlyoutWPF.Classes.Downstream;
 using NLog;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -48,6 +49,14 @@ internal class ExperimentsService
     public static async Task<ExperimentsResult> GetExperimentsAsync()
     {
         var result = new ExperimentsResult();
+
+        if (!DownstreamPolicy.EnableUpstreamExperiments)
+        {
+            _experiments = [];
+            _hasExperiments = false;
+            return result;
+        }
+
         try
         {
             var response = await FluentFlyoutApiClient.GetStringAsync(ApiEndpoint);
@@ -94,6 +103,9 @@ internal class ExperimentsService
     // returns variantName
     public static string CheckUuidInExperiment(string experimentName)
     {
+        if (!DownstreamPolicy.EnableUpstreamExperiments)
+            return string.Empty;
+
         var experiment = _experiments.FirstOrDefault(e => e.Name.Equals(experimentName, StringComparison.OrdinalIgnoreCase));
         Guid uuid = SettingsManager.Current.Uuid;
 

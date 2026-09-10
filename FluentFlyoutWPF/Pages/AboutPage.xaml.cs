@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.ViewModels;
+using System.Windows;
 using System.Windows.Controls;
 namespace FluentFlyoutWPF.Pages;
 
@@ -15,5 +17,11 @@ public partial class AboutPage : Page
     {
         InitializeComponent();
         DataContext = this;
+
+        if (!DownstreamPolicy.EnableUpstreamPurchaseUi)
+        {
+            PremiumSectionTitle.Visibility = Visibility.Collapsed;
+            PremiumSection.Visibility = Visibility.Collapsed;
+        }
     }
 }

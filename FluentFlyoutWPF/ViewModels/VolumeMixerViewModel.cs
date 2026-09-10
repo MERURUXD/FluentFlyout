@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FluentFlyout.Classes.Utils;
 using FluentFlyoutWPF.Classes;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Models;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
@@ -190,7 +191,8 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
                 string name = pid != 0 ? GetSessionDisplayName(session) : "System sounds";
 
-                if (name == "FluentFlyout") continue;
+                if (name.Equals(ProductIdentity.ExecutableName, StringComparison.OrdinalIgnoreCase))
+                    continue;
 
                 var icon = MediaPlayerData.GetAndCacheProcessIcon(pid, name);
                 var audioSession = new AudioSessionModel(session, name, pid, sessionState, icon);

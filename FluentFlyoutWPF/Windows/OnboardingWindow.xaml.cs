@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyoutWPF.Classes.Services;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.ViewModels;
 using MicaWPF.Controls;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Media.Animation;
 
 namespace FluentFlyoutWPF;
@@ -35,6 +37,7 @@ public partial class OnboardingWindow : MicaWindow
 
         DataContext = _viewModel;
         InitializeComponent();
+        Icon = new BitmapImage(new Uri($"pack://application:,,,{ProductIdentity.IconPath}"));
         instance = this;
 
         Closed += (_, _) =>

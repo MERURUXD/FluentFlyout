@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
+using FluentFlyoutWPF.Classes.Downstream;
 using System.Net.Http;
 using System.Net.Http.Json;
 
@@ -90,7 +91,7 @@ public sealed class FluentFlyoutApiClient
         string normalizedVersion = string.IsNullOrWhiteSpace(appVersion) ? "unknown" : appVersion;
 
         _client.DefaultRequestHeaders.UserAgent.Clear();
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd($"FluentFlyout/{normalizedVersion}");
+        _client.DefaultRequestHeaders.UserAgent.ParseAdd($"{ProductIdentity.UserAgentName}/{normalizedVersion}");
     }
 
     private static void RenewClient()

@@ -3,6 +3,7 @@
 
 using FluentFlyout.Classes;
 using FluentFlyout.Classes.Settings;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,10 +17,16 @@ public partial class PremiumPurchaseButton : UserControl
     public PremiumPurchaseButton()
     {
         InitializeComponent();
+
+        if (!DownstreamPolicy.EnableUpstreamPurchaseUi)
+            Visibility = Visibility.Collapsed;
     }
 
     private void PurchaseButton_Click(object sender, RoutedEventArgs e)
     {
+        if (!DownstreamPolicy.EnableUpstreamPurchaseUi)
+            return;
+
         LicenseManager.UnlockPremium(sender);
     }
 }

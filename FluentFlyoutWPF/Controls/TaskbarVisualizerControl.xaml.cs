@@ -4,6 +4,7 @@
 using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF;
 using FluentFlyoutWPF.Classes;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -19,22 +20,29 @@ public partial class TaskbarVisualizerControl : UserControl
     private const double DefaultTaskbarVisualizerHeight = 40;
     private const double SmallTaskbarVisualizerHeight = 28;
 
-    // reference to main window for flyout functions
-    private static readonly Visualizer visualizer = new();
+    private static Visualizer? visualizer;
+    private static TaskbarVisualizerControl? currentControl;
 
     public TaskbarVisualizerControl()
     {
         InitializeComponent();
+        currentControl = this;
+        Unloaded += OnUnloaded;
 
         // Set DataContext for bindings
         DataContext = SettingsManager.Current;
 
         if (SettingsManager.Current.TaskbarVisualizerEnabled)
         {
-            visualizer.Start();
+            var instance = EnsureVisualizer();
+            instance.Start();
+            VisualizerContainer.Source = instance.Bitmap;
         }
 
-        VisualizerContainer.Source = visualizer.Bitmap;
+        if (visualizer is { } existingVisualizer)
+        {
+            VisualizerContainer.Source = existingVisualizer.Bitmap;
+        }
 
         // for hover animation
         if (MainBorder.Background is not SolidColorBrush)
@@ -53,25 +61,48 @@ public partial class TaskbarVisualizerControl : UserControl
 
     public static void OnTaskbarVisualizerEnabledChanged(bool value)
     {
-        if (visualizer == null)
-            return;
-
         if (value)
         {
-            visualizer.Start();
+            if (currentControl == null)
+                return;
+
+            var instance = EnsureVisualizer();
+            currentControl.VisualizerContainer.Source = instance.Bitmap;
+            instance.Start();
         }
         else
         {
-            visualizer.Stop();
+            ReleaseVisualizer();
         }
+    }
+
+    public static void StopVisualizer()
+    {
+        ReleaseVisualizer();
     }
 
     public static void DisposeVisualizer()
     {
-        if (visualizer == null)
-            return;
+        ReleaseVisualizer();
+        currentControl = null;
+    }
 
-        visualizer.Dispose();
+    private static void ReleaseVisualizer()
+    {
+        var instance = visualizer;
+        visualizer = null;
+        instance?.Dispose();
+    }
+
+    private static Visualizer EnsureVisualizer()
+        => visualizer ??= new Visualizer();
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        if (ReferenceEquals(currentControl, this))
+            currentControl = null;
+
+        Unloaded -= OnUnloaded;
     }
 
     // TODO: The following mouse events are almost the same as the ones in TaskbarWidgetControl.xaml.cs.

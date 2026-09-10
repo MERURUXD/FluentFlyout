@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
+      xmlns:downstream="clr-namespace:FluentFlyoutWPF.Classes.Downstream"
       xmlns:fluentflyoutcontrols="clr-namespace:FluentFlyout.Controls"
       mc:Ignorable="d"
       d:DesignHeight="1200" d:DesignWidth="600"
@@ -36,7 +37,7 @@
             </ui:Button>
 
             <!--Update status indicator-->
-            <ui:Button Appearance="Transparent" Padding="8" BorderBrush="Transparent" Margin="0,0,16,16" Click="CheckForUpdates_Click">
+            <ui:Button x:Name="UpdateCheckButton" Appearance="Transparent" Padding="8" BorderBrush="Transparent" Margin="0,0,16,16" Click="CheckForUpdates_Click">
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon x:Name="UpdateStatusIcon" FontSize="24" Margin="0,0,12,0">
                         <ui:SymbolIcon.Style>
@@ -276,8 +277,8 @@
             </ui:Button>
         </StackPanel>
 
-        <TextBlock Text="{DynamicResource AboutPremiumTitle}" FontSize="14" FontWeight="SemiBold" Margin="0,36,0,0" />
-        <Grid Margin="0,12,0,0">
+        <TextBlock x:Name="PremiumSectionTitle" Text="{DynamicResource AboutPremiumTitle}" FontSize="14" FontWeight="SemiBold" Margin="0,36,0,0" />
+        <Grid x:Name="PremiumSection" Margin="0,12,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -360,7 +361,7 @@
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                     <TextBlock Text="{DynamicResource EnjoyingAppText}" HorizontalAlignment="Center" FontSize="12" Opacity="0.5" VerticalAlignment="Center" Margin="4,0,12,0" />
                 </StackPanel>
-                <ui:Anchor Appearance="Transparent" Content="{DynamicResource GitHubRepoLink}" Icon="{ui:SymbolIcon Open24}" NavigateUri="https://github.com/unchihugo/FluentFlyout" />
+                <ui:Anchor Appearance="Transparent" Content="{DynamicResource GitHubRepoLink}" Icon="{ui:SymbolIcon Open24}" NavigateUri="{x:Static downstream:ProductIdentity.RepositoryUrl}" />
             </StackPanel>
         </DockPanel>
     </StackPanel>

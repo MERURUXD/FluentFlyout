@@ -9,13 +9,13 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="unchihugo.FluentFlyout"
+    Name="MERURUXD.FluentFlyoutDownstream"
     Publisher="CN=49793F74-1457-4B66-A672-4ED3A640FC76"
     Version="2.15.0.0" />
 
   <Properties>
-    <DisplayName>FluentFlyout</DisplayName>
-    <PublisherDisplayName>unchihugo</PublisherDisplayName>
+    <DisplayName>FluentFlyout Downstream</DisplayName>
+    <PublisherDisplayName>MERURUXD</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 
@@ -57,10 +57,10 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="FluentFlyout"
+        DisplayName="FluentFlyout Downstream"
         BackgroundColor="transparent"
-        Square150x150Logo="Images\Square150x150Logo.png" Square44x44Logo="Images\FluentFlyout.png" Description="FluentFlyout is a simple and modern audio flyout for Windows, built with Fluent 2 Design principles. The UI seemingly blends in with Windows 10/11, providing you an uninterrupted, clean, and native-like experience when controlling your media.">
-        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  ShortName="FluentFlyout" Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png">
+        Square150x150Logo="Images\Square150x150Logo.png" Square44x44Logo="Images\FluentFlyout.png" Description="FluentFlyout Downstream is a personal downstream build of the FluentFlyout media flyout for Windows.">
+        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  ShortName="FluentFlyout Downstream" Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="wide310x150Logo"/>
             <uap:ShowOn Tile="square150x150Logo"/>
@@ -71,20 +71,20 @@
 		<Extensions>
 			<desktop:Extension Category="windows.startupTask">
 				<desktop:StartupTask
-				  TaskId="FluentFlyoutStartup"
+				  TaskId="FluentFlyoutDownstreamStartup"
 				  Enabled="true"
-				  DisplayName="FluentFlyout"/>
+				  DisplayName="FluentFlyout Downstream"/>
 			</desktop:Extension>
 
 			<desktop:Extension Category="windows.toastNotificationActivation">
 				<desktop:ToastNotificationActivation
-				  ToastActivatorCLSID="79086E7F-0D65-4507-82B6-85F2288930D5"/>
+				  ToastActivatorCLSID="A4B7F5C8-5A1B-4B1F-9F54-4CF40A4E4E85"/>
 			</desktop:Extension>
 			
 			<com:Extension Category="windows.comServer">
 				<com:ComServer>
-					<com:ExeServer Executable="FluentFlyout\FluentFlyout.exe" Arguments="-ToastActivated" DisplayName="View Changes">
-						<com:Class Id="79086E7F-0D65-4507-82B6-85F2288930D5" DisplayName="View Changes"/>
+					<com:ExeServer Executable="FluentFlyoutDownstream\FluentFlyoutDownstream.exe" Arguments="-ToastActivated" DisplayName="View Changes">
+						<com:Class Id="A4B7F5C8-5A1B-4B1F-9F54-4CF40A4E4E85" DisplayName="View Changes"/>
 					</com:ExeServer>
 				</com:ComServer>
 			</com:Extension>

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
+using FluentFlyoutWPF.Classes.Downstream;
+using FluentFlyoutWPF.Classes.Services;
 using Microsoft.Toolkit.Uwp.Notifications;
 using NLog;
 using System.Runtime.InteropServices;
@@ -10,7 +12,7 @@ using System.Windows;
 namespace FluentFlyout.Classes;
 
 [ComVisible(true)]
-[Guid("79086E7F-0D65-4507-82B6-85F2288930D5")]
+[Guid(ProductIdentity.ToastActivatorClsid)]
 internal static class Notifications
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -20,6 +22,9 @@ internal static class Notifications
     /// </summary>
     public static void HandleNotificationActivation(ToastNotificationActivatedEventArgsCompat toastArgs)
     {
+        if (!DownstreamPolicy.UpdateChecksEnabled)
+            return;
+
         try
         {
             // Obtain the arguments from the notification
@@ -36,7 +41,7 @@ internal static class Notifications
                     case "downloadUpdate":
                         if (args.TryGetValue("url", out string url))
                         {
-                            OpenUrlInBrowser(url);
+                            UpdateCheckerService.OpenUpdateUrl(url);
                         }
                         break;
                 }
@@ -50,6 +55,15 @@ internal static class Notifications
 
     public static void OpenChangelogInBrowser()
     {
+        if (DownstreamPolicy.EnableDownstreamUpdateCheck)
+        {
+            OpenUrlInBrowser(ProductIdentity.LatestReleaseUrl);
+            return;
+        }
+
+        if (!DownstreamPolicy.EnableUpstreamUpdateCheck)
+            return;
+
         OpenUrlInBrowser("https://fluentflyout.com/changelog/");
     }
 
@@ -60,6 +74,9 @@ internal static class Notifications
     /// <param name="currentVersion"></param>
     public static void ShowFirstOrUpdateNotification(string lastKnownVersion, string currentVersion)
     {
+        if (!DownstreamPolicy.UpdateChecksEnabled)
+            return;
+
         if (string.IsNullOrEmpty(lastKnownVersion) || currentVersion == "debug")
         {
             return;
@@ -99,7 +116,8 @@ internal static class Notifications
     /// <param name="updateUrl">The URL to download the update (can be empty)</param>
     public static void ShowUpdateAvailableNotification(string newVersion, string updateUrl)
     {
-        if (!SettingsManager.Current.ShowUpdateNotifications) return;
+        if (!DownstreamPolicy.UpdateChecksEnabled || !SettingsManager.Current.ShowUpdateNotifications)
+            return;
 
         long currentUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 

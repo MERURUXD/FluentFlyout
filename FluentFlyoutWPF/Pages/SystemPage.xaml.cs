@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Classes.Utils;
 using Microsoft.Win32;
 using NLog;
@@ -21,6 +22,15 @@ public partial class SystemPage : Page
         InitializeComponent();
         DataContext = SettingsManager.Current;
         UpdateMonitorList();
+
+        if (!DownstreamPolicy.EnableUpstreamTelemetry)
+            AnonymousUsageDataCard.Visibility = Visibility.Collapsed;
+
+        if (!DownstreamPolicy.UpdateChecksEnabled)
+        {
+            UpdatesSectionHeader.Visibility = Visibility.Collapsed;
+            ShowUpdateNotificationsTitleCard.Visibility = Visibility.Collapsed;
+        }
     }
 
     private void StartupSwitch_Click(object sender, RoutedEventArgs e)
@@ -34,14 +44,13 @@ public partial class SystemPage : Page
         {
             using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
             if (key == null) return;
-            const string appName = "FluentFlyout";
             var executablePath = Environment.ProcessPath;
 
             if (enable)
             {
                 if (File.Exists(executablePath))
                 {
-                    key.SetValue(appName, executablePath);
+                    key.SetValue(ProductIdentity.StartupRegistryValueName, executablePath);
                 }
                 else
                 {
@@ -50,9 +59,9 @@ public partial class SystemPage : Page
             }
             else
             {
-                if (key.GetValue(appName) != null)
+                if (key.GetValue(ProductIdentity.StartupRegistryValueName) != null)
                 {
-                    key.DeleteValue(appName, false);
+                    key.DeleteValue(ProductIdentity.StartupRegistryValueName, false);
                 }
             }
         }
@@ -104,7 +113,7 @@ public partial class SystemPage : Page
     {
         var saveFileDialog = new Microsoft.Win32.SaveFileDialog
         {
-            FileName = $"FluentFlyout_Settings_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}",
+            FileName = $"{ProductIdentity.Slug}_Settings_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}",
             DefaultExt = ".xml",
             Filter = "XML Files (*.xml)|*.xml|All Files (*.*)|*.*"
         };

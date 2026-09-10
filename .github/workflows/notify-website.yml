@@ -10,6 +10,9 @@ on:
 
 jobs:
   dispatch:
+    # The upstream fork is retained for mergeability, but downstream releases
+    # must never dispatch to FluentFlyout's website infrastructure.
+    if: github.repository == 'unchihugo/FluentFlyout'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Website Update

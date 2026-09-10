@@ -125,11 +125,17 @@ internal static class BitmapHelper
     }
 
     internal static BitmapImage? GetThumbnail(IRandomAccessStreamReference? thumbnail, int maxThumbnailSize = _maxThumbnailSize)
+        => GetThumbnailCore(thumbnail, null, maxThumbnailSize);
+
+    internal static BitmapImage? GetThumbnailWithHash(IRandomAccessStreamReference? thumbnail, int stableThumbnailHash, int maxThumbnailSize = _maxThumbnailSize)
+        => GetThumbnailCore(thumbnail, stableThumbnailHash, maxThumbnailSize);
+
+    private static BitmapImage? GetThumbnailCore(IRandomAccessStreamReference? thumbnail, int? stableThumbnailHash, int maxThumbnailSize)
     {
         if (thumbnail == null)
             return null;
 
-        int hashCode = GetStableThumbnailHash(thumbnail);
+        int hashCode = stableThumbnailHash ?? GetStableThumbnailHash(thumbnail);
 
         if (hashCode == 0)
             return null;

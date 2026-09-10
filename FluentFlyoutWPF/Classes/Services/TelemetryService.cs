@@ -3,6 +3,7 @@
 
 using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF.Classes.Clients;
+using FluentFlyoutWPF.Classes.Downstream;
 using NLog;
 
 namespace FluentFlyoutWPF.Classes.Services;
@@ -14,7 +15,8 @@ public static class TelemetryService
 
     public static async Task SendTelemetryEventAsync(string eventName, string? experimentId = null)
     {
-        if (!SettingsManager.Current.AnonymousTelemetryAllowed) return;
+        if (!DownstreamPolicy.EnableUpstreamTelemetry || !SettingsManager.Current.AnonymousTelemetryAllowed)
+            return;
 
         try
         {

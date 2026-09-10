@@ -291,6 +291,12 @@ public partial class UserSettings : ObservableObject
     public partial bool PauseOtherSessionsEnabled { get; set; }
 
     /// <summary>
+    /// Selects the active media-session policy. 0 is Automatic and 1 is Spotify Preferred.
+    /// </summary>
+    [ObservableProperty]
+    public partial int MediaSessionSelectionMode { get; set; }
+
+    /// <summary>
     /// Enable subtle animations for the lock keys flyout indicator
     /// </summary>
     [ObservableProperty]
@@ -717,7 +723,7 @@ public partial class UserSettings : ObservableObject
         NIconLeftClick = 0;
         CenterTitleArtist = false;
         FlyoutAnimationEasingStyle = 2;
-        LockKeysEnabled = true;
+        LockKeysEnabled = false;
         LockKeysCapsEnabled = true;
         LockKeysNumEnabled = true;
         LockKeysScrollEnabled = true;
@@ -734,6 +740,7 @@ public partial class UserSettings : ObservableObject
         LastKnownVersion = string.Empty;
         SeekbarEnabled = false;
         PauseOtherSessionsEnabled = false;
+        MediaSessionSelectionMode = 0;
         LockKeysAnimated = true;
         LockKeysInsertEnabled = true;
         MediaFlyoutBackgroundBlur = 0;
@@ -779,10 +786,10 @@ public partial class UserSettings : ObservableObject
         AcrylicBlurOpacity = 175;
         UseAlbumArtAsAccentColor = false;
         LastUpdateNotificationUnixSeconds = 0;
-        ShowUpdateNotifications = true;
+        ShowUpdateNotifications = false;
         LegacyTaskbarWidthEnabled = false;
         Uuid = Guid.NewGuid();
-        AnonymousTelemetryAllowed = true;
+        AnonymousTelemetryAllowed = false;
         AllowedApps = [];
         BlockedApps = [];
 
@@ -1032,6 +1039,14 @@ public partial class UserSettings : ObservableObject
     }
 
     partial void OnAppFilteringModeChanged(int oldValue, int newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+
+        MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
+        mainWindow?.RefreshFilteredMedia();
+    }
+
+    partial void OnMediaSessionSelectionModeChanged(int oldValue, int newValue)
     {
         if (oldValue == newValue || _initializing) return;
 

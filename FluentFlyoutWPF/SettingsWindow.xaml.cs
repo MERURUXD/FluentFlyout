@@ -3,11 +3,13 @@
 
 using FluentFlyout.Classes;
 using FluentFlyout.Classes.Settings;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Pages;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Wpf.Ui.Controls;
 
 namespace FluentFlyoutWPF;
@@ -39,6 +41,7 @@ public partial class SettingsWindow : FluentWindow
         }
 
         InitializeComponent();
+        Icon = new BitmapImage(new Uri($"pack://application:,,,{ProductIdentity.IconPath}"));
         instance = this;
 
         Closed += (s, e) => instance = null;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using System.IO;
+using FluentFlyoutWPF.Classes.Downstream;
 using Windows.Storage;
 
 namespace FluentFlyoutWPF.Classes.Utils
@@ -18,32 +19,24 @@ namespace FluentFlyoutWPF.Classes.Utils
             {
                 path = Path.Combine(ApplicationData.Current.LocalCacheFolder.Path,
                     "Roaming",
-                    "FluentFlyout");
+                    ProductIdentity.Slug);
                 if (Directory.Exists(path))
                     return path;
             }
             catch { }
 
-            // if that doesn't work, check %appData%\FluentFlyout
+            // if that doesn't work, check the downstream AppData directory
             try
             {
-                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "FluentFlyout");
+                path = ProductIdentity.AppDataDirectoryPath;
                 if (Directory.Exists(path))
                     return path;
             }
             catch { }
 
-            // if neither of those exist, return hardcoded path
-            // %localAppData%\Packages\unchihugo.FluentFlyout_69b7b6qge1ahj\LocalCache\Roaming\FluentFlyout
-            return Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Packages",
-                "unchihugo.FluentFlyout_69b7b6qge1ahj",
-                "LocalCache",
-                "Roaming",
-                "FluentFlyout"
-            );
+            // Return the same downstream path used by SettingsManager when no
+            // packaged cache directory has been created yet.
+            return ProductIdentity.AppDataDirectoryPath;
         }
     }
 }
