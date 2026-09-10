@@ -412,9 +412,10 @@ public partial class MainWindow : MicaWindow
         if (retainedConsumers == VolumeMixerConsumer.None || _isCleaningUp)
             return;
 
+        VolumeMixerWindow? newWindow = null;
         try
         {
-            var newWindow = new VolumeMixerWindow();
+            newWindow = new VolumeMixerWindow();
             volumeMixerWindow = newWindow;
 
             if ((retainedConsumers & VolumeMixerConsumer.VolumeControl) != 0)
@@ -425,7 +426,9 @@ public partial class MainWindow : MicaWindow
         }
         catch (Exception ex)
         {
-            volumeMixerWindow = null;
+            newWindow?.DisposeResources();
+            if (ReferenceEquals(volumeMixerWindow, newWindow))
+                volumeMixerWindow = null;
             Logger.Error(ex, "Failed to recreate Volume Mixer window after a display change");
         }
     }
@@ -1356,7 +1359,7 @@ public partial class MainWindow : MicaWindow
         }
 
         UpdateUI(activeSession);
-        HandlePlayBackState(activeSession.ControlSession.GetPlaybackInfo().PlaybackStatus);
+        HandlePlayBackState(activeSession.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
 
         if (nextUpWindow != null) // close NextUpWindow if it's open
             CloseNextUpWindow();
@@ -1642,7 +1645,7 @@ public partial class MainWindow : MicaWindow
                     {
                         _mediaSessionSupportsSeekbar = mediaSessionSupportsSeekbar;
                         UpdateUILayout();
-                        HandlePlayBackState(mediaProperties.PlaybackStatus);
+                        HandlePlayBackState(mediaProperties?.PlaybackStatus);
                         // Force refly
                         _isHiding = true;
                         ShowMediaFlyout();
