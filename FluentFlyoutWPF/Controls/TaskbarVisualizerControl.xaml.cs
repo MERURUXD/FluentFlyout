@@ -91,6 +91,22 @@ public partial class TaskbarVisualizerControl : UserControl
     {
         var instance = visualizer;
         visualizer = null;
+
+        if (instance == null)
+            return;
+
+        var control = currentControl;
+        if (control != null)
+        {
+            control.Dispatcher.BeginInvoke(() =>
+            {
+                // A disable/re-enable transition may have installed a new bitmap while
+                // the old instance was being disposed. Only detach the bitmap we own.
+                if (ReferenceEquals(control.VisualizerContainer.Source, instance.Bitmap))
+                    control.VisualizerContainer.Source = null;
+            });
+        }
+
         instance?.Dispose();
     }
 

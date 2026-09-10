@@ -24,6 +24,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Windows.Media.Control;
 using static FluentFlyout.Classes.NativeMethods;
@@ -331,13 +332,16 @@ public partial class MainWindow : MicaWindow
         && SettingsManager.Current.TaskbarWidgetEnabled
         && SettingsManager.Current.IsPremiumUnlocked;
 
-    private VolumeMixerWindow? EnsureVolumeMixerWindow()
+    private VolumeMixerWindow? EnsureVolumeMixerWindow(VolumeMixerConsumer consumer)
     {
         if (_isCleaningUp)
             return null;
 
         if (volumeMixerWindow != null)
+        {
+            volumeMixerWindow.ViewModel.AcquireConsumer(consumer);
             return volumeMixerWindow;
+        }
 
         try
         {
@@ -349,6 +353,8 @@ public partial class MainWindow : MicaWindow
             {
                 Dispatcher.Invoke(() => volumeMixerWindow ??= new VolumeMixerWindow());
             }
+
+            volumeMixerWindow?.ViewModel.AcquireConsumer(consumer);
         }
         catch (Exception ex)
         {
@@ -368,15 +374,77 @@ public partial class MainWindow : MicaWindow
 
         try
         {
-            if (window.IsLoaded)
-                window.Close();
-            else
-                window.ViewModel.Dispose();
+            window.Close();
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to close Volume Mixer window");
         }
+        finally
+        {
+            window.DisposeResources();
+        }
+    }
+
+    internal void ReleaseVolumeMixerConsumer(VolumeMixerConsumer consumer)
+    {
+        var window = volumeMixerWindow;
+        if (window == null)
+            return;
+
+        window.ViewModel.ReleaseConsumer(consumer);
+        if (!window.ViewModel.HasActiveConsumers)
+            CloseVolumeMixerWindow();
+    }
+
+    private void RecreateVolumeMixerWindowForDisplay()
+    {
+        var oldWindow = volumeMixerWindow;
+        if (oldWindow == null)
+            return;
+
+        var retainedConsumers = oldWindow.ViewModel.ActiveConsumers
+            & (VolumeMixerConsumer.VolumeControl | VolumeMixerConsumer.Mixer);
+        bool wasExpanded = oldWindow.ViewModel.IsExpanded;
+
+        CloseVolumeMixerWindow();
+
+        if (retainedConsumers == VolumeMixerConsumer.None || _isCleaningUp)
+            return;
+
+        VolumeMixerWindow? newWindow = null;
+        try
+        {
+            newWindow = new VolumeMixerWindow();
+            volumeMixerWindow = newWindow;
+
+            if ((retainedConsumers & VolumeMixerConsumer.VolumeControl) != 0)
+                newWindow.ViewModel.AcquireConsumer(VolumeMixerConsumer.VolumeControl);
+
+            if (wasExpanded && SettingsManager.Current.VolumeMixerEnabled)
+                newWindow.ViewModel.IsExpanded = true;
+        }
+        catch (Exception ex)
+        {
+            newWindow?.DisposeResources();
+            if (ReferenceEquals(volumeMixerWindow, newWindow))
+                volumeMixerWindow = null;
+            Logger.Error(ex, "Failed to recreate Volume Mixer window after a display change");
+        }
+    }
+
+    internal void OnVolumeMixerEnabledChanged(bool enabled)
+    {
+        if (!enabled && volumeMixerWindow?.ViewModel.IsExpanded == true)
+            volumeMixerWindow.ViewModel.IsExpanded = false;
+    }
+
+    internal void OnVolumeControlDisabled()
+    {
+        if (volumeMixerWindow?.ViewModel.IsExpanded == true)
+            volumeMixerWindow.ViewModel.IsExpanded = false;
+
+        ReleaseVolumeMixerConsumer(VolumeMixerConsumer.VolumeControl);
     }
 
     private void CloseTaskbarWindow()
@@ -385,6 +453,8 @@ public partial class MainWindow : MicaWindow
         taskbarWindow = null;
 
         TaskbarVisualizerControl.StopVisualizer();
+        ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarTooltip);
+        ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarScroll);
 
         if (window == null)
             return;
@@ -401,8 +471,13 @@ public partial class MainWindow : MicaWindow
 
     public float? GetActiveMediaAppVolume()
     {
-        if (!ShouldHaveTaskbarWindow || EnsureVolumeMixerWindow()?.ViewModel is not { } volumeMixerViewModel ||
-            GetActiveMediaSession() is not { } activeSession)
+        if (!ShouldHaveTaskbarWindow || GetActiveMediaSession() is not { } activeSession)
+        {
+            ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarTooltip);
+            return null;
+        }
+
+        if (EnsureVolumeMixerWindow(VolumeMixerConsumer.TaskbarTooltip)?.ViewModel is not { } volumeMixerViewModel)
             return null;
 
         int? processId = MediaPlayerData.GetAndCacheProcessId(activeSession.Id);
@@ -413,7 +488,10 @@ public partial class MainWindow : MicaWindow
 
     public void AdjustTaskbarVolume(float delta)
     {
-        if (!ShouldHaveTaskbarWindow || EnsureVolumeMixerWindow()?.ViewModel is not { } volumeMixerViewModel)
+        if (!ShouldHaveTaskbarWindow
+            || SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 0
+            || (SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 2 && GetActiveMediaSession() is null)
+            || EnsureVolumeMixerWindow(VolumeMixerConsumer.TaskbarScroll)?.ViewModel is not { } volumeMixerViewModel)
             return;
 
         switch (SettingsManager.Current.TaskbarWidgetScrollVolumeMode)
@@ -490,6 +568,9 @@ public partial class MainWindow : MicaWindow
             Dispatcher.BeginInvoke(RefreshFilteredMedia, DispatcherPriority.Background);
             return;
         }
+
+        if (!IsVisible)
+            StopSeekbarTimer();
 
         var activeSession = GetActiveMediaSession();
         if (activeSession?.ControlSession is not { } activeControlSession)
@@ -834,6 +915,9 @@ public partial class MainWindow : MicaWindow
         var activeSession = GetActiveMediaSession();
         if (!mediaManager.IsStarted || activeSession?.ControlSession is not { } activeControlSession)
         {
+            ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarTooltip);
+            if (SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 2)
+                ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarScroll);
             taskbarWindow.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
             return;
         }
@@ -846,6 +930,67 @@ public partial class MainWindow : MicaWindow
         var thumbnail = BitmapHelper.GetThumbnail(songInfo.Thumbnail);
         BitmapHelper.GetDominantColors(1);
         taskbarWindow.UpdateUi(songInfo.Title, songInfo.Artist, thumbnail, playbackInfo.PlaybackStatus, playbackInfo.Controls);
+    }
+
+    private bool TryUpdateTaskbarWindowIfCurrent(
+        TaskbarWindow? expectedWindow,
+        string title,
+        string artist,
+        BitmapImage? thumbnail,
+        GlobalSystemMediaTransportControlsSessionPlaybackStatus? playbackStatus,
+        GlobalSystemMediaTransportControlsSessionPlaybackControls? playbackControls)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            try
+            {
+                return Dispatcher.Invoke(
+                    () => TryUpdateTaskbarWindowIfCurrent(expectedWindow, title, artist, thumbnail, playbackStatus, playbackControls));
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Failed to marshal a taskbar media update");
+                return false;
+            }
+        }
+
+        if (expectedWindow == null
+            || !ReferenceEquals(taskbarWindow, expectedWindow)
+            || expectedWindow.IsClosing
+            || !ShouldHaveTaskbarWindow)
+            return false;
+
+        try
+        {
+            expectedWindow.UpdateUi(title, artist, thumbnail, playbackStatus, playbackControls);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to apply a taskbar media update");
+            return false;
+        }
+    }
+
+    internal void RefreshTaskbarVolumeTooltip()
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(RefreshTaskbarVolumeTooltip, DispatcherPriority.Background);
+            return;
+        }
+
+        if (!ShouldHaveTaskbarWindow || taskbarWindow?.IsClosing != false)
+            return;
+
+        try
+        {
+            taskbarWindow.RefreshAppVolumeTooltip();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to refresh the taskbar volume tooltip");
+        }
     }
 
     public void reportBug(object? sender, EventArgs e)
@@ -913,14 +1058,21 @@ public partial class MainWindow : MicaWindow
 
         var selectedPlaybackInfo = selectedControlSession.GetPlaybackInfo();
 
-        if (ShouldHaveTaskbarWindow && taskbarWindow != null)
+        TaskbarWindow? taskbarUpdateTarget = ShouldHaveTaskbarWindow ? taskbarWindow : null;
+        if (taskbarUpdateTarget != null)
         {
             var tbSongInfo = TryGetMediaProperties(selectedControlSession);
             if (tbSongInfo != null)
             {
                 var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
                 BitmapHelper.GetDominantColors(1);
-                taskbarWindow.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, selectedPlaybackInfo?.PlaybackStatus, selectedPlaybackInfo?.Controls);
+                TryUpdateTaskbarWindowIfCurrent(
+                    taskbarUpdateTarget,
+                    tbSongInfo.Title,
+                    tbSongInfo.Artist,
+                    tbThumbnail,
+                    selectedPlaybackInfo?.PlaybackStatus,
+                    selectedPlaybackInfo?.Controls);
             }
         }
 
@@ -964,7 +1116,8 @@ public partial class MainWindow : MicaWindow
 
         var playbackInfo = currentActiveSession.ControlSession.GetPlaybackInfo();
 
-        bool updateTaskbar = ShouldHaveTaskbarWindow && taskbarWindow != null;
+        TaskbarWindow? updateTaskbarTarget = ShouldHaveTaskbarWindow ? taskbarWindow : null;
+        bool updateTaskbar = updateTaskbarTarget != null;
         bool updateNextUp = SettingsManager.Current.NextUpEnabled
             && !FullscreenDetector.IsFullscreenApplicationRunning();
         bool updateMainFlyout = IsVisible;
@@ -986,14 +1139,26 @@ public partial class MainWindow : MicaWindow
                 return; // prevent multiple calls for the same song info
         }
 
-        previousMediaProperty = check;
-        previousMediaPropertyThumbnail = checkThumbnail;
-
         var thumbnail = BitmapHelper.GetThumbnailWithHash(songInfo.Thumbnail, checkThumbnail);
         BitmapHelper.GetDominantColors(1);
 
-        if (updateTaskbar)
-            taskbarWindow!.UpdateUi(songInfo.Title, songInfo.Artist, thumbnail, playbackInfo.PlaybackStatus, playbackInfo.Controls);
+        bool taskbarUpdated = updateTaskbarTarget != null
+            && TryUpdateTaskbarWindowIfCurrent(
+                updateTaskbarTarget,
+                songInfo.Title,
+                songInfo.Artist,
+                thumbnail,
+                playbackInfo.PlaybackStatus,
+                playbackInfo.Controls);
+
+        if (!taskbarUpdated && !updateNextUp && !updateMainFlyout)
+        {
+            pauseOtherMediaSessionsIfNeeded(mediaSession);
+            return;
+        }
+
+        previousMediaProperty = check;
+        previousMediaPropertyThumbnail = checkThumbnail;
 
         pauseOtherMediaSessionsIfNeeded(mediaSession);
 
@@ -1058,17 +1223,24 @@ public partial class MainWindow : MicaWindow
     {
         if (GetActiveMediaSession() is not { } session || session.Id != mediaSession.Id) return;
 
-        if (_seekBarEnabled)
+        if (!SettingsManager.Current.SeekbarEnabled)
         {
-            Dispatcher.Invoke(() =>
-            {
-                if (Visibility != Visibility.Visible || _isHiding || _isDragging) return;
-
-                _lastSelfUpdateTimestamp = DateTime.Now;
-                UpdateSeekbarCurrentDuration(session.ControlSession.GetTimelineProperties().Position);
-                HandlePlayBackState(session.ControlSession.GetPlaybackInfo().PlaybackStatus);
-            });
+            RefreshSeekbarTimer();
+            return;
         }
+
+        Dispatcher.Invoke(() =>
+        {
+            if (Visibility != Visibility.Visible || _isHiding || _isDragging)
+            {
+                HandlePlayBackState(session.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
+                return;
+            }
+
+            _lastSelfUpdateTimestamp = DateTime.Now;
+            UpdateSeekbarCurrentDuration(session.ControlSession.GetTimelineProperties().Position);
+            HandlePlayBackState(session.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
+        });
     }
 
     private void MediaManager_OnAnySessionClosed(MediaSession mediaSession)
@@ -1109,7 +1281,7 @@ public partial class MainWindow : MicaWindow
 
                 if (SettingsManager.Current.VolumeControlEnabled)
                 {
-                    var volumeWindow = EnsureVolumeMixerWindow();
+                    var volumeWindow = EnsureVolumeMixerWindow(VolumeMixerConsumer.VolumeControl);
                     volumeWindow?.ViewModel.SyncMasterFromDevice();
                     volumeWindow?.ShowFlyout();
                 }
@@ -1181,15 +1353,13 @@ public partial class MainWindow : MicaWindow
             if (_isHiding)
             {
                 Hide();
-                if (_seekBarEnabled)
-                    HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused);
+                HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused);
             }
             return;
         }
 
         UpdateUI(activeSession);
-        if (_seekBarEnabled)
-            HandlePlayBackState(activeSession.ControlSession.GetPlaybackInfo().PlaybackStatus);
+        HandlePlayBackState(activeSession.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
 
         if (nextUpWindow != null) // close NextUpWindow if it's open
             CloseNextUpWindow();
@@ -1203,6 +1373,7 @@ public partial class MainWindow : MicaWindow
         cts = new CancellationTokenSource();
         var token = cts.Token;
         Visibility = Visibility.Visible;
+        HandlePlayBackState(activeSession.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
         WindowHelper.SetTopmost(this);
 
         try
@@ -1236,8 +1407,7 @@ public partial class MainWindow : MicaWindow
                         await Task.Delay(getDuration());
                         if (_isHiding == false) return;
                         Hide();
-                        if (_seekBarEnabled)
-                            HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused);
+                        HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused);
                         break;
                     }
                 }
@@ -1308,6 +1478,7 @@ public partial class MainWindow : MicaWindow
                 SeekbarCurrentDuration.Text = string.Empty;
                 SeekbarMaxDuration.Text = string.Empty;
                 UpdateUILayout();
+                HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
                 MediaIdButton.Visibility = Visibility.Collapsed;
                 SeekbarWrapper.Visibility = Visibility.Collapsed;
             });
@@ -1474,6 +1645,7 @@ public partial class MainWindow : MicaWindow
                     {
                         _mediaSessionSupportsSeekbar = mediaSessionSupportsSeekbar;
                         UpdateUILayout();
+                        HandlePlayBackState(mediaProperties?.PlaybackStatus);
                         // Force refly
                         _isHiding = true;
                         ShowMediaFlyout();
@@ -1554,6 +1726,9 @@ public partial class MainWindow : MicaWindow
         _centerTitleArtist = SettingsManager.Current.CenterTitleArtist;
         _seekBarEnabled = SettingsManager.Current.SeekbarEnabled;
         _alwaysDisplay = SettingsManager.Current.MediaFlyoutAlwaysDisplay;
+
+        if (!_seekBarEnabled)
+            StopSeekbarTimer();
     }
 
     private async void MediaIdButton_Click(object sender, RoutedEventArgs e)
@@ -1621,6 +1796,7 @@ public partial class MainWindow : MicaWindow
     {
         if (_isDragging) return;
         _isDragging = true;
+        StopSeekbarTimer();
 
         Slider slider = (Slider)sender;
         System.Windows.Point clickPosition = e.GetPosition(slider);
@@ -1645,6 +1821,7 @@ public partial class MainWindow : MicaWindow
             await session.ControlSession.TryChangePlaybackPositionAsync(seekPosition.Ticks);
         }
         _isDragging = false;
+        HandlePlayBackState(GetActiveMediaSession()?.ControlSession?.GetPlaybackInfo()?.PlaybackStatus);
     }
 
     private void Seekbar_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -1659,10 +1836,34 @@ public partial class MainWindow : MicaWindow
 
     private void SeekbarUpdateUi(object? sender)
     {
-        if (DateTime.Now.Subtract(_lastSelfUpdateTimestamp).TotalSeconds < 1) return;
+        _seekBarEnabled = SettingsManager.Current.SeekbarEnabled;
+        bool isVisible = Visibility == Visibility.Visible && !_isHiding && !_isCleaningUp;
+        if (!_seekBarEnabled || !isVisible || _isDragging || !_mediaSessionSupportsSeekbar)
+        {
+            StopSeekbarTimer();
+            return;
+        }
 
-        if (!_seekBarEnabled || Visibility != Visibility.Visible || _isDragging) return;
-        if (GetActiveMediaSession() is not { } session) return;
+        if (GetActiveMediaSession() is not { } session)
+        {
+            StopSeekbarTimer();
+            return;
+        }
+
+        var playbackInfo = session.ControlSession.GetPlaybackInfo();
+        if (!SeekbarTimerPolicy.ShouldRun(
+                _seekBarEnabled,
+                isVisible,
+                playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing,
+                _mediaSessionSupportsSeekbar,
+                _isDragging))
+        {
+            StopSeekbarTimer();
+            return;
+        }
+
+        if (DateTime.Now.Subtract(_lastSelfUpdateTimestamp).TotalSeconds < 1)
+            return;
 
         var timeline = session.ControlSession.GetTimelineProperties();
         var pos = timeline.Position + (DateTime.Now - timeline.LastUpdatedTime.DateTime);
@@ -1684,20 +1885,60 @@ public partial class MainWindow : MicaWindow
         });
     }
 
+    internal void RefreshSeekbarTimer()
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(RefreshSeekbarTimer, DispatcherPriority.Background);
+            return;
+        }
+
+        _seekBarEnabled = SettingsManager.Current.SeekbarEnabled;
+        var playbackStatus = GetActiveMediaSession()?.ControlSession?.GetPlaybackInfo()?.PlaybackStatus;
+        HandlePlayBackState(playbackStatus);
+    }
+
     private void HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus? status)
     {
-        if (status == null) return;
-        if (status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+        _seekBarEnabled = SettingsManager.Current.SeekbarEnabled;
+
+        bool shouldRun = SeekbarTimerPolicy.ShouldRun(
+            _seekBarEnabled,
+            Visibility == Visibility.Visible && !_isHiding && !_isCleaningUp,
+            status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing,
+            _mediaSessionSupportsSeekbar,
+            _isDragging);
+
+        if (!shouldRun)
         {
-            if (_isActive) return;
-            _isActive = true;
+            StopSeekbarTimer();
+            return;
+        }
+
+        if (_isActive)
+            return;
+
+        _isActive = true;
+        try
+        {
             _positionTimer.Change(0, _seekbarUpdateInterval);
         }
-        else
+        catch (ObjectDisposedException)
         {
-            if (!_isActive) return;
             _isActive = false;
+        }
+    }
+
+    private void StopSeekbarTimer()
+    {
+        _isActive = false;
+        try
+        {
             _positionTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+        catch (ObjectDisposedException)
+        {
+            // The timer is already disposed during shutdown.
         }
     }
 
@@ -1729,7 +1970,7 @@ public partial class MainWindow : MicaWindow
             mediaManager.OnAnySessionClosed -= MediaManager_OnAnySessionClosed;
 
             // dispose managed resources
-            _positionTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            StopSeekbarTimer();
             _positionTimer?.Dispose();
             cts?.Cancel();
             cts?.Dispose();
@@ -1896,8 +2137,7 @@ public partial class MainWindow : MicaWindow
         if (nextUpWindow != null)
             CloseNextUpWindow();
 
-        if (volumeMixerWindow != null)
-            CloseVolumeMixerWindow();
+        RecreateVolumeMixerWindowForDisplay();
 
         RecreateTaskbarWindow();
     }

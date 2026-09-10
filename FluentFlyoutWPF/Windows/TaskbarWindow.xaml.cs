@@ -46,6 +46,8 @@ public partial class TaskbarWindow : Window
     private GlobalSystemMediaTransportControlsSessionPlaybackStatus? _lastPlaybackStatus;
     private DispatcherTimer? _autoHideTimer;
 
+    internal bool IsClosing => _isClosing;
+
     public TaskbarWindow()
     {
         WindowHelper.SetNoActivate(this);
@@ -697,6 +699,9 @@ on_error:
 
     public void UpdateUi(string title, string artist, BitmapImage? icon, GlobalSystemMediaTransportControlsSessionPlaybackStatus? playbackStatus, GlobalSystemMediaTransportControlsSessionPlaybackControls? playbackControls = null)
     {
+        if (_isClosing)
+            return;
+
         // Check premium status - hide widget if not unlocked
         if ((!SettingsManager.Current.TaskbarWidgetEnabled || !SettingsManager.Current.IsPremiumUnlocked))
         {
@@ -773,6 +778,9 @@ on_error:
 
     public void RefreshAppVolumeTooltip()
     {
+        if (_isClosing)
+            return;
+
         Widget.RefreshAppVolumeTooltip();
     }
 
