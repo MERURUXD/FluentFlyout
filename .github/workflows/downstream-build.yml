@@ -27,5 +27,11 @@ jobs:
       - name: Restore WPF project
         run: dotnet restore FluentFlyoutWPF/FluentFlyout.csproj -p:Platform=x64
 
+      - name: Restore focused tests
+        run: dotnet restore tests/FluentFlyoutWPF.Tests/FluentFlyoutWPF.Tests.csproj -p:Platform=x64
+
       - name: Build WPF project
         run: dotnet build FluentFlyoutWPF/FluentFlyout.csproj -c "GitHub Release" -p:Platform=x64 --no-restore
+
+      - name: Run focused production behavior tests
+        run: dotnet test tests/FluentFlyoutWPF.Tests/FluentFlyoutWPF.Tests.csproj -c "GitHub Release" -p:Platform=x64 --no-restore
