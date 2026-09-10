@@ -1,14 +1,14 @@
 // Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-using FluentFlyoutWPF.Classes.Services;
 using FluentFlyoutWPF.Classes.Downstream;
+using FluentFlyoutWPF.Classes.Services;
 using FluentFlyoutWPF.ViewModels;
 using MicaWPF.Controls;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 
 namespace FluentFlyoutWPF;
 

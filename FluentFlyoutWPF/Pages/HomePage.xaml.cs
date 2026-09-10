@@ -3,8 +3,8 @@
 
 using FluentFlyout.Classes;
 using FluentFlyout.Classes.Settings;
-using FluentFlyoutWPF.Classes.Services;
 using FluentFlyoutWPF.Classes.Downstream;
+using FluentFlyoutWPF.Classes.Services;
 using FluentFlyoutWPF.Classes.Utils;
 using FluentFlyoutWPF.ViewModels;
 using NLog;
