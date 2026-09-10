@@ -77,7 +77,7 @@ internal static class Notifications
         if (!DownstreamPolicy.UpdateChecksEnabled)
             return;
 
-        if (string.IsNullOrEmpty(lastKnownVersion) || currentVersion == "debug")
+        if (string.IsNullOrEmpty(lastKnownVersion) || !ProductVersion.IsStableIdentity(currentVersion))
         {
             return;
         }

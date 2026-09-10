@@ -17,6 +17,11 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- The MSIX manifest remains the stable-version source. Unpackaged builds
+         identify their channel and source independently through assembly metadata. -->
+    <DownstreamBuildChannel Condition="'$(DownstreamBuildChannel)' == ''">development</DownstreamBuildChannel>
+    <DownstreamBuildVersion Condition="'$(DownstreamBuildVersion)' == ''">unknown</DownstreamBuildVersion>
+    <DownstreamSourceRevision Condition="'$(DownstreamSourceRevision)' == ''">unknown</DownstreamSourceRevision>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'GitHub Release'">
     <DefineConstants>$(DefineConstants);GITHUB_RELEASE</DefineConstants>
@@ -51,6 +56,11 @@
     <PackageReference Include="unchihugo.WPF-UI" Version="4.4.2" />
     <PackageReference Include="WPF-UI.Tray" Version="4.3.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="DownstreamBuildChannel" Value="$(DownstreamBuildChannel)" />
+    <AssemblyMetadata Include="DownstreamBuildVersion" Value="$(DownstreamBuildVersion)" />
+    <AssemblyMetadata Include="DownstreamSourceRevision" Value="$(DownstreamSourceRevision)" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">
