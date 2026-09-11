@@ -98,6 +98,20 @@ control/mixer, update notifications, and anonymous telemetry start disabled.
 Existing settings are not overwritten by constructor defaults during
 deserialization. Settings changes are debounced before persistence.
 
+## Public settings surface
+
+The downstream settings navigation exposes only Home, Taskbar Widget, Taskbar
+Visualizer, Next Up, System, and About. Home's functional dashboard mirrors
+that core surface with four cards: Taskbar Widget, Taskbar Visualizer, Next Up,
+and System. Media Flyout, Volume Mixer, and Lock Keys pages remain in the
+project for compatibility and internal navigation, but are not exposed through
+the public navigation or settings search.
+
+Hiding those settings entries does not disable the Main Media Flyout runtime.
+The taskbar widget's click path still calls `MainWindow.ShowMediaFlyout` and
+remains a supported interaction; the page and runtime implementations for
+Volume Mixer and Lock Keys are likewise retained for the later staged cleanup.
+
 ## Media-session flow and ownership
 
 `MainWindow` reads the current media-manager collection for each ownership
