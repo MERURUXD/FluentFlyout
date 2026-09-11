@@ -29,9 +29,7 @@
             <converters:BoolToVisibleCollapsedConverter x:Key="BoolToVisibleCollapsedConverter"/>
             <converters:BoolToEnabledDisabledConverter x:Key="BoolToEnabledDisabledConverter" />
             <converters:BoolToFullHalfOpacityConverter x:Key="BoolToFullHalfOpacityConverter" />
-            <converters:BoolToFullHalfOpacityConverter x:Key="BoolToHalfFullOpacityConverter" TrueValue="0.5" FalseValue="1" />
 
-            <converters:NullToVisibilityConverter x:Key="NullToVisibleConverter" />
             <converters:NullToVisibilityConverter x:Key="NullToCollapsedConverter" NullValue="Collapsed" NonNullValue="Visible" />
         </ResourceDictionary>
     </Application.Resources>
