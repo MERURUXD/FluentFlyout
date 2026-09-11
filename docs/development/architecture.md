@@ -79,6 +79,11 @@ separate from the official product. The supported release configuration is the
 portable downstream ZIP; retained MSIX/Store code and workflows are not evidence
 that the Store path is part of the supported downstream product.
 
+The downstream Home, About, taskbar, visualizer, system, mixer, and onboarding
+pages do not present Premium/status/purchase UI. The licensing implementation,
+compatibility gates, purchase control, and related resources remain in the tree
+for the retained Store/GitHub behavior and later staged cleanup.
+
 ## Settings and defaults
 
 `SettingsManager` writes to `%AppData%\FluentFlyoutDownstream\settings.xml` and
