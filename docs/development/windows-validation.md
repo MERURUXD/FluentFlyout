@@ -1,8 +1,8 @@
 # Stage 6 Windows validation report
 
-**Date:** 2026-09-11  
-**Status:** Partial acceptance with explicit desktop and comparability blockers  
-**Target commit:** `b5be9567820b138e0e2956a0be524212bd300900`  
+**Date:** 2026-09-11
+**Status:** Partial acceptance with explicit desktop and comparability blockers
+**Target commit:** `b5be9567820b138e0e2956a0be524212bd300900`
 **Host:** Windows 11 Home 64-bit, build `26200`, .NET SDK `10.0.401`
 
 This report records evidence for the current downstream checkout. It does not
