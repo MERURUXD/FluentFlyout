@@ -86,5 +86,6 @@ migration/coexistence, controlled network capture, notifications, and
 shutdown-time resource release. Record each as pass, fail, not run, or blocked
 with a minimal reproduction and evidence path. See
 [`06-windows-validation.md`](remediation-prompts/06-windows-validation.md) for
-the acceptance matrix and do not claim a percentage until the raw measurements
+the acceptance matrix and [`windows-validation.md`](windows-validation.md) for
+the current evidence. Do not claim a percentage until the raw measurements
 exist.
