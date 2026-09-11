@@ -18,10 +18,9 @@ git ls-remote origin refs/heads/master
 git ls-remote upstream refs/heads/master
 ```
 
-Preserve uncommitted user changes and task-material directories. In particular,
-do not remove `fluentflyout_codex_prompts_6stage/` merely to make a sync appear
-clean. A clean sync base means the intended downstream commit and a deliberately
-reviewed working tree, not an erased working tree.
+Preserve uncommitted user changes. A clean sync base means the intended
+downstream commit and a deliberately reviewed working tree, not an erased
+working tree.
 
 ## 2. Compare without merging
 
