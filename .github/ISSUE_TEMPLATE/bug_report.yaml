@@ -53,10 +53,8 @@ body:
     id: commit-sha
     attributes:
       label: Commit SHA
-      description: Use the full SHA when reporting a source or development build.
+      description: Optional for a stable ZIP; use the full SHA when reporting a source or development build.
       placeholder: 40-character commit SHA
-    validations:
-      required: true
 
   - type: input
     id: windows-version
