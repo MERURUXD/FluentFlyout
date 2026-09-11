@@ -1,7 +1,7 @@
 # Stage 4 Windows validation report
 
-**Date:** 2026-09-11
-**Status:** Core smoke pass; comparison, Store, coexistence, and controlled-profile items remain not run
+**Date:** 2026-09-12
+**Status:** Core surface smoke pass; the latest media-key attempt lacked an active session, and comparison, Store, coexistence, and controlled-profile items remain not run
 **Target:** `codex/stage4-final-cleanup` (packaged validation commit `938bc93f5e50c5d663c05ce886427e0282d04564`)
 **Host:** Windows 11 Home 64-bit, build `26200`, .NET SDK `10.0.401`
 
@@ -75,9 +75,9 @@ operation was performed.
 | Scenario | Status | Evidence or blocker |
 | --- | --- | --- |
 | Cold start with retained optional surfaces never enabled | Not run as a disposable-profile result | Static ownership conditions and automated lifecycle tests pass; a valid isolated desktop profile was not used for this scenario. |
-| Taskbar Widget metadata, artwork, and playback surface | Pass | Current final build taskbar screenshot; stable media-session smoke also observed the same metadata path. |
+| Taskbar Widget metadata, artwork, and playback surface | Pass on an active-session run | The earlier final-build taskbar screenshot and stable media-session smoke observed the metadata path; the latest f99a856 launch had no active media session for metadata. |
 | Taskbar body-click ↔ Main Media Flyout | Pass | Current source retains `ShowMediaFlyout(toggleMode: true, forceShow: true)`; the final runtime is unchanged from the Stage 3 desktop pass that opened/toggled it. |
-| Main Media Flyout media and volume-key semantics | Pass | Current final build opened the Main Flyout from a media Next key; Stage 3 final smoke also covered media and volume keys with `MediaFlyoutVolumeKeysExcluded`. |
+| Main Media Flyout media and volume-key semantics | Prior runtime pass; latest media-key run blocked | The f99a856 attempt had no active media session, so it is not counted as a current media-key pass; the unchanged Stage 3 final smoke covered media and volume keys with `MediaFlyoutVolumeKeysExcluded`. |
 | Visualizer pause/resume and render-device reattach | Pass | Stage 3 final smoke passed pause/resume and Realtek headphone → speaker → headphone reattach; Stage 4 changes do not alter production runtime code. |
 | Next Up normal display, Main-visible suppression, and post-hide recovery | Pass | Stage 3 final smoke used a stable Spotify SMTC source and observed all three states with matching title/artist/artwork. |
 | Settings navigation and retired-surface search contract | Pass | Current UIA navigation exposed only Home, Widget, Visualizer, Next Up, System, and About; three downstream contract tests passed. |
@@ -169,8 +169,9 @@ performance result.
 
 ## Final assessment and follow-up
 
-- **Functionality:** the final build's Widget/settings/media-key smoke passed;
-  the unchanged Stage 3 runtime also has real Widget/Main Flyout, Visualizer,
+- **Functionality:** the final build's Widget/settings smoke passed; its latest
+  media-key attempt was blocked by the absence of an active media session. The
+  unchanged Stage 3 runtime also has real Widget/Main Flyout, Visualizer,
   device-reattach, and Next Up evidence. Controlled shutdown/recovery items
   remain unverified where marked above.
 - **Resource release:** source, contract tests, and focused tests provide
