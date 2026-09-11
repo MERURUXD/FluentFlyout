@@ -4,7 +4,6 @@
 using FluentFlyoutWPF.Classes.Clients;
 using FluentFlyoutWPF.Classes.Downstream;
 using NLog;
-using System.Globalization;
 using System.Net.Http;
 using System.Text.Json;
 
@@ -44,7 +43,7 @@ public static class UpdateCheckerService
         };
 
         if (DownstreamPolicy.EnableDownstreamUpdateCheck)
-            return await CheckDownstreamForUpdatesAsync(currentVersion);
+            return await CheckDownstreamForUpdatesAsync(currentVersion, DownstreamHttpClient);
 
         if (!DownstreamPolicy.EnableUpstreamUpdateCheck)
             return result;
@@ -108,14 +107,18 @@ public static class UpdateCheckerService
         }
     }
 
-    private static async Task<UpdateCheckResult> CheckDownstreamForUpdatesAsync(string currentVersion)
+    internal static async Task<UpdateCheckResult> CheckDownstreamForUpdatesAsync(
+        string currentVersion,
+        HttpClient httpClient)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
+
         var result = new UpdateCheckResult
         {
             CheckedAt = DateTime.Now
         };
 
-        if (!TryParseVersion(currentVersion, out _))
+        if (!ProductVersion.IsStableIdentity(currentVersion))
         {
             Logger.Info($"Skipping downstream update check for non-release version: {currentVersion}");
             return result;
@@ -123,7 +126,7 @@ public static class UpdateCheckerService
 
         try
         {
-            using var response = await DownstreamHttpClient.GetAsync(ProductIdentity.LatestReleaseApiUrl);
+            using var response = await httpClient.GetAsync(ProductIdentity.LatestReleaseApiUrl);
             if (!response.IsSuccessStatusCode)
             {
                 Logger.Info($"Downstream update check returned HTTP {(int)response.StatusCode}.");
@@ -139,7 +142,7 @@ public static class UpdateCheckerService
             }
 
             string newestVersion = tagNameElement.GetString() ?? string.Empty;
-            if (!TryParseVersion(newestVersion, out _))
+            if (!ProductVersion.IsStableIdentity(newestVersion))
             {
                 Logger.Info($"Ignoring malformed downstream release tag: {newestVersion}");
                 return result;
@@ -184,37 +187,13 @@ public static class UpdateCheckerService
 
     private static bool IsNewerVersion(string currentVersion, string newestVersion)
     {
-        if (!TryParseVersion(currentVersion, out var current) ||
-            !TryParseVersion(newestVersion, out var newest))
+        if (!ProductVersion.TryParseStableVersion(currentVersion, out var current) ||
+            !ProductVersion.TryParseStableVersion(newestVersion, out var newest))
         {
             Logger.Info($"Unable to compare release versions: {currentVersion} vs {newestVersion}");
             return false;
         }
 
         return newest > current;
-    }
-
-    private static bool TryParseVersion(string value, out Version version)
-    {
-        version = new Version();
-        string normalized = value.Trim();
-        if (normalized.StartsWith('v'))
-            normalized = normalized[1..];
-
-        string[] components = normalized.Split('.');
-        if (components.Length is < 3 or > 4)
-            return false;
-
-        var numbers = new int[components.Length];
-        for (int i = 0; i < components.Length; i++)
-        {
-            if (!int.TryParse(components[i], NumberStyles.None, CultureInfo.InvariantCulture, out numbers[i]) || numbers[i] < 0)
-                return false;
-        }
-
-        version = components.Length == 4
-            ? new Version(numbers[0], numbers[1], numbers[2], numbers[3])
-            : new Version(numbers[0], numbers[1], numbers[2]);
-        return true;
     }
 }

@@ -83,7 +83,7 @@
 			
 			<com:Extension Category="windows.comServer">
 				<com:ComServer>
-					<com:ExeServer Executable="FluentFlyoutDownstream\FluentFlyoutDownstream.exe" Arguments="-ToastActivated" DisplayName="View Changes">
+					<com:ExeServer Executable="FluentFlyout\FluentFlyoutDownstream.exe" Arguments="-ToastActivated" DisplayName="View Changes">
 						<com:Class Id="A4B7F5C8-5A1B-4B1F-9F54-4CF40A4E4E85" DisplayName="View Changes"/>
 					</com:ExeServer>
 				</com:ComServer>

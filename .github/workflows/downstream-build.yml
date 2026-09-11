@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
@@ -31,7 +33,16 @@ jobs:
         run: dotnet restore tests/FluentFlyoutWPF.Tests/FluentFlyoutWPF.Tests.csproj -p:Platform=x64
 
       - name: Build WPF project
-        run: dotnet build FluentFlyoutWPF/FluentFlyout.csproj -c "GitHub Release" -p:Platform=x64 --no-restore
+        run: dotnet build FluentFlyoutWPF/FluentFlyout.csproj -c "GitHub Release" -p:Platform=x64 -p:DownstreamBuildChannel=development -p:DownstreamSourceRevision=${{ github.sha }} --no-restore
 
       - name: Run focused production behavior tests
-        run: dotnet test tests/FluentFlyoutWPF.Tests/FluentFlyoutWPF.Tests.csproj -c "GitHub Release" -p:Platform=x64 --no-restore
+        run: dotnet test tests/FluentFlyoutWPF.Tests/FluentFlyoutWPF.Tests.csproj -c "GitHub Release" -p:Platform=x64 -p:DownstreamBuildChannel=development -p:DownstreamSourceRevision=${{ github.sha }} --no-restore
+
+      - name: Validate downstream package (no release mutation)
+        shell: pwsh
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP 'FluentFlyoutDownstream-development-win-x64.zip'
+          & .\scripts\Build-DownstreamZip.ps1 `
+            -Channel development `
+            -ExpectedCommit $env:GITHUB_SHA `
+            -ArchivePath $archive

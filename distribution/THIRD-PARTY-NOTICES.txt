@@ -1,0 +1,72 @@
+Third-party notices for FluentFlyout Downstream
+
+This inventory is maintained from the restored runtime dependency graph in
+FluentFlyoutWPF/obj/project.assets.json. The packaging script also writes
+licenses/nuget/RESOLVED-PACKAGES.txt from the exact restored package metadata
+and copies any license or notice files shipped by those package archives.
+The .NET runtime and Windows Desktop framework notices are copied under
+licenses/dotnet/ from the installed .NET SDK/runtime used for the publish.
+
+License expressions, authors, and project URLs below are package metadata
+observed for the current downstream build. When a package archive does not
+carry a separate license file, this record does not infer a different license;
+the declared expression and upstream project URL remain the authoritative
+reference for that dependency.
+
+Resolved NuGet runtime packages
+
+- CommunityToolkit.Mvvm 8.4.2 — MIT — .NET Foundation and Contributors
+  https://github.com/CommunityToolkit/dotnet
+- Dubya.WindowsMediaController 2.5.6 — MIT — DubyaDude
+  https://github.com/DubyaDude/WindowsMediaController
+- MicaWPF 6.3.2 — MIT — Simnico99
+  https://github.com/Simnico99/MicaWPF
+- MicaWPF.Core 6.3.2 — MIT — Simnico99
+  https://github.com/Simnico99/MicaWPF
+- MicaWPFRuntimeComponent 1.1.9 — MIT — Simnico99
+  https://github.com/Simnico99/MicaWPFRuntimeComponent
+- Microsoft.Extensions.Logging.Abstractions 6.0.0 — MIT — .NET Foundation
+  https://github.com/dotnet/runtime
+- Microsoft.Toolkit.Uwp.Notifications 7.1.3 — MIT — Microsoft.Toolkit and
+  dotnetfoundation
+  https://github.com/CommunityToolkit/WindowsCommunityToolkit
+- NAudio 2.3.0 — MIT — Mark Heath and Contributors
+  https://github.com/naudio/NAudio
+- NAudio.Asio 2.3.0 — MIT — Mark Heath
+  https://github.com/naudio/NAudio
+- NAudio.Core 2.3.0 — MIT — Mark Heath
+  https://github.com/naudio/NAudio
+- NAudio.Midi 2.3.0 — MIT — Mark Heath
+  https://github.com/naudio/NAudio
+- NAudio.Wasapi 2.3.0 — MIT — Mark Heath
+  https://github.com/naudio/NAudio
+- NAudio.WinForms 2.3.0 — MIT — Mark Heath
+  https://github.com/naudio/NAudio
+- NAudio.WinMM 2.3.0 — MIT — NAudio.WinMM
+  https://github.com/naudio/NAudio
+- NLog 6.1.3 — BSD-3-Clause — Jarek Kowalski, Kim Christensen, and Julian
+  Verdurmen
+  https://github.com/NLog/NLog
+- unchihugo.WPF-UI 4.4.2 — MIT — unchihugo
+  https://github.com/unchihugo/wpfui
+- WPF-UI 4.3.0 — MIT — lepo.co
+  https://github.com/lepoco/wpfui
+- WPF-UI.Abstractions 4.3.0 — MIT — lepo.co
+  https://github.com/lepoco/wpfui
+- WPF-UI.Tray 4.3.0 — MIT — lepo.co
+  https://github.com/lepoco/wpfui
+
+Package-provided notices
+
+Where present in the restored package archive, the packaging script preserves
+the package's original license and third-party notice files under
+licenses/nuget/. In particular, the current graph includes package-provided
+notices for CommunityToolkit.Mvvm, Microsoft.Extensions.Logging.Abstractions,
+unchihugo.WPF-UI, and WPF-UI. The generated resolved-package report lists the
+exact files copied for each package.
+
+.NET runtime notices
+
+The self-contained publish includes the .NET runtime and Windows Desktop
+framework. Their license and third-party notice files are preserved under
+licenses/dotnet/LICENSE.txt and licenses/dotnet/ThirdPartyNotices.txt.

@@ -13,66 +13,81 @@ permissions:
   contents: read
 
 jobs:
-  build-dev:
-    name: Build downstream ZIP (x64)
+  quality-dev:
+    name: Quality gate (development, x64)
     if: >-
       github.repository == 'MERURUXD/FluentFlyout' &&
       ((github.event_name == 'push' && github.ref == 'refs/heads/master') ||
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'))
     runs-on: windows-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
-      - name: Extract downstream version
-        shell: pwsh
-        run: |
-          [xml]$manifest = Get-Content 'FluentFlyoutMSIX\Package.appxmanifest'
-          $fullVersion = [string]$manifest.Package.Identity.Version
-          if ($fullVersion -notmatch '^\d+\.\d+\.\d+\.0$') {
-            throw "Expected a MAJOR.MINOR.PATCH.0 version in Package.appxmanifest, got '$fullVersion'."
-          }
-
-          $version = ($fullVersion -split '\.')[0..2] -join '.'
-          "APP_VERSION=$version" >> $env:GITHUB_ENV
-
-      - name: Restore WPF publish inputs
+      - name: Restore WPF project
         run: dotnet restore FluentFlyoutWPF/FluentFlyout.csproj -p:Platform=x64 -r win-x64
 
-      - name: Publish self-contained WPF build
+      - name: Restore focused tests
+        run: dotnet restore tests/FluentFlyoutWPF.Tests/FluentFlyoutWPF.Tests.csproj -p:Platform=x64
+
+      - name: Verify formatting
+        run: dotnet format FluentFlyout.sln --verify-no-changes --verbosity diagnostic
+
+      - name: Build WPF project
+        run: dotnet build FluentFlyoutWPF/FluentFlyout.csproj -c "GitHub Release" -p:Platform=x64 -p:DownstreamBuildChannel=development -p:DownstreamSourceRevision=${{ github.sha }} --no-restore
+
+      - name: Run focused tests
+        run: dotnet test tests/FluentFlyoutWPF.Tests/FluentFlyoutWPF.Tests.csproj -c "GitHub Release" -p:Platform=x64 -p:DownstreamBuildChannel=development -p:DownstreamSourceRevision=${{ github.sha }} --no-restore
+
+  build-dev:
+    name: Build downstream ZIP (x64)
+    needs: quality-dev
+    if: >-
+      needs.quality-dev.result == 'success' &&
+      github.repository == 'MERURUXD/FluentFlyout' &&
+      ((github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'))
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build and validate self-contained ZIP
         shell: pwsh
         run: |
-          $publishDir = Join-Path $env:RUNNER_TEMP 'FluentFlyoutDownstream-dev-win-x64'
-          New-Item -ItemType Directory -Path $publishDir -Force | Out-Null
-
-          dotnet publish FluentFlyoutWPF/FluentFlyout.csproj `
-            --configuration 'GitHub Release' `
-            --framework net10.0-windows10.0.22000.0 `
-            --runtime win-x64 `
-            --self-contained true `
-            --no-restore `
-            --output $publishDir `
-            -p:Platform=x64 `
-            -p:Version=$env:APP_VERSION
-
-          if (-not (Test-Path (Join-Path $publishDir 'FluentFlyoutDownstream.exe'))) {
-            throw 'The downstream executable was not produced.'
-          }
-
-          $archivePath = Join-Path $env:RUNNER_TEMP 'FluentFlyoutDownstream-dev-win-x64.zip'
-          Compress-Archive -Path (Join-Path $publishDir '*') -DestinationPath $archivePath -Force
+          $archive = Join-Path $env:RUNNER_TEMP 'FluentFlyoutDownstream-dev-win-x64.zip'
+          & .\scripts\Build-DownstreamZip.ps1 `
+            -Channel dev `
+            -ExpectedCommit $env:GITHUB_SHA `
+            -ArchivePath $archive
 
       - name: Upload release archive for the publisher
         uses: actions/upload-artifact@v4
         with:
           name: FluentFlyoutDownstream-dev-win-x64
-          path: ${{ runner.temp }}/FluentFlyoutDownstream-dev-win-x64.zip
+          path: |
+            ${{ runner.temp }}/FluentFlyoutDownstream-dev-win-x64.zip
+            ${{ runner.temp }}/FluentFlyoutDownstream-dev-win-x64.zip.sha256
           if-no-files-found: error
 
   publish-dev:
@@ -93,6 +108,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
 
       - name: Download release archive
         uses: actions/download-artifact@v4
@@ -108,16 +124,66 @@ jobs:
             throw 'The release archive was not downloaded.'
           }
 
+          $checksumFile = Get-ChildItem (Join-Path $env:RUNNER_TEMP 'downstream-release') -Filter '*.sha256' | Select-Object -First 1
+          if ($null -eq $checksumFile) {
+            throw 'The release checksum was not downloaded.'
+          }
+
+          $recordedHash = ((Get-Content -LiteralPath $checksumFile.FullName -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+          $actualHash = (Get-FileHash -LiteralPath $archive.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($recordedHash -ne $actualHash) {
+            throw 'The downloaded release checksum does not match.'
+          }
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [IO.Compression.ZipFile]::OpenRead($archive.FullName)
+          try {
+            $releaseEntry = $zip.GetEntry('RELEASE-INFO.txt')
+            if ($null -eq $releaseEntry) {
+              throw 'The release archive has no RELEASE-INFO.txt.'
+            }
+
+            $releaseStream = $releaseEntry.Open()
+            try {
+              $releaseInfo = [IO.StreamReader]::new($releaseStream).ReadToEnd()
+            } finally {
+              $releaseStream.Dispose()
+            }
+          } finally {
+            $zip.Dispose()
+          }
+
+          if ($releaseInfo -notmatch "(?m)^Channel: dev\r?$") {
+            throw 'The release archive is not marked as the dev channel.'
+          }
+          if ($releaseInfo -notmatch "(?m)^Source state: clean\r?$") {
+            throw 'The release archive was not built from a clean source tree.'
+          }
+          if ($releaseInfo -notmatch "(?m)^Commit: $([regex]::Escape($env:GITHUB_SHA))\r?$") {
+            throw 'The release archive commit does not match GITHUB_SHA.'
+          }
+          if ($releaseInfo -notmatch "(?m)^Source: https://github\.com/MERURUXD/FluentFlyout/tree/$([regex]::Escape($env:GITHUB_SHA))\r?$") {
+            throw 'The release archive source locator does not match GITHUB_SHA.'
+          }
+
+          $checkoutHead = (git rev-parse HEAD).Trim()
+          if ($LASTEXITCODE -ne 0 -or $checkoutHead -ne $env:GITHUB_SHA) {
+            throw "Publisher checkout '$checkoutHead' does not match GITHUB_SHA '$env:GITHUB_SHA'."
+          }
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git tag --force dev $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to move the dev tag locally.' }
           git push origin '+refs/tags/dev:refs/tags/dev'
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to push the dev tag.' }
 
           $notesPath = Join-Path $env:RUNNER_TEMP 'dev-release-notes.md'
           @"
           Rolling downstream development build.
 
           Commit: $env:GITHUB_SHA
+          Source: https://github.com/MERURUXD/FluentFlyout/tree/$env:GITHUB_SHA
           This prerelease is replaced by the next successful master build.
           Stable releases are published manually with immutable vMAJOR.MINOR.PATCH tags.
           "@ | Set-Content -Path $notesPath -Encoding utf8
@@ -132,15 +198,15 @@ jobs:
               --prerelease
             if ($LASTEXITCODE -ne 0) { throw 'Failed to refresh the rolling dev release.' }
 
-            gh release upload dev $archive.FullName --repo $env:GITHUB_REPOSITORY --clobber
+            gh release upload dev $archive.FullName $checksumFile.FullName --repo $env:GITHUB_REPOSITORY --clobber
+            if ($LASTEXITCODE -ne 0) { throw 'Failed to upload the rolling dev release assets.' }
           }
           else {
-            gh release create dev $archive.FullName `
+            gh release create dev $archive.FullName $checksumFile.FullName `
               --repo $env:GITHUB_REPOSITORY `
               --target $env:GITHUB_SHA `
               --title "FluentFlyout Downstream dev ($($env:GITHUB_SHA.Substring(0, 7)))" `
               --notes-file $notesPath `
               --prerelease
+            if ($LASTEXITCODE -ne 0) { throw 'Failed to create the rolling dev release.' }
           }
-
-          if ($LASTEXITCODE -ne 0) { throw 'Failed to publish the rolling dev release.' }

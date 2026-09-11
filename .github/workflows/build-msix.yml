@@ -13,6 +13,9 @@ permissions:
 
 jobs:
   build:
+    # This upstream-derived workflow remains for synchronization only. Never
+    # consume its signing/package path in the downstream repository.
+    if: github.repository == 'unchihugo/FluentFlyout'
     runs-on: windows-latest
     
     strategy:

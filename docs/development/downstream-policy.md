@@ -32,6 +32,22 @@ The policy does not change the Store/GitHub licensing implementation. The
 `GitHub Release` build continues to use the existing premium behavior, while
 the upstream purchase UI is hidden in the downstream shell.
 
+## Build and update identity
+
+`FluentFlyoutMSIX/Package.appxmanifest` is the repository-owned source for the
+stable semantic base version. Unpackaged builds carry separate assembly
+metadata for `DownstreamBuildChannel`, `DownstreamBuildVersion`, and
+`DownstreamSourceRevision`; ordinary builds default to the non-stable
+`development` channel, while the ZIP packager injects `dev` or `stable` and
+the current full commit SHA.
+
+Only a stable identity such as `v2.15.0` participates in downstream update
+comparison. Development and rolling `dev` identities remain non-stable even
+when they include the manifest version, and the updater exits before making a
+request for them. The updater reads release metadata and opens the fixed
+downstream release page; it never downloads, executes, installs, or replaces a
+binary.
+
 ## Runtime identity
 
 `FluentFlyoutWPF/Classes/Downstream/ProductIdentity.cs` centralizes the values
