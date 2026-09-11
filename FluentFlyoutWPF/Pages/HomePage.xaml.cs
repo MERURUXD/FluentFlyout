@@ -143,16 +143,6 @@ public partial class HomePage : Page
         }
     }
 
-    private void MediaFlyout_Click(object sender, System.Windows.RoutedEventArgs e)
-    {
-        SettingsWindow.NavigateToPage(typeof(MediaFlyoutPage));
-    }
-
-    private void VolumeFlyout_Click(object sender, System.Windows.RoutedEventArgs e)
-    {
-        SettingsWindow.NavigateToPage(typeof(VolumeMixerPage));
-    }
-
     private void TaskbarWidget_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         SettingsWindow.NavigateToPage(typeof(TaskbarWidgetPage));
@@ -161,11 +151,6 @@ public partial class HomePage : Page
     private void NextUp_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         SettingsWindow.NavigateToPage(typeof(NextUpPage));
-    }
-
-    private void LockKeys_Click(object sender, System.Windows.RoutedEventArgs e)
-    {
-        SettingsWindow.NavigateToPage(typeof(LockKeysPage));
     }
 
     private void TaskbarVisualizer_Click(object sender, System.Windows.RoutedEventArgs e)
