@@ -26,8 +26,6 @@ public partial class SettingsWindow : FluentWindow
     private static readonly HashSet<Type> HiddenSettingsPageTypes =
     [
         typeof(MediaFlyoutPage),
-        typeof(VolumeMixerPage),
-        typeof(LockKeysPage),
     ];
     static readonly Regex SplitCamelCaseRegex = new(@"(?<=[a-z0-9])(?=[A-Z])", RegexOptions.Compiled);
 

@@ -7,9 +7,7 @@ using FluentFlyout.Classes.Settings;
 using FluentFlyout.Classes.Utils;
 using FluentFlyout.Controls;
 using FluentFlyoutWPF.Classes;
-using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Models;
-using FluentFlyoutWPF.Windows;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Windows;
@@ -178,53 +176,6 @@ public partial class UserSettings : ObservableObject
     public partial int FlyoutAnimationEasingStyle { get; set; }
 
     /// <summary>
-    /// Enable lock keys flyout (shows Caps/Num/Scroll status)
-    /// </summary>
-    [ObservableProperty]
-    public partial bool LockKeysEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool LockKeysCapsEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool LockKeysNumEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool LockKeysScrollEnabled { get; set; }
-
-    /// <summary>
-    /// Lock keys flyout display duration (milliseconds)
-    /// </summary>
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(LockKeysDurationText))]
-    public partial int LockKeysDuration { get; set; }
-
-    [XmlIgnore]
-    public string LockKeysDurationText
-    {
-        get => LockKeysDuration.ToString();
-        set
-        {
-            if (int.TryParse(value, out var result))
-            {
-                LockKeysDuration = result switch
-                {
-                    > 10000 => 10000,
-                    < 0 => 0,
-                    _ => result
-                };
-            }
-            else
-            {
-                LockKeysDuration = 2000;
-            }
-
-            OnPropertyChanged();
-        }
-    }
-
-    /// <summary>
     /// App theme. 0 for default, 1 for light, 2 for dark.
     /// </summary>
     [ObservableProperty]
@@ -262,18 +213,6 @@ public partial class UserSettings : ObservableObject
     public partial bool DisableIfFullscreen { get; set; }
 
     /// <summary>
-    /// Use bold symbol and font in the lock keys flyout
-    /// </summary>
-    [ObservableProperty]
-    [XmlElement(ElementName = "LockKeysBoldUI")]
-    public partial bool LockKeysBoldUi { get; set; }
-
-    /// Selects which monitor to use for the lock keys flyout when multiple monitors are in use.
-    /// 0 = Default behavior, 1 = Monitor containing the focused window, 2 = Monitor containing the cursor.
-    [ObservableProperty]
-    public partial int LockKeysMonitorPreference { get; set; }
-
-    /// <summary>
     /// Determines if the user has updated to a new version
     /// </summary>
     [ObservableProperty]
@@ -298,18 +237,6 @@ public partial class UserSettings : ObservableObject
     public partial int MediaSessionSelectionMode { get; set; }
 
     /// <summary>
-    /// Enable subtle animations for the lock keys flyout indicator
-    /// </summary>
-    [ObservableProperty]
-    public partial bool LockKeysAnimated { get; set; }
-
-    /// <summary>
-    /// Show LockKeys flyout when the Insert key is pressed
-    /// </summary>
-    [ObservableProperty]
-    public partial bool LockKeysInsertEnabled { get; set; }
-
-    /// <summary>
     /// Preset for media flyout background blur styles
     /// </summary>
     [ObservableProperty]
@@ -326,15 +253,6 @@ public partial class UserSettings : ObservableObject
     /// </summary>
     [ObservableProperty]
     public partial bool NextUpAcrylicWindowEnabled { get; set; }
-
-    /// <summary>
-    /// Enable acrylic blur effect on the Lock Keys window
-    /// </summary>
-    [ObservableProperty]
-    public partial bool LockKeysAcrylicWindowEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool VolumeMixerAcrylicWindowEnabled { get; set; }
 
     /// <summary>
     /// User's preferred app language (e.g., "system" for system default)
@@ -472,13 +390,6 @@ public partial class UserSettings : ObservableObject
     public partial bool TaskbarWidgetScrollingEnabled { get; set; }
 
     /// <summary>
-    /// Controls whether scrolling over the taskbar widget adjusts master or player volume.
-    /// 0: Off, 1: Master volume, 2: Player volume
-    /// </summary>
-    [ObservableProperty]
-    public partial int TaskbarWidgetScrollVolumeMode { get; set; }
-
-    /// <summary>
     /// Gets or sets a value indicating whether the taskbar widget scrolling text should loop forever.
     /// </summary>
     [ObservableProperty]
@@ -595,46 +506,6 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool TaskbarVisualizerBaselineAutoHide { get; set; }
 
-    [ObservableProperty]
-    public partial bool VolumeControlEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool VolumeControlAboveMediaFlyout { get; set; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(VolumeControlDurationText))]
-    public partial int VolumeControlDuration { get; set; }
-
-    [XmlIgnore]
-    public string VolumeControlDurationText
-    {
-        get => VolumeControlDuration.ToString();
-        set
-        {
-            if (int.TryParse(value, out var result))
-            {
-                VolumeControlDuration = result switch
-                {
-                    > 10000 => 10000,
-                    < 0 => 0,
-                    _ => result
-                };
-            }
-            else
-            {
-                VolumeControlDuration = 3000;
-            }
-
-            OnPropertyChanged();
-        }
-    }
-
-    [ObservableProperty]
-    public partial bool VolumeMixerEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool VolumeMixerHighlightActiveApps { get; set; }
-
     /// <summary>
     /// The audio peak level for the taskbar visualizer from 1 to 3.
     /// This is used to calibrate the visualizer bar height to the audio output.
@@ -724,11 +595,6 @@ public partial class UserSettings : ObservableObject
         NIconLeftClick = 0;
         CenterTitleArtist = false;
         FlyoutAnimationEasingStyle = 2;
-        LockKeysEnabled = false;
-        LockKeysCapsEnabled = true;
-        LockKeysNumEnabled = true;
-        LockKeysScrollEnabled = true;
-        LockKeysDuration = 2000;
         AppTheme = 0;
         MediaFlyoutEnabled = true;
         MediaFlyoutAlwaysDisplay = false;
@@ -736,22 +602,16 @@ public partial class UserSettings : ObservableObject
         NIconSymbol = false;
         NIconHide = false;
         DisableIfFullscreen = true;
-        LockKeysBoldUi = false;
-        LockKeysMonitorPreference = 0;
         LastKnownVersion = string.Empty;
         SeekbarEnabled = false;
         PauseOtherSessionsEnabled = false;
         MediaSessionSelectionMode = 0;
-        LockKeysAnimated = true;
-        LockKeysInsertEnabled = true;
         MediaFlyoutBackgroundBlur = 0;
         AppLanguage = "system";
         FlowDirection = FlowDirection.LeftToRight;
         FontFamily = "Segoe UI Variable, Microsoft YaHei UI, Yu Gothic UI";
         MediaFlyoutAcrylicWindowEnabled = true;
         NextUpAcrylicWindowEnabled = true;
-        LockKeysAcrylicWindowEnabled = true;
-        VolumeMixerAcrylicWindowEnabled = true;
         TaskbarWidgetEnabled = false;
         TaskbarWidgetSelectedMonitor = 0;
         TaskbarWidgetPosition = 0;
@@ -765,7 +625,6 @@ public partial class UserSettings : ObservableObject
         TaskbarWidgetControlsPosition = 1;
         TaskbarWidgetAnimated = true;
         TaskbarWidgetScrollingEnabled = false;
-        TaskbarWidgetScrollVolumeMode = 1;
         TaskbarWidgetScrollingTextSpeed = 20;
         TaskbarWidgetScrollingTextLoopForever = false;
         TaskbarVisualizerEnabled = false;
@@ -779,11 +638,6 @@ public partial class UserSettings : ObservableObject
         TaskbarVisualizerAudioSensitivity = 2;
         TaskbarVisualizerAudioPeakLevel = 3;
         TaskbarVisualizerBaselineAutoHide = false;
-        VolumeControlEnabled = false;
-        VolumeControlAboveMediaFlyout = false;
-        VolumeControlDuration = 3000;
-        VolumeMixerEnabled = false;
-        VolumeMixerHighlightActiveApps = false;
         AcrylicBlurOpacity = 175;
         UseAlbumArtAsAccentColor = false;
         LastUpdateNotificationUnixSeconds = 0;
@@ -990,14 +844,6 @@ public partial class UserSettings : ObservableObject
         UpdateTaskbarMarquees();
     }
 
-    partial void OnTaskbarWidgetScrollVolumeModeChanged(int oldValue, int newValue)
-    {
-        if (oldValue == newValue || _initializing) return;
-
-        if (newValue == 0 && Application.Current?.MainWindow is MainWindow mainWindow)
-            mainWindow.ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarScroll);
-    }
-
     private void UpdateTaskbarMarquees()
     {
         MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
@@ -1061,37 +907,6 @@ public partial class UserSettings : ObservableObject
 
         MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
         mainWindow?.RefreshFilteredMedia();
-    }
-
-    partial void OnVolumeMixerHighlightActiveAppsChanged(bool oldValue, bool newValue)
-    {
-        if (oldValue == newValue || _initializing) return;
-
-        // Check premium status before allowing highlight to be enabled
-        if (newValue && !SettingsManager.Current.IsPremiumUnlocked)
-        {
-            VolumeMixerHighlightActiveApps = false;
-            return;
-        }
-    }
-
-    partial void OnVolumeControlEnabledChanged(bool oldValue, bool newValue)
-    {
-        if (newValue == true || oldValue == newValue || _initializing) return;
-
-        if (Application.Current?.MainWindow is MainWindow mainWindow)
-            mainWindow.OnVolumeControlDisabled();
-
-        // re-enable native volume flyout
-        VolumeMixerWindow.ShowVolumeOsd();
-    }
-
-    partial void OnVolumeMixerEnabledChanged(bool oldValue, bool newValue)
-    {
-        if (oldValue == newValue || _initializing) return;
-
-        if (Application.Current?.MainWindow is MainWindow mainWindow)
-            mainWindow.OnVolumeMixerEnabledChanged(newValue);
     }
 
     partial void OnSeekbarEnabledChanged(bool oldValue, bool newValue)
