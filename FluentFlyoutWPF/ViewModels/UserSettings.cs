@@ -507,14 +507,6 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool IsStoreVersion { get; set; }
 
-    [XmlIgnore]
-    [ObservableProperty]
-    public partial string PremiumPrice { get; set; }
-
-    [XmlIgnore]
-    [ObservableProperty]
-    public partial string PremiumPurchaseAction { get; set; }
-
     /// <summary>
     /// Last time the program has sent an update notification in Unix seconds.
     /// </summary>

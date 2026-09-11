@@ -36,10 +36,6 @@ public partial class HomePage : Page
             UpdateCheckButton.Visibility = Visibility.Collapsed;
         }
 
-        if (!DownstreamPolicy.EnableUpstreamPurchaseUi)
-        {
-            ViewMicrosoftStoreButton.Visibility = Visibility.Collapsed;
-        }
     }
 
     private void UpdateLastCheckedText()
@@ -161,25 +157,6 @@ public partial class HomePage : Page
     private void System_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         SettingsWindow.NavigateToPage(typeof(SystemPage));
-    }
-
-    private void ViewMicrosoftStore_Click(object sender, System.Windows.RoutedEventArgs e)
-    {
-        if (!DownstreamPolicy.EnableUpstreamPurchaseUi)
-            return;
-
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = "https://apps.microsoft.com/detail/9N45NSM4TNBP",
-                UseShellExecute = true
-            });
-        }
-        catch
-        {
-            Logger.Error("Failed to open Microsoft Store page");
-        }
     }
 
     private void ViewLogs_Click(object sender, System.Windows.RoutedEventArgs e)
