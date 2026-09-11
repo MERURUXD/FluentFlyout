@@ -83,41 +83,13 @@ public partial class UserSettings : ObservableObject
     /// MediaFlyout Always Display
     /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsDurationEditable))]
     public partial bool MediaFlyoutAlwaysDisplay { get; set; }
-
-    [XmlIgnore] public bool IsDurationEditable => !MediaFlyoutAlwaysDisplay;
 
     /// <summary>
     /// Flyout display duration (milliseconds)
     /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DurationText))]
     public partial int Duration { get; set; }
-
-    [XmlIgnore]
-    public string DurationText
-    {
-        get => Duration.ToString();
-        set
-        {
-            if (int.TryParse(value, out var result))
-            {
-                Duration = result switch
-                {
-                    > 10000 => 10000,
-                    < 0 => 0,
-                    _ => result
-                };
-            }
-            else
-            {
-                Duration = 3000;
-            }
-
-            OnPropertyChanged();
-        }
-    }
 
     /// <summary>
     /// Enable the 'Next Up' flyout (experimental)
@@ -534,14 +506,6 @@ public partial class UserSettings : ObservableObject
     /// </summary>
     [ObservableProperty]
     public partial bool IsStoreVersion { get; set; }
-
-    [XmlIgnore]
-    [ObservableProperty]
-    public partial string PremiumPrice { get; set; }
-
-    [XmlIgnore]
-    [ObservableProperty]
-    public partial string PremiumPurchaseAction { get; set; }
 
     /// <summary>
     /// Last time the program has sent an update notification in Unix seconds.

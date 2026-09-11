@@ -9,10 +9,6 @@ comparison.
 
 The current checkout makes optional work conditional at its ownership boundary:
 
-- Volume mixer construction, audio-device/session subscriptions, and the
-  one-second polling timer require an active volume/mixer/taskbar-volume
-  consumer. Releasing the last consumer closes the window and releases the
-  view-model resources.
 - Taskbar widget construction and its 1.5-second positioning timer require the
   enabled widget and premium access. Disable/close stops the timer and closes
   the window.
@@ -33,8 +29,8 @@ resource costs and do not prove that all Windows interleavings are leak-free.
 ## Automated evidence
 
 The focused test project covers resource ownership, callback draining, seekbar
-timer decisions, volume-mixer consumers, media-session selection/display
-ownership, stable product identity, and downstream update metadata. Run the
+timer decisions, media-session selection/display ownership, retired-settings
+compatibility, stable product identity, and downstream update metadata. Run the
 tests from a Windows .NET 10 environment with the exact configuration shown in
 the repository instructions; report the command and result in the stage
 handoff. A green test run is automated evidence, not a desktop measurement.
@@ -63,19 +59,18 @@ convert noise or a single run into a performance percentage.
 
 ## Required scenario matrix
 
-| Scenario | Playback | Taskbar widget | Visualizer | Volume consumer | Lifecycle variant |
-| --- | --- | --- | --- | --- | --- |
-| Cold idle | none | off | off | off | never enabled |
-| Cold playback | fixed repeatable source | off | off | off | never enabled |
-| Taskbar | fixed source | on | off | off | enabled throughout |
-| Visualizer | fixed source | on | on | off | enabled throughout |
-| Volume | fixed source | off | off | on | enabled throughout |
-| Disable/release | fixed source | on, then off | on, then off | on, then off | last consumer closed |
+| Scenario | Playback | Taskbar widget | Visualizer | Lifecycle variant |
+| --- | --- | --- | --- | --- |
+| Cold idle | none | off | off | never enabled |
+| Cold playback | fixed repeatable source | off | off | never enabled |
+| Taskbar | fixed source | on | off | enabled throughout |
+| Visualizer | fixed source | on | on | enabled throughout |
+| Disable/release | fixed source | on, then off | on, then off | last optional surface closed |
 
-The release row must also be observed with a shared consumer retained, so one
-feature turning off does not get mistaken for releasing a resource still needed
-by another feature. Repeat the enable/disable cycle after display and Explorer
-recovery when that controlled profile is available.
+The release row must also be observed with the shared media/session owner
+retained, so one feature turning off does not get mistaken for releasing a
+resource still needed by another feature. Repeat the enable/disable cycle after
+display and Explorer recovery when that controlled profile is available.
 
 ## Runtime evidence still required
 

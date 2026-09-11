@@ -20,7 +20,7 @@
 For the current downstream scope, privacy boundary, and contribution route, see the [release guide](docs/development/release.md), [privacy policy](PRIVACY-POLICY.md), and [contribution guide](.github/CONTRIBUTING.md). The upstream installation and Store material below is retained as clearly labelled reference information only.
 
 FluentFlyout Downstream is a modern Flyout app for Windows, built with Fluent 2 Design principles.
-The UI seemingly blends in with Windows 11, providing you an uninterrupted, clean, and native-like experience when controlling your media, lock keys, and more.  
+The UI seemingly blends in with Windows 11, providing you an uninterrupted, clean, and native-like experience when controlling your media and more.
 
 FluentFlyout features smooth animations, blends with your system's color themes and includes a suite of personalization settings while providing media controls, information and more in nice and modern looking popup flyouts.
 
@@ -29,7 +29,6 @@ FluentFlyout features smooth animations, blends with your system's color themes 
 ## Features ✨
 - **Audio flyout: Displays Cover, Title, Artist and media controls**
 - **"Up Next" flyout: shows what's next when a song ends**
-- **Lock Keys flyout: displays the status of lock keys at a glance**
 - **Taskbar widget: shows media info directly on the Windows taskbar**
 - Native Windows-like design
 - Uses Fluent 2 components
@@ -122,7 +121,7 @@ For the downstream data boundary, see the [privacy policy](PRIVACY-POLICY.md).
 </a>
 
 ## Upstream sustainability and Microsoft Store notes 💰
-The following notes describe the upstream project, not a downstream release or purchase policy. This fork remains free and open-source, and its compiled GitHub Release configuration retains the upstream premium implementation without enabling the upstream purchase UI.
+The following notes describe the upstream project, not a downstream release or purchase policy. This fork remains free and open-source, and its compiled GitHub Release configuration retains entitlement compatibility without enabling the upstream purchase UI.
 
 Maintaining a project of this scale takes time and effort. To support ongoing development, the Microsoft Store version offers a convenient way to install the app and includes a few optional features unlockable via a small payment (€2.99, varies by region).
 

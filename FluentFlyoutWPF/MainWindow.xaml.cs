@@ -199,7 +199,6 @@ public partial class MainWindow : MicaWindow
         }
 
         string previousVersion = SettingsManager.Current.LastKnownVersion;
-        _ = CheckForExperimentsOnStartupAsync(previousVersion);
 
         // apply other things on new thread
         Dispatcher.Invoke(() =>
@@ -216,34 +215,6 @@ public partial class MainWindow : MicaWindow
             // check for updates on startup
             _ = CheckForUpdatesOnStartupAsync();
         });
-    }
-
-    private async Task CheckForExperimentsOnStartupAsync(string previousVersion)
-    {
-        OnboardingExperiment(previousVersion);
-    }
-
-    private void OnboardingExperiment(string previousVersion)
-    {
-        if (!DownstreamPolicy.EnableOnboarding)
-            return;
-
-        // show onboarding to new users (no previous version stored = user has never run the app before)
-        if (string.IsNullOrEmpty(previousVersion))
-        {
-            if (ExperimentsService.HasExperiments)
-            {
-                if (ExperimentsService.CheckUuidInExperiment("onboarding") == "A")
-                    OnboardingWindow.ShowInstance();
-                else
-                {
-                    SettingsWindow.ShowInstance();
-                    _ = TelemetryService.SendTelemetryEventAsync("onboarding_completed", "onboarding");
-                }
-            }
-            else
-                OnboardingWindow.ShowInstance();
-        }
     }
 
     private async Task CheckForUpdatesOnStartupAsync()

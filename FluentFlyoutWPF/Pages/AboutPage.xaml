@@ -55,10 +55,6 @@
 
         <DockPanel LastChildFill="False" Margin="0,24,0,12">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Left">
-                <ui:SymbolIcon Symbol="Star24" Filled="True" Width="24" Height="24" FontSize="16" VerticalAlignment="Center" Foreground="Gold" />
-                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                    <TextBlock Text="{DynamicResource EnjoyingAppText}" HorizontalAlignment="Center" FontSize="12" Opacity="0.5" VerticalAlignment="Center" Margin="4,0,0,0" />
-                </StackPanel>
                 <ui:Anchor Appearance="Transparent" Content="{DynamicResource GitHubRepoLink}" Icon="{ui:SymbolIcon Open24}" NavigateUri="{x:Static downstream:ProductIdentity.RepositoryUrl}" Margin="12,0,0,0" />
             </StackPanel>
         </DockPanel>

@@ -16,8 +16,6 @@ of truth for the current downstream switches:
 - `EnableUpstreamExperiments = false`
 - `EnableUpstreamUpdateCheck = false`
 - `EnableDownstreamUpdateCheck = true`
-- `EnableUpstreamPurchaseUi = false`
-- `EnableOnboarding = false`
 
 Experiments, telemetry, and update checking retain their upstream service
 implementations but return before contacting `FluentFlyoutApiClient` when the
@@ -31,9 +29,10 @@ updater remain in the project for future mergeability, but the upstream branch
 is unreachable under the current policy.
 
 The policy does not change the Store/GitHub licensing implementation. The
-`GitHub Release` build continues to use the existing premium behavior, while
-downstream pages omit Premium/status/purchase affordances and the shell still
-hides the upstream Microsoft Store link under the code-owned policy.
+`GitHub Release` build continues to use the existing entitlement behavior, while
+the downstream UI contains no Premium/status/purchase or Microsoft Store
+purchase presentation. `LicenseManager` remains the compatibility boundary for
+Store entitlement checks and GitHub/self-built unlock behavior.
 
 ## Build and update identity
 
@@ -87,18 +86,19 @@ unpackaged path.
 ## Fresh-install defaults
 
 The downstream defaults retain media flyout and fullscreen protection, while
-starting Lock Keys, Next Up, Volume Mixer, Taskbar Visualizer, telemetry, and
-upstream update notifications disabled. Deserialization does not reapply these
-defaults to an existing settings file.
+starting Next Up, Taskbar Widget, Taskbar Visualizer, telemetry, and upstream
+update notifications disabled. Deserialization does not reapply these defaults
+to an existing settings file.
 
 ## Non-goals and verification boundary
 
-This policy does not delete optional implementations, remove localization or
-the Source Generator, rewrite media/session selection, change Store signing,
-or claim desktop/network/coexistence tests that were not exercised. Build and
-static audits cover the policy, release, and identity seams; desktop migration,
-coexistence, and controlled network-capture checks require a Windows desktop
-test profile.
+This policy intentionally retires the downstream purchase/onboarding surfaces,
+the unused optional implementations, and zero-reference localization. It does
+not remove the Source Generator, rewrite media/session selection, change Store
+signing, or claim desktop/network/coexistence tests that were not exercised.
+Build and static audits cover the policy, release, and identity seams; desktop
+migration, coexistence, and controlled network-capture checks require a Windows
+desktop test profile.
 
 ## Evidence classification
 

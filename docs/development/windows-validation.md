@@ -1,8 +1,8 @@
-# Stage 6 Windows validation report
+# Stage 4 Windows validation report
 
-**Date:** 2026-09-11
-**Status:** Partial acceptance with explicit desktop and comparability blockers
-**Target commit:** `b5be9567820b138e0e2956a0be524212bd300900`
+**Date:** 2026-09-12
+**Status:** Core surface smoke pass; the latest media-key attempt lacked an active session, and comparison, Store, coexistence, and controlled-profile items remain not run
+**Target:** `codex/stage4-final-cleanup` (runtime/package validation commit `f99a85647876da852b04532ea3cb742252c04500`; report-only HEAD is updated separately)
 **Host:** Windows 11 Home 64-bit, build `26200`, .NET SDK `10.0.401`
 
 This report records evidence for the current downstream checkout. It does not
@@ -11,38 +11,41 @@ coexistence, network-capture, or performance behavior.
 
 ## Scope and comparison
 
-The accepted target is the post-stage-5 `master` commit above. No separate
-before/after comparison build was selected: the historical review SHA is not a
-measured baseline for this run, and producing a comparable baseline would be a
-separate controlled measurement task. Therefore no performance percentage or
-resource improvement is reported.
+The accepted target is the final Stage 4 downstream checkout on the branch above.
+No separate before/after comparison build was selected: the historical review
+SHA is not a measured baseline for this run, and producing a comparable baseline
+would be a separate controlled measurement task. Therefore no performance
+percentage or resource improvement is reported.
 
-The checkout used for this report was not clean. The development ZIP below is
-therefore an artifact inspection, not a clean release candidate.
+The packaged validation commit was clean. The development ZIP below is an
+artifact inspection, not a stable release candidate or a publishing operation.
 
 ## Static and automated evidence
 
 | Check | Result | Evidence |
 | --- | --- | --- |
 | WPF restore | Pass | `dotnet restore FluentFlyoutWPF\FluentFlyout.csproj -p:Platform=x64` |
-| WPF x64 `GitHub Release` build | Pass | `dotnet build FluentFlyoutWPF\FluentFlyout.csproj -c "GitHub Release" -p:Platform=x64 --no-restore`; existing compiler warnings only |
+| WPF x64 `GitHub Release` build | Pass | `dotnet build FluentFlyoutWPF\FluentFlyout.csproj -c "GitHub Release" -p:Platform=x64 --no-restore`; 0 errors, existing compiler warnings only |
 | Focused test restore | Pass with existing `NU1904` advisory | `dotnet restore tests\FluentFlyoutWPF.Tests\FluentFlyoutWPF.Tests.csproj -p:Platform=x64` |
-| Focused production-behavior tests | Pass | 67 passed, 0 failed, 0 skipped |
+| Focused production and downstream contract tests | Pass | 70 passed, 0 failed, 0 skipped |
+| WPF x64 non-GitHub `Release` build | Pass | `dotnet build FluentFlyoutWPF\FluentFlyout.csproj -c Release -p:Platform=x64 --no-restore`; 0 errors |
 | Solution format | Pass | `dotnet format FluentFlyout.sln --verify-no-changes --verbosity diagnostic`; 0 files formatted |
 | Final diff check | Pass | `git diff --check` |
+| Stage 4C retired-resource audit | Pass | 114-key manifest; 2529 expected localization removals; 0 unexpected removals/additions; 29/29 XML dictionaries parse |
 
 The automated suite exercises resource lifecycle, callback draining, seekbar
-timer decisions, volume consumers, media-session selection/display ownership,
-product-version parsing, and metadata-only update behavior. These are
-automated seams, not replacements for the desktop matrix below.
+timer decisions, media-session selection/display ownership, retired-settings and
+surface compatibility, product-version parsing, and metadata-only update
+behavior. These are automated seams, not replacements for the desktop matrix
+below.
 
 ## Development ZIP artifact
 
-The non-publishing package check used:
+The non-publishing package check used on clean commit `f99a85647876da852b04532ea3cb742252c04500`:
 
 ```powershell
 $sha = (git rev-parse HEAD).Trim()
-$archive = Join-Path $env:TEMP "FluentFlyoutDownstream-development-$($sha.Substring(0, 7))-stage6.zip"
+$archive = Join-Path $env:TEMP "FluentFlyoutDownstream-development-$($sha.Substring(0, 7))-stage4-final.zip"
 .\scripts\Build-DownstreamZip.ps1 `
   -Channel development `
   -ExpectedCommit $sha `
@@ -52,30 +55,37 @@ $archive = Join-Path $env:TEMP "FluentFlyoutDownstream-development-$($sha.Substr
 Observed artifact facts:
 
 - manifest version: `2.15.0`;
-- build identity: `development+b5be956`;
-- source state: `dirty`;
-- archive SHA-256: `4a4ba1173360965263d03fb9da43ecf7bec452cd21b773cb66073921633e8ba4`;
-- archive entry count: 512; and
+- build identity: `development+f99a856`;
+- source state: `clean`;
+- archive SHA-256: `2510c1bd9c3a1e58c1d5476662c71cb2b0155ea73f81a5eea6625292d6f824ac`;
+- archive entry count: 503; and
 - required entries present: `FluentFlyoutDownstream.exe`, `LICENSE`,
   `README.txt`, `THIRD-PARTY-NOTICES.txt`, `RELEASE-INFO.txt`, and resolved
   runtime/third-party notices.
 
-The archive's `RELEASE-INFO.txt` recorded the same commit, dirty source state,
-source URL, and metadata-only updater boundary. No tag, release, upload, MSIX
-install, Store operation, or signing operation was performed.
+The archive's `RELEASE-INFO.txt` recorded the same commit, clean source state,
+source URL, and metadata-only updater boundary. Its retained WPF assets include
+the downstream application icon/tray icons, Home hero, Next Up demo, Widget
+demo, and Visualizer image; the retired icon, Demo5, and upstream tray assets
+are absent. No tag, release, upload, MSIX install, Store operation, or signing
+operation was performed.
 
 ## Functional and lifecycle matrix
 
 | Scenario | Status | Evidence or blocker |
 | --- | --- | --- |
-| Cold start with optional consumers never enabled | Not accepted as a desktop result | Static ownership conditions and automated lifecycle tests pass; a valid isolated desktop profile was not available. |
-| Enable then disable the last taskbar/visualizer/volume consumer | Automated pass; desktop not run | Focused lifecycle/consumer tests pass; no controlled audio/display profile was used. |
-| Shared consumer remains active while another consumer disables | Automated pass; desktop not run | Consumer ownership tests pass; no GUI/audio observation. |
+| Cold start with retained optional surfaces never enabled | Not run as a disposable-profile result | Static ownership conditions and automated lifecycle tests pass; a valid isolated desktop profile was not used for this scenario. |
+| Taskbar Widget metadata, artwork, and playback surface | Pass on an active-session run | The earlier final-build taskbar screenshot and stable media-session smoke observed the metadata path; the latest f99a856 launch had no active media session for metadata. |
+| Taskbar body-click ↔ Main Media Flyout | Pass | Current source retains `ShowMediaFlyout(toggleMode: true, forceShow: true)`; the final runtime is unchanged from the Stage 3 desktop pass that opened/toggled it. |
+| Main Media Flyout media and volume-key semantics | Prior runtime pass; latest media-key run blocked | The f99a856 attempt had no active media session, so it is not counted as a current media-key pass; the unchanged Stage 3 final smoke covered media and volume keys with `MediaFlyoutVolumeKeysExcluded`. |
+| Visualizer pause/resume and render-device reattach | Pass | Stage 3 final smoke passed pause/resume and Realtek headphone → speaker → headphone reattach; Stage 4 changes do not alter production runtime code. |
+| Next Up normal display, Main-visible suppression, and post-hide recovery | Pass | Stage 3 final smoke used a stable Spotify SMTC source and observed all three states with matching title/artist/artwork. |
+| Settings navigation and retired-surface search contract | Pass | Current UIA navigation exposed only Home, Widget, Visualizer, Next Up, System, and About; three downstream contract tests passed. |
 | Device switch, lock-screen/Explorer/display recovery, taskbar rebuild | Not run | Requires a controlled interactive Windows profile and device/display actions. |
-| Spotify/browser selection, pause combinations, filtering, Automatic/unknown mode, restart with same metadata | Automated policy pass; desktop not run | Focused media policy/ownership tests pass; no Spotify or browser playback session was used. |
+| Spotify/browser selection, pause combinations, filtering, Automatic/unknown mode, restart with same metadata | Automated policy pass; desktop not run | Focused media policy/ownership tests pass; the three-state Next Up smoke used Spotify SMTC, but the full matrix was not repeated here. |
 | Fresh settings, legacy migration, backup recovery, downstream/upstream coexistence | Static contract only | Requires a disposable Windows profile and a separately installed official product; real user profile was not used. |
 | Update/network boundary | Automated fixture pass; live capture not run | Tests use local responses; no real network capture or upstream service observation was claimed. |
-| ZIP version/SHA/source/licence inspection | Pass | Development archive facts above; it is not a clean release candidate. |
+| ZIP version/SHA/source/licence inspection | Pass | Clean development archive facts above; it is not a stable release candidate. |
 
 ## Controlled desktop acceptance checklist
 
@@ -94,12 +104,13 @@ above; a build or automated test does not mark a desktop item complete.
 
 ### Function and lifecycle
 
-- [ ] Cold-start with taskbar, visualizer, and volume consumers never enabled.
-- [ ] Enable each optional consumer, disable the last consumer, and repeat the
+- [ ] Cold-start with taskbar, visualizer, Next Up, and Main Media Flyout never
+  enabled.
+- [ ] Enable each retained optional surface, disable it, and repeat the
   enable/disable cycle; verify its timer, capture, subscriptions, callbacks,
   and window stop or release.
-- [ ] Keep a shared consumer active while disabling another consumer; verify
-  that resources still needed by the shared consumer remain active.
+- [ ] Keep the shared media/session owner active while disabling another
+  surface; verify that resources still needed by the shared owner remain active.
 - [ ] Interleave device switching, lock-screen resume, Explorer/display
   recovery, high-frequency flyout/taskbar updates, and taskbar close/recreate;
   check for isolated capture, hidden-window growth, exceptions, and stale
@@ -109,8 +120,8 @@ above; a build or automated test does not mark a desktop item complete.
 
 - [ ] Exercise Spotify and browser playback/pause combinations, app filtering,
   `Automatic` and unknown-mode fallback, newly added unselected sessions, and
-  same-ID session close/restart with identical metadata. Confirm that Next Up,
-  volume targeting, and media controls use the same selected session.
+  same-ID session close/restart with identical metadata. Confirm that Next Up
+  and media controls use the same selected session.
 - [ ] With a disposable fixture, verify fresh settings, legacy migration,
   backup recovery, explicit feature values, and downstream identity. Preserve
   the original legacy file; test official-product coexistence only in a
@@ -133,7 +144,7 @@ above; a build or automated test does not mark a desktop item complete.
   target; build them to separate output directories.
 - [ ] For each scenario, run five cold starts with a fixed readiness wait and a
   60–120 second sample window. Cover no-playback all-off, fixed playback
-  all-off, taskbar, taskbar plus visualizer, volume consumer, and each feature
+  all-off, taskbar, taskbar plus visualizer, Next Up, and each retained surface
   enabled then disabled.
 - [ ] Record launch-to-ready time, CPU mean and peak, Working Set, Private
   Bytes, timer/wakeup observations, and capture/window counts. Keep raw traces
@@ -158,16 +169,21 @@ performance result.
 
 ## Final assessment and follow-up
 
-- **Functionality:** automated policy/lifecycle seams pass; real GUI/audio/media
-  behavior remains unverified for the scenarios marked above.
-- **Resource release:** source and focused tests provide evidence for ownership
-  paths; shutdown/recovery still needs a controlled desktop profile.
+- **Functionality:** the final build's Widget/settings smoke passed; its latest
+  media-key attempt was blocked by the absence of an active media session. The
+  unchanged Stage 3 runtime also has real Widget/Main Flyout, Visualizer,
+  device-reattach, and Next Up evidence. Controlled shutdown/recovery items
+  remain unverified where marked above.
+- **Resource release:** source, contract tests, and focused tests provide
+  evidence for ownership paths; full shutdown/recovery still needs a controlled
+  desktop profile.
 - **Performance:** not comparable; no improvement claim is made.
-- **Artifact:** the development ZIP is structurally valid and traceable, but its
-  dirty source state means it must not be treated as a release candidate.
+- **Artifact:** the development ZIP is structurally valid and traceable from a
+  clean commit, but its development channel means it must not be treated as a
+  stable release candidate.
 
 The next valid desktop run needs a disposable Windows account or a tested
 known-folder isolation method, a clean target checkout, a separately built
 comparison commit, and a fixed raw-data destination outside the repository.
-Stage 6 does not authorize adding optimizations, changing media behavior, or
-publishing the inspected artifact.
+This Stage 4 validation does not authorize adding optimizations, changing media
+behavior, or publishing the inspected artifact.

@@ -4,26 +4,8 @@
     <system:String x:Key="Enabled">Activat</system:String>
     <system:String x:Key="Disabled">Desactivat</system:String>
     <system:String x:Key="MediaFlyoutTitle">Flyout Multimèdia</system:String>
-    <system:String x:Key="MediaFlyoutDescription">En escoltar multimèdia, premeu qualsevol tecla de volum o relacionada amb multimèdia (reproduir/aturar, apujar/abaixar volum, etc.) al teclat per mostrar el flyout. Mostra informació multimèdia, juntament amb controls de reproducció i més.</system:String>
-    <system:String x:Key="TextBlockText1">Habilitar Flyout Multimèdia</system:String>
-    <system:String x:Key="TextBlockText3">Es mostra un flyout quan es prem una tecla multimèdia</system:String>
-    <system:String x:Key="TextBlockText2">Tria des d'un conjunt predeterminat d'estils de desenfocament moderns</system:String>
-    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Cap</system:String>
-    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Exclou Tecles de Volum</system:String>
-    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">No mostrar el flyout quan es premi volum amunt/avall/silenci</system:String>
     <system:String x:Key="AcrylicWindowTitle">Flyouts Acrilics</system:String>
     <system:String x:Key="MillisecondsUnit">ms</system:String>
-    <system:String x:Key="FlyoutStayDurationDescription">(per defecte: 3000 ms)</system:String>
-    <system:String x:Key="MediaFlyoutAlwaysDisplay">Mostra Sempre</system:String>
-    <system:String x:Key="CenterTitleArtistTitle">Centrar títol i artista</system:String>
-    <system:String x:Key="CenterTitleArtistDescription">Alinear el texte al centre en comptes de l'esquerra</system:String>
-    <system:String x:Key="ShowMediaPlayerNameTitle">Mostrar nom del reproductor de media</system:String>
-    <system:String x:Key="RepeatButtonTitle">Botó de repetició*</system:String>
-    <system:String x:Key="RepeatButtonDescription">Tria entre repetir tot o repetir un, augmenta l'amplada del flyout</system:String>
-    <system:String x:Key="ShuffleButtonTitle">Botó de barreja*</system:String>
-    <system:String x:Key="ShuffleButtonDescription">Augmenta l'amplada del flyout</system:String>
-    <system:String x:Key="PauseOtherMediaTitle">Pausa altres continguts multimèdia automàticament</system:String>
-    <system:String x:Key="PauseOtherMediaDescription">Quan reprodueixes o et centres en nous continguts multimèdia, altres sessions actives es posen en pausa automàticament</system:String>
     <system:String x:Key="TaskbarWidgetCustomizationTitle">Widget de la barra de tasques</system:String>
     <system:String x:Key="TaskbarWidgetEnabledTitle">Activa el widget de la barra de tasques</system:String>
     <system:String x:Key="TaskbarWidgetVisualIssuesWarning">Configura les opcions següents si teniu problemes visuals.</system:String>
@@ -33,27 +15,11 @@
     <system:String x:Key="TaskbarWidgetBackgroundBlurDescription">Afegeix un efecte de desenfocament de fons al widget de la barra de tasques</system:String>
     <system:String x:Key="TaskbarWidgetHideCompletelyTitle">Amaga completament quan no hi ha cap media present</system:String>
     <system:String x:Key="TaskbarWidgetHideCompletelyDescription">Amaga tot el widget quan no hi ha contingut multimèdia disponible, en comptes de mostrar una icona multimèdia</system:String>
-    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Estil 1 (Il·luminació de la Portada)</system:String>
-    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Estil 2 (Il·luminat Difuminat)</system:String>
-    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Estil 3 (Difuminat)</system:String>
-    <system:String x:Key="BackgroundBlurTitle">Desenfocament del fons</system:String>
     <system:String x:Key="AcrylicWindowDescription">Aplica un efecte de desenfocament acrílic transparent al flyouts</system:String>
-    <system:String x:Key="CompactLayoutTitle">Disposició compacta</system:String>
-    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Un disseny més prim i menys intrusiu
-Oculta els botons de repetició, aleatori i la informació del reproductor</system:String>
     <system:String x:Key="SelectedMonitorTitle">Pantalla objectiu del Flyout</system:String>
-    <system:String x:Key="FlyoutPositionTitle">Posició del Flyout</system:String>
     <system:String x:Key="PositionBottomLeft" xml:space="preserve"> Inferior esquerra</system:String>
     <system:String x:Key="PositionBottomCenter" xml:space="preserve"> Centre inferior</system:String>
     <system:String x:Key="PositionBottomRight" xml:space="preserve"> Inferior Dreta</system:String>
-    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Superior Esquerra</system:String>
-    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Centre superior</system:String>
-    <system:String x:Key="PositionTopRight" xml:space="preserve"> Superior Dreta</system:String>
-    <system:String x:Key="FlyoutStayDurationTitle">Duració del Flyout</system:String>
-    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">El menú desplegable roman obert fins que feu clic al botó de tancament</system:String>
-    <system:String x:Key="ShowSeekbarTitle">Mostra barra de progrés*</system:String>
-    <system:String x:Key="ShowSeekbarDescription">Una barra de progrés apareixerà si el reproductor ho suporta</system:String>
-    <system:String x:Key="UnsupportedControlsWarning">*Alguns navegadors/reproductors no suporten controls per repetir, aleatori o la barra de progrés.</system:String>
     <system:String x:Key="TaskbarWidgetDescription">Un widget compacte que apareix a la Barra de Tasques de Windows per tenir accés instantani al teu contingut multimèdia. Fes clic al widget per expandir el Flyout Multimèdia.</system:String>
     <system:String x:Key="TaskbarWidgetEnabledDescription">Mostra un widget multimèdia compacte a la barra de tasques</system:String>
     <system:String x:Key="TaskbarWidgetSelectedMonitorTitle">Monitor en què estarà el Widget</system:String>
@@ -91,45 +57,12 @@ Oculta els botons de repetició, aleatori i la informació del reproductor</syst
     <system:String x:Key="TaskbarVisualizerOutputDeviceDescription">Canvia el que mostra el visualitzador canviant el dispositiu de sortida de FluentFlyout.</system:String>
     <system:String x:Key="TaskbarVisualizerClickableTitle">Click per obrir Configuració</system:String>
     <system:String x:Key="TaskbarVisualizerClickableDescription">Feu clic al visualitzador obre la vostra pàgina de configuració</system:String>
-    <system:String x:Key="PremiumFeatureTitle">Funcions Premium</system:String>
-    <system:String x:Key="PremiumFeatureDescription" xml:space="preserve">La teva contribució única m'ajuda a mantenir FluentFlyout viu i actualitzat. Desbloqueja instantàniament totes les opcions de personalització premiun, per sempre.
-
-Nota: Com a projecte de codi obert, aquestes opcions també estan disponibles de franc mitjançant l'instal·lador manual de GitHub. L'únic inconvenient és que les actualitzacions i la instal·lació s'han de fer manualment.</system:String>
-    <system:String x:Key="PremiumLockedMessage">Aquesta opció és part del paquet premium</system:String>
-    <system:String x:Key="PremiumUnlockedMessage">Opcions Premium desbloquejades. Gràcies pel teu suport!</system:String>
-    <system:String x:Key="PremiumGitHubMessage">Les opcions premium estan desbloquejades per a versions de GitHub/compilades per tu mateix</system:String>
-    <system:String x:Key="UnlockPremiumButton">Desbloquejar Premium</system:String>
-    <system:String x:Key="PremiumPurchaseSuccess">Premium desbloquejat correctament!</system:String>
-    <system:String x:Key="PremiumPurchaseFailed">Compra fallida. Si us plau intenta-ho de nou.</system:String>
-    <system:String x:Key="PremiumPurchaseCancelled">Compra cancel·lada.</system:String>
-    <system:String x:Key="UnlockFullExperienceText">Desbloqueja l'experiència completa de FluentFlyout:</system:String>
-    <system:String x:Key="TaskbarWidgetCustomizationPerk">Activa el Widget de la Barra de Tasques i Visualitzador</system:String>
-    <system:String x:Key="AcrylicBlurOpacityPerk">Ajusta l'efecte de desenfocament Acrílic</system:String>
-    <system:String x:Key="HideTrayIconPerk">Amagar Icona de la Safata</system:String>
-    <system:String x:Key="AllFuturePremiumFeatures">Totes les funcions premium</system:String>
     <system:String x:Key="NextUpCustomizationTitle">Flyout de Següent</system:String>
     <system:String x:Key="NextUpDescription" xml:space="preserve">Un flyout que mostra la següent cançó/vídeo quan s'acaba l'actual. Només apareix si el següent es reprodueix automàticament, si es pressiona següent/anterior manualment, apareixerà el flyout principal.</system:String>
     <system:String x:Key="EnableNextUpTitle">Activar Flyout de Següent</system:String>
     <system:String x:Key="EnableNextUpDescription">Mostra el que ve quan s'acaba una cançó/vídeo</system:String>
     <system:String x:Key="NextUpStayDurationTitle">Duració de Següent</system:String>
     <system:String x:Key="NextUpStayDurationDescription">(per defecte: 2000 ms)</system:String>
-    <system:String x:Key="LockKeysCustomizationTitle">Flyout de Tecles de Bloqueig</system:String>
-    <system:String x:Key="LockKeysDescription" xml:space="preserve">Revisa l'estat de les tecles de bloqueig d'una ullada. Apareix en prémer Bloq Maj, Bloq Num o Bloq Despl. Útil per a portàtils/teclats sense indicadors de tecles de bloqueig.</system:String>
-    <system:String x:Key="EnableLockKeysTitle">Activar Flyout de Tecles de Bloqueig</system:String>
-    <system:String x:Key="EnableLockKeysDescription">Mostra si la tecla de bloqueig especificada està activa o no</system:String>
-    <system:String x:Key="LockKeysStayDurationTitle">Duració de Tecles de Bloqueig</system:String>
-    <system:String x:Key="LockKeysStayDurationDescription">(per defecte: 2000 ms)</system:String>
-    <system:String x:Key="LockKeysBoldUITitle">Símbol i Font en Negreta</system:String>
-    <system:String x:Key="LockKeysBoldUIDescription">Emfatitza el símbol i la font del flyout</system:String>
-    <system:String x:Key="LockKeysCursorUITitle">Pantalla preferida</system:String>
-    <system:String x:Key="LockKeysCursorUIDescription" xml:space="preserve">Trieu en quin monitor es mostrarà el flyout.</system:String>
-    <system:String x:Key="DefaultLockLayoutPosition">Per Defecte (Pantalla objectiu del Flyout)</system:String>
-    <system:String x:Key="MonitorWithFocusedWindow">Monitor amb la finestra activa</system:String>
-    <system:String x:Key="MonitorWithCursor">Monitor amb el cursor</system:String>
-    <system:String x:Key="EnableInsertKeyTitle">Activar Flyout per a la Tecla Insert</system:String>
-    <system:String x:Key="EnableInsertKeyDescription">Determina si premeu la tecla d'Insert mostrarà el Flyout</system:String>
-    <system:String x:Key="LockKeysAnimatedTitle">Animacions d'Indicador</system:String>
-    <system:String x:Key="LockKeysAnimatedDescription">Activa animacions subtils per a l'indicador de les tecles de bloqueig</system:String>
     <system:String x:Key="SystemSettingsTitle">Sistema</system:String>
     <system:String x:Key="LaunchOnStartupTitle">Executar quan s'iniciï l'equip</system:String>
     <system:String x:Key="LaunchOnStartupDescription">Executar minimitzat a la safata quan inicieu sessió al Windows</system:String>
@@ -176,25 +109,13 @@ Nota: Com a projecte de codi obert, aquestes opcions també estan disponibles de
     <system:String x:Key="AboutContributorsDescription">Moltes gràcies a totes les increïbles persones que han contribuït al desenvolupament i èxit de FluentFlyout!</system:String>
     <system:String x:Key="DevelopersTitle">Desenvolupadors</system:String>
     <system:String x:Key="TranslatorsTitle">Traductors</system:String>
-    <system:String x:Key="AboutPremiumTitle">Sobre el Premium</system:String>
     <system:String x:Key="AboutOpenSourceLicensesTitle">Llicències de Codi Obert</system:String>
     <system:String x:Key="AboutOpenSourceLicensesDescription">FluentFlyout s'ha construït amb els paquets de codi obert següents:</system:String>
-    <system:String x:Key="EnjoyingAppText" xml:space="preserve">Estàs gaudint de l'app? Dóna-li una estrella a GitHub
-o deixa una opinió a la Microsoft Store!</system:String>
     <system:String x:Key="GitHubRepoLink">Repositori de GitHub</system:String>
-    <system:String x:Key="SponsorMeLink">Patrocina'm</system:String>
-    <system:String x:Key="BuyMeCoffeeLink">Convida'm a un cafè</system:String>
-    <system:String x:Key="CloseButton">Tancar</system:String>
     <system:String x:Key="AppLanguageTitle">Idioma de l'Aplicació</system:String>
     <system:String x:Key="AppLanguageDescription" xml:space="preserve">Si el vostre idioma no està llistat o està incomplet, per defecte s'usarà anglès
 Pots ajudar a contribuir amb les traduccions a</system:String>
     <system:String x:Key="AppLanguageDescriptionLink">Weblate</system:String>
-    <system:String x:Key="LockWindow_CapsLock">Bloq. Mayús</system:String>
-    <system:String x:Key="LockWindow_NumLock">Bloq. Num</system:String>
-    <system:String x:Key="LockWindow_ScrollLock">Bloq. Despl</system:String>
-    <system:String x:Key="LockWindow_InsertPressed">Polsat Insert</system:String>
-    <system:String x:Key="LockWindow_LockOn">activat</system:String>
-    <system:String x:Key="LockWindow_LockOff">desactivat</system:String>
     <system:String x:Key="NextUpWindow_UpNextText">Pista següent:</system:String>
     <system:String x:Key="TrayIcon_SettingsOption">Configuració</system:String>
     <system:String x:Key="TrayIcon_GitHubRepositoryOption">Repositori</system:String>
@@ -231,31 +152,8 @@ Pots ajudar a contribuir amb les traduccions a</system:String>
     <system:String x:Key="LegacyTaskbarWidthDescription">Fes servir el sistema antic de l'amplada del widget de la barra de tasques</system:String>
     <system:String x:Key="TaskbarWidgetShowPauseOverlayTitle">Mostra l'Icona de Pausa</system:String>
     <system:String x:Key="TaskbarWidgetShowPauseOverlayDescription">Quan el contingut multimèdia està en pausa, mostra una icona de pausa sobre la portada de l'àlbum</system:String>
-    <system:String x:Key="VolumeMixerHighlightPerk">Ressaltar les aplicacions actives al mesclador de volum</system:String>
-    <system:String x:Key="VolumeFlyoutTitle">Flyout de volum</system:String>
-    <system:String x:Key="VolumeFlyoutDescription">Un flyout independent de control de volum que s'expandeix a un mesclador de volum, reemplaçant la interfície de volum predeterminada del Windows.</system:String>
-    <system:String x:Key="EnableVolumeFlyoutTitle">Habilitar Flyout de Volum</system:String>
-    <system:String x:Key="EnableVolumeFlyoutDescription">Reemplaça el flyout de volum predeterminat de Windows</system:String>
-    <system:String x:Key="VolumeAboveMediaFlyoutTitle">Posicionar el Flyout de Volum sobre el Flyout de Multimèdia</system:String>
-    <system:String x:Key="VolumeFlyoutStayDurationTitle">Durada del Flyout de Volum</system:String>
-    <system:String x:Key="VolumeMixerSectionTitle">Mesclador de Volum</system:String>
-    <system:String x:Key="EnableVolumeMixerTitle">Activa el Mesclador de Volum</system:String>
-    <system:String x:Key="EnableVolumeMixerDescription">Control precís dels volums de les aplicacions individuals</system:String>
-    <system:String x:Key="VolumeMixerHighlightTitle">Ressaltar aplicacions que reprodueixen àudio</system:String>
-    <system:String x:Key="VolumeMixerHighlightDescription">Veure quines aplicacions estan emetent àudio actualment</system:String>
-    <system:String x:Key="MasterVolumeText">Volum principal</system:String>
-    <system:String x:Key="Back">Enrere</system:String>
-    <system:String x:Key="Next">Seguent</system:String>
-    <system:String x:Key="Finish">Acabar</system:String>
-    <system:String x:Key="OnboardingStepsCounter">Pas {0} de {1}</system:String>
     <system:String x:Key="TaskbarWidgetFixedWidthTitle">Amplada fixa del Widget</system:String>
     <system:String x:Key="TaskbarWidgetFixedWidthDescription">Mantingues el widget a una amplada fixa en comptes de redimensionar-lo per adaptar-lo al títol i al text de l'artista</system:String>
-    <system:String x:Key="EnableCapsTitle">Activa l'indicador de Bloq Majúscules</system:String>
-    <system:String x:Key="EnableCapsDescription">Mostra quan es prem la tecla Bloq Majúscules</system:String>
-    <system:String x:Key="EnableNumTitle">Activa l'indicador del Bloq Num</system:String>
-    <system:String x:Key="EnableNumDescription">Mostra quan es prem la tecla Bloq Num</system:String>
-    <system:String x:Key="EnableScrollTitle">Indicador d'activació del Bloq Desplaçament</system:String>
-    <system:String x:Key="EnableScrollDescription">Mostra quan es prem la tecla Bloq Desplaçament</system:String>
     <system:String x:Key="AnonymousUsageDataTitle">Enviar dades d'ús anònimes</system:String>
     <system:String x:Key="AnonymousUsageDataDescription">Ajuda a millorar l'aplicació enviant dades d'ús anònimes i no identificables</system:String>
     <system:String x:Key="AppFilteringTitle">Filtratge d'Aplicacions</system:String>
@@ -278,7 +176,6 @@ Pots ajudar a contribuir amb les traduccions a</system:String>
     <system:String x:Key="TaskbarVisualizerBaselineAutoHideDescription">Amaga automàticament la línia de base quan no es reprodueix àudio</system:String>
     <system:String x:Key="SearchSettings">Configuració de cerca</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextTitle">Text en Desplaçament</system:String>
-    <system:String x:Key="TaskbarWidgetScrollingTitle">Activar Desplaçament</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextDescription">Desplaça automàticament el text llarg que no cap</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverTitle">Desplaçament Continu</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Repetir el text en un bucle infinit en una direcció en comptes de desplaçar-se endavant i endarrere.</system:String>
