@@ -14,7 +14,7 @@ This is a personal downstream fork of [FluentFlyout](https://github.com/unchihug
 
 These are requirements for changes, not a claim that all existing paths already satisfy them. Verify the current implementation and distinguish new regressions from inherited defects.
 
-- Keep the code-owned isolation in `FluentFlyoutWPF/Classes/Downstream/DownstreamPolicy.cs`: imported settings must not re-enable upstream telemetry, experiments, or update infrastructure. Keep purchase UI and onboarding policy explicit.
+- Keep the code-owned isolation in `FluentFlyoutWPF/Classes/Downstream/DownstreamPolicy.cs`: imported settings must not re-enable upstream telemetry, experiments, or update infrastructure. Downstream purchase UI and onboarding runtime are intentionally retired; keep Store entitlement compatibility and GitHub Release unlock policy explicit.
 - Keep updates on the fixed downstream GitHub stable-release channel. The rolling `dev` prerelease is not a stable update. Do not add binary download, execution, or installation to a metadata-only updater.
 - Preserve the separate downstream identity for settings, logs, startup registration, mutex/events, and notifications. Legacy settings are migration input, not a write destination; preserve explicit feature choices and the migration's identity reset.
 - Apply app filtering before media preference. Preserve Automatic mode and unknown-mode fallback. Selected-session UI and controls must agree; deduplication must not outlive its session ownership. Do not add a polling loop to conceal missed session events.

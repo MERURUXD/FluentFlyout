@@ -34,7 +34,7 @@ MainWindow constructor
   - register downstream identity/startup/mutex/event values
   - start media monitoring and the low-level keyboard hook
   - subscribe media-session, shell, and display-environment events
-  - schedule policy-gated onboarding/experiment and update work
+  - schedule policy-gated experiment and update work
         |
         v
 MainWindow.Loaded
@@ -47,7 +47,7 @@ MainWindow.Loaded
 CleanupResources / OnClosed
   - mark cleanup, stop timers, cancel async state, and unsubscribe media events
   - dispose seekbar/visualizer resources and unhook native handlers
-  - close lock, Next Up, taskbar, and mixer windows
+  - close Next Up and taskbar windows
   - restore the native volume OSD and shut down logging
 ```
 
@@ -63,8 +63,7 @@ documentation.
 
 `FluentFlyoutWPF/Classes/Downstream/DownstreamPolicy.cs` is the code-owned gate:
 
-- upstream telemetry, experiments, update checks, purchase UI, and onboarding
-  are disabled;
+- upstream telemetry, experiments, and update checks are disabled;
 - the downstream update check is enabled; and
 - imported settings cannot turn those upstream paths back on.
 
@@ -79,10 +78,10 @@ separate from the official product. The supported release configuration is the
 portable downstream ZIP; retained MSIX/Store code and workflows are not evidence
 that the Store path is part of the supported downstream product.
 
-The downstream Home, About, taskbar, visualizer, system, mixer, and onboarding
-pages do not present Premium/status/purchase UI. The licensing implementation,
-compatibility gates, purchase control, and related resources remain in the tree
-for the retained Store/GitHub behavior and later staged cleanup.
+The downstream Home, About, taskbar, visualizer, and system pages do not present
+Premium/status/purchase UI. Purchase presentation controls and product-query
+plumbing are removed; `LicenseManager` and its compatibility gates remain for
+the retained Store/GitHub entitlement behavior.
 
 ## Settings and defaults
 
@@ -93,8 +92,8 @@ the legacy files untouched, writes only to the downstream directory, preserves
 explicit values, creates a new UUID, and clears the persisted Store identity.
 
 Fresh defaults retain the media flyout, fullscreen protection, acrylic surfaces,
-and startup registration. Lock Keys, Next Up, taskbar widget/visualizer, volume
-control/mixer, update notifications, and anonymous telemetry start disabled.
+and startup registration. Next Up, taskbar widget/visualizer, update
+notifications, and anonymous telemetry start disabled.
 Existing settings are not overwritten by constructor defaults during
 deserialization. Settings changes are debounced before persistence.
 
@@ -103,14 +102,13 @@ deserialization. Settings changes are debounced before persistence.
 The downstream settings navigation exposes only Home, Taskbar Widget, Taskbar
 Visualizer, Next Up, System, and About. Home's functional dashboard mirrors
 that core surface with four cards: Taskbar Widget, Taskbar Visualizer, Next Up,
-and System. Media Flyout, Volume Mixer, and Lock Keys pages remain in the
-project for compatibility and internal navigation, but are not exposed through
-the public navigation or settings search.
+and System. The Media Flyout settings page, Volume Mixer page, and Lock Keys
+page are retired from production; the Main Media Flyout runtime remains an
+independent coordinator surface.
 
-Hiding those settings entries does not disable the Main Media Flyout runtime.
 The taskbar widget's click path still calls `MainWindow.ShowMediaFlyout` and
-remains a supported interaction; the page and runtime implementations for
-Volume Mixer and Lock Keys are likewise retained for the later staged cleanup.
+remains a supported interaction. Retiring those settings pages does not disable
+the Main Media Flyout runtime or its shared media/session infrastructure.
 
 ## Media-session flow and ownership
 
@@ -129,7 +127,7 @@ Spotify is identified from the Windows media-session application identity, not
 from title text or process enumeration. The selection policy does not cache a
 long-lived `MediaSession`; close/restart resolves the currently registered
 instance. The selected owner is shared by the flyout, taskbar, controls,
-seek/timeline updates, Next Up, and active-media volume targeting.
+seek/timeline updates, and Next Up.
 
 Property callbacks verify the source session before preparing data and recheck
 ownership on the WPF Dispatcher before committing it. Metadata deduplication is
@@ -142,15 +140,10 @@ same-ID session restart must not move selected UI backward.
 - The taskbar window is created only when the widget is enabled and premium
   access is available. Its positioning timer exists only with that window;
   disabling or closing the widget closes the window and stops the timer.
-- The volume mixer is created on demand for an active volume/mixer/taskbar
-  consumer. Its view-model device/session subscriptions and one-second timer
-  are released when the last consumer is released; a hidden volume flyout keeps
-  the shared consumer alive when appropriate.
 - The taskbar visualizer owns a nullable visualizer instance. It allocates audio
   capture, buffers, watchdog work, and system subscriptions only while enabled,
   drains in-flight callbacks on disable/dispose, and rejects stale restarts.
-- Next Up and Lock Keys remain lazy. The low-level keyboard hook is a separate
-  startup cost from the Lock Keys window.
+- Next Up remains lazy and keeps only its own short-lived origin-session token.
 - The seekbar `System.Threading.Timer` is active only when the seekbar is
   visible, supported, enabled, and the selected session is playing. The display
   environment refresh is a debounced one-shot Dispatcher timer.
@@ -182,7 +175,7 @@ require the controlled Windows validation summarized in the
 | `FluentFlyoutWPF/MainWindow.xaml.cs` | Long-lived coordinator for startup, media, hooks, timers, and cleanup | Small policy or lifecycle adapter |
 | Media manager/session selection | Windows API and upstream behavior are correctness-sensitive | Filter/selection/ownership policy with focused tests |
 | Settings and XAML pages | Generated properties and search metadata cross-cut the UI | Narrow callbacks and policy files |
-| Taskbar/visualizer/mixer windows | UI lifetime, timers, devices, and capture interact | Explicit owner lifecycle and tests |
+| Taskbar/visualizer windows | UI lifetime, timers, devices, and capture interact | Explicit owner lifecycle and tests |
 | API, telemetry, update, and Store classes | Fork-specific privacy/release policy overlaps upstream code | Code-owned policy gate |
 | `.github/workflows/*` and `FluentFlyoutMSIX/*` | Signing, packaging, and publishing are operationally sensitive | Additive downstream workflow; preserve upstream path |
 
