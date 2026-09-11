@@ -32,7 +32,8 @@ is unreachable under the current policy.
 
 The policy does not change the Store/GitHub licensing implementation. The
 `GitHub Release` build continues to use the existing premium behavior, while
-the upstream purchase UI is hidden in the downstream shell.
+downstream pages omit Premium/status/purchase affordances and the shell still
+hides the upstream Microsoft Store link under the code-owned policy.
 
 ## Build and update identity
 

@@ -38,8 +38,6 @@ public partial class HomePage : Page
 
         if (!DownstreamPolicy.EnableUpstreamPurchaseUi)
         {
-            PremiumSectionTitle.Visibility = Visibility.Collapsed;
-            PremiumSection.Visibility = Visibility.Collapsed;
             ViewMicrosoftStoreButton.Visibility = Visibility.Collapsed;
         }
     }

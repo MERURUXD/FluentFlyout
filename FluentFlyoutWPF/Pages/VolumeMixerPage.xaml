@@ -7,7 +7,6 @@
       xmlns:controls="clr-namespace:MicaWPF.Controls;assembly=MicaWPF"
       xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
       xmlns:converters="clr-namespace:FluentFlyoutWPF.Classes.Converters"
-      xmlns:fluentflyoutcontrols="clr-namespace:FluentFlyout.Controls"
       mc:Ignorable="d"
       d:DesignHeight="800" d:DesignWidth="800"
       Title="VolumeFlyoutPage"
@@ -100,7 +99,6 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{DynamicResource VolumeMixerHighlightTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
-                            <fluentflyoutcontrols:AccentBadge Margin="6,0,0,0" />
                         </StackPanel>
                         <TextBlock Text="{DynamicResource VolumeMixerHighlightDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>

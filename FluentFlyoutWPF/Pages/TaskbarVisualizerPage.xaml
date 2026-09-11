@@ -6,7 +6,6 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:controls="clr-namespace:MicaWPF.Controls;assembly=MicaWPF"
       xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
-      xmlns:fluentflyoutcontrols="clr-namespace:FluentFlyout.Controls"
       mc:Ignorable="d"
       d:DesignHeight="1000" d:DesignWidth="800"
       Title="TaskbarWidgetPage"
@@ -40,48 +39,6 @@
                 <TextBlock FontSize="14" FontWeight="Regular" HorizontalAlignment="Stretch" Opacity="0.75" Margin="12,0,0,0" MaxWidth="450" TextWrapping="WrapWithOverflow" Text="{DynamicResource TaskbarVisualizerDescription}" />
             </StackPanel>
 
-            <!-- Premium Status InfoBar (only shown for Store versions) -->
-            <ui:InfoBar Grid.Row="1" Title="{DynamicResource PremiumUnlockedMessage}" Severity="Success" IsClosable="True" Margin="0,0,0,3">
-                <ui:InfoBar.Style>
-                    <Style TargetType="ui:InfoBar" BasedOn="{StaticResource {x:Type ui:InfoBar}}">
-                        <Setter Property="IsOpen" Value="False" />
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsStoreVersion}" Value="True" />
-                                    <Condition Binding="{Binding IsPremiumUnlocked}" Value="True" />
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="IsOpen" Value="True" />
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ui:InfoBar.Style>
-            </ui:InfoBar>
-
-            <!-- Premium Locked InfoBar (only shown for Store versions without premium) -->
-            <ui:InfoBar Grid.Row="1" IsOpen="True" Severity="Warning" IsClosable="False" Margin="0,0,0,3">
-                <ui:InfoBar.Style>
-                    <Style TargetType="ui:InfoBar">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsStoreVersion}" Value="True" />
-                                    <Condition Binding="{Binding IsPremiumUnlocked}" Value="False" />
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="Visibility" Value="Visible" />
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ui:InfoBar.Style>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{DynamicResource PremiumLockedMessage}" VerticalAlignment="Center" />
-                    <fluentflyoutcontrols:PremiumPurchaseButton Margin="12,2,0,2" />
-                </StackPanel>
-            </ui:InfoBar>
-
-            <!-- GitHub Version InfoBar -->
-            <ui:InfoBar Grid.Row="1" Title="{DynamicResource PremiumGitHubMessage}" Severity="Informational" IsOpen="True" IsClosable="False" Margin="0,0,0,3" Visibility="{Binding IsStoreVersion, Converter={StaticResource BoolToCollapsedVisibleConverter}}" />
         </Grid>
 
         <StackPanel Opacity="{Binding IsPremiumUnlocked, Converter={StaticResource BoolToFullHalfOpacityConverter}}">
@@ -90,7 +47,6 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{DynamicResource TaskbarVisualizerEnabledTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
-                            <fluentflyoutcontrols:AccentBadge Margin="6,0,0,0" />
                         </StackPanel>
                         <TextBlock Text="{DynamicResource TaskbarVisualizerEnabledDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
