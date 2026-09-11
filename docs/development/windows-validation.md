@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-12
 **Status:** Core surface smoke pass; the latest media-key attempt lacked an active session, and comparison, Store, coexistence, and controlled-profile items remain not run
-**Target:** `codex/stage4-final-cleanup` (packaged validation commit `938bc93f5e50c5d663c05ce886427e0282d04564`)
+**Target:** `codex/stage4-final-cleanup` (runtime/package validation commit `f99a85647876da852b04532ea3cb742252c04500`; report-only HEAD is updated separately)
 **Host:** Windows 11 Home 64-bit, build `26200`, .NET SDK `10.0.401`
 
 This report records evidence for the current downstream checkout. It does not
@@ -41,7 +41,7 @@ below.
 
 ## Development ZIP artifact
 
-The non-publishing package check used on clean commit `938bc93f5e50c5d663c05ce886427e0282d04564`:
+The non-publishing package check used on clean commit `f99a85647876da852b04532ea3cb742252c04500`:
 
 ```powershell
 $sha = (git rev-parse HEAD).Trim()
@@ -55,9 +55,9 @@ $archive = Join-Path $env:TEMP "FluentFlyoutDownstream-development-$($sha.Substr
 Observed artifact facts:
 
 - manifest version: `2.15.0`;
-- build identity: `development+938bc93`;
+- build identity: `development+f99a856`;
 - source state: `clean`;
-- archive SHA-256: `a299fc4443e10872ecbcf977004cad22886d36885b834240aa5a7b8d58cc3cac`;
+- archive SHA-256: `2510c1bd9c3a1e58c1d5476662c71cb2b0155ea73f81a5eea6625292d6f824ac`;
 - archive entry count: 503; and
 - required entries present: `FluentFlyoutDownstream.exe`, `LICENSE`,
   `README.txt`, `THIRD-PARTY-NOTICES.txt`, `RELEASE-INFO.txt`, and resolved
