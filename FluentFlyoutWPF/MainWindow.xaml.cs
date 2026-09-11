@@ -74,7 +74,6 @@ public partial class MainWindow : MicaWindow
     private bool _isDragging;
     private bool _isHiding = true;
 
-    private LockWindow? lockWindow;
     private DateTime _lastSelfUpdateTimestamp = DateTime.MinValue;
 
     internal TaskbarWindow? taskbarWindow;
@@ -1481,31 +1480,6 @@ public partial class MainWindow : MicaWindow
                 }
             }
 
-            if (SettingsManager.Current.LockKeysEnabled
-                && !FullscreenDetector.IsFullscreenApplicationRunning()
-                && wParam == WM_KEYUP)
-            {
-                if (vkCode == 0x14 && SettingsManager.Current.LockKeysCapsEnabled) // Caps Lock
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLockFlyout(FindResource("LockWindow_CapsLock").ToString(), Keyboard.IsKeyToggled(Key.CapsLock));
-                }
-                else if (vkCode == 0x90 && SettingsManager.Current.LockKeysNumEnabled) // Num Lock
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLockFlyout(FindResource("LockWindow_NumLock").ToString(), Keyboard.IsKeyToggled(Key.NumLock));
-                }
-                else if (vkCode == 0x91 && SettingsManager.Current.LockKeysScrollEnabled) // Scroll Lock
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLockFlyout(FindResource("LockWindow_ScrollLock").ToString(), Keyboard.IsKeyToggled(Key.Scroll));
-                }
-                else if (vkCode == 0x2D && SettingsManager.Current.LockKeysInsertEnabled) // Insert
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLockFlyout("Insert", Keyboard.IsKeyToggled(Key.Insert));
-                }
-            }
         }
         return CallNextHookEx(_hookId, nCode, wParam, lParam);
     }
@@ -2178,9 +2152,6 @@ public partial class MainWindow : MicaWindow
             DeregisterShellHookWindow(new WindowInteropHelper(this).Handle);
 
             // clean up other resources
-            if (lockWindow?.IsLoaded == true)
-                lockWindow.Close();
-
             if (nextUpWindow != null)
                 CloseNextUpWindow();
 
@@ -2319,12 +2290,6 @@ public partial class MainWindow : MicaWindow
 
         // These windows retain an HWND for their lifetime. Recreate them so they cannot
         // keep DPI, work-area, taskbar-parent, or UI Automation state from the old topology.
-        if (lockWindow != null)
-        {
-            lockWindow.Close();
-            lockWindow = null;
-        }
-
         if (nextUpWindow != null)
             CloseNextUpWindow();
 

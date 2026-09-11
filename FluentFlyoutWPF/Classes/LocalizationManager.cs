@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
-using FluentFlyout.Classes.Utils;
 using FluentFlyoutWPF;
 using System.Globalization;
 using System.Windows;
@@ -12,8 +11,6 @@ namespace FluentFlyout.Classes;
 public static class LocalizationManager
 {
     private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-
-    public static double maxLength = 0;
 
     // current language code (first two letters) for easy access
     public static string LanguageCode { get; set; } = string.Empty;
@@ -138,24 +135,6 @@ public static class LocalizationManager
             }
         }
 
-        //Calculate the Lock Key Flyout text's Max Lenght
-        List<double> Lengths = new List<double>();
-
-        Lengths.Add(StringWidth.GetStringWidth(Application.Current.TryFindResource("LockWindow_InsertPressed").ToString() ?? string.Empty));
-
-        var On = Application.Current.TryFindResource("LockWindow_LockOn")?.ToString() ?? string.Empty;
-        var Off = Application.Current.TryFindResource("LockWindow_LockOff")?.ToString() ?? string.Empty;
-        var OnOffMax = On.Length >= Off.Length ? On + " " : Off + " ";
-
-        Lengths.Add(StringWidth.GetStringWidth(OnOffMax + Application.Current.TryFindResource("LockWindow_CapsLock").ToString() ?? string.Empty));
-        Lengths.Add(StringWidth.GetStringWidth(OnOffMax + Application.Current.TryFindResource("LockWindow_NumLock").ToString() ?? string.Empty));
-        Lengths.Add(StringWidth.GetStringWidth(OnOffMax + Application.Current.TryFindResource("LockWindow_ScrollLock").ToString() ?? string.Empty));
-
-        maxLength = Lengths.Max() + 8; // additional margin to avoid text clipping
-
-        // set minimum just in case if resources weren't loaded
-        if (maxLength < 20)
-            maxLength = 115; // 160 (default width) - 45 (estimated padding)
     }
 
     private static void ApplyFlowDirection(string languageCode)

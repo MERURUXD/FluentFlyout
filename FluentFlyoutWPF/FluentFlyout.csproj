@@ -43,7 +43,6 @@
     <None Remove="Resources\FluentFlyoutTaskbar-NoTitle-Zoomed.png" />
     <None Remove="Resources\FluentFlyoutVolumeDemo.png" />
     <None Remove="Resources\FluentFlyoutWhite.png" />
-    <None Remove="Resources\Onboarding\LockKeysFlyout.png" />
     <None Remove="Resources\Onboarding\MediaFlyout.png" />
     <None Remove="Resources\Onboarding\Taskbar.png" />
   </ItemGroup>
@@ -82,9 +81,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\FluentFlyoutVolumeDemo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Onboarding\LockKeysFlyout.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Onboarding\MediaFlyout.png">

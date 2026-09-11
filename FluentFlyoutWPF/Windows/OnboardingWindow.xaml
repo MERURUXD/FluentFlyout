@@ -140,14 +140,6 @@
                                     </StackPanel>
                                 </StackPanel>
 
-                                <StackPanel Visibility="{Binding IsLockKeysStep, Converter={StaticResource BoolToVisibleCollapsedConverter}}">
-                                    <TextBlock Text="{DynamicResource EnableLockKeysTitle}" FontSize="14" FontWeight="SemiBold" />
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <ui:ToggleSwitch IsChecked="{Binding Settings.LockKeysEnabled, Mode=TwoWay}" />
-                                        <TextBlock Margin="8,0,0,0" Text="{Binding Settings.LockKeysEnabled, Converter={StaticResource BoolToEnabledDisabledConverter}}" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </StackPanel>
-
                             </StackPanel>
                         </ui:PassiveScrollViewer>
                     </Grid>

@@ -178,53 +178,6 @@ public partial class UserSettings : ObservableObject
     public partial int FlyoutAnimationEasingStyle { get; set; }
 
     /// <summary>
-    /// Enable lock keys flyout (shows Caps/Num/Scroll status)
-    /// </summary>
-    [ObservableProperty]
-    public partial bool LockKeysEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool LockKeysCapsEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool LockKeysNumEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool LockKeysScrollEnabled { get; set; }
-
-    /// <summary>
-    /// Lock keys flyout display duration (milliseconds)
-    /// </summary>
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(LockKeysDurationText))]
-    public partial int LockKeysDuration { get; set; }
-
-    [XmlIgnore]
-    public string LockKeysDurationText
-    {
-        get => LockKeysDuration.ToString();
-        set
-        {
-            if (int.TryParse(value, out var result))
-            {
-                LockKeysDuration = result switch
-                {
-                    > 10000 => 10000,
-                    < 0 => 0,
-                    _ => result
-                };
-            }
-            else
-            {
-                LockKeysDuration = 2000;
-            }
-
-            OnPropertyChanged();
-        }
-    }
-
-    /// <summary>
     /// App theme. 0 for default, 1 for light, 2 for dark.
     /// </summary>
     [ObservableProperty]
@@ -262,18 +215,6 @@ public partial class UserSettings : ObservableObject
     public partial bool DisableIfFullscreen { get; set; }
 
     /// <summary>
-    /// Use bold symbol and font in the lock keys flyout
-    /// </summary>
-    [ObservableProperty]
-    [XmlElement(ElementName = "LockKeysBoldUI")]
-    public partial bool LockKeysBoldUi { get; set; }
-
-    /// Selects which monitor to use for the lock keys flyout when multiple monitors are in use.
-    /// 0 = Default behavior, 1 = Monitor containing the focused window, 2 = Monitor containing the cursor.
-    [ObservableProperty]
-    public partial int LockKeysMonitorPreference { get; set; }
-
-    /// <summary>
     /// Determines if the user has updated to a new version
     /// </summary>
     [ObservableProperty]
@@ -298,18 +239,6 @@ public partial class UserSettings : ObservableObject
     public partial int MediaSessionSelectionMode { get; set; }
 
     /// <summary>
-    /// Enable subtle animations for the lock keys flyout indicator
-    /// </summary>
-    [ObservableProperty]
-    public partial bool LockKeysAnimated { get; set; }
-
-    /// <summary>
-    /// Show LockKeys flyout when the Insert key is pressed
-    /// </summary>
-    [ObservableProperty]
-    public partial bool LockKeysInsertEnabled { get; set; }
-
-    /// <summary>
     /// Preset for media flyout background blur styles
     /// </summary>
     [ObservableProperty]
@@ -326,12 +255,6 @@ public partial class UserSettings : ObservableObject
     /// </summary>
     [ObservableProperty]
     public partial bool NextUpAcrylicWindowEnabled { get; set; }
-
-    /// <summary>
-    /// Enable acrylic blur effect on the Lock Keys window
-    /// </summary>
-    [ObservableProperty]
-    public partial bool LockKeysAcrylicWindowEnabled { get; set; }
 
     [ObservableProperty]
     public partial bool VolumeMixerAcrylicWindowEnabled { get; set; }
@@ -724,11 +647,6 @@ public partial class UserSettings : ObservableObject
         NIconLeftClick = 0;
         CenterTitleArtist = false;
         FlyoutAnimationEasingStyle = 2;
-        LockKeysEnabled = false;
-        LockKeysCapsEnabled = true;
-        LockKeysNumEnabled = true;
-        LockKeysScrollEnabled = true;
-        LockKeysDuration = 2000;
         AppTheme = 0;
         MediaFlyoutEnabled = true;
         MediaFlyoutAlwaysDisplay = false;
@@ -736,21 +654,16 @@ public partial class UserSettings : ObservableObject
         NIconSymbol = false;
         NIconHide = false;
         DisableIfFullscreen = true;
-        LockKeysBoldUi = false;
-        LockKeysMonitorPreference = 0;
         LastKnownVersion = string.Empty;
         SeekbarEnabled = false;
         PauseOtherSessionsEnabled = false;
         MediaSessionSelectionMode = 0;
-        LockKeysAnimated = true;
-        LockKeysInsertEnabled = true;
         MediaFlyoutBackgroundBlur = 0;
         AppLanguage = "system";
         FlowDirection = FlowDirection.LeftToRight;
         FontFamily = "Segoe UI Variable, Microsoft YaHei UI, Yu Gothic UI";
         MediaFlyoutAcrylicWindowEnabled = true;
         NextUpAcrylicWindowEnabled = true;
-        LockKeysAcrylicWindowEnabled = true;
         VolumeMixerAcrylicWindowEnabled = true;
         TaskbarWidgetEnabled = false;
         TaskbarWidgetSelectedMonitor = 0;
