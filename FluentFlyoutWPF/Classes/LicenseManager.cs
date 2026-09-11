@@ -165,4 +165,16 @@ public class LicenseManager
         }
     }
 
+    /// <summary>
+    /// Refreshes the license status (checks for changes)
+    /// </summary>
+    public async Task RefreshLicenseAsync()
+    {
+        if (!_isStoreVersion)
+            return;
+
+        await CheckPremiumStatusAsync();
+        SettingsManager.Current.IsPremiumUnlocked = _isPremiumUnlocked;
+    }
+
 }
