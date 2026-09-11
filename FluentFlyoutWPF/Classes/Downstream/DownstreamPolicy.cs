@@ -14,7 +14,6 @@ public static class DownstreamPolicy
     public static readonly bool EnableUpstreamUpdateCheck = false;
     public static readonly bool EnableDownstreamUpdateCheck = true;
     public static readonly bool EnableUpstreamPurchaseUi = false;
-    public static readonly bool EnableOnboarding = false;
 
     public static bool UpdateChecksEnabled =>
         EnableDownstreamUpdateCheck || EnableUpstreamUpdateCheck;

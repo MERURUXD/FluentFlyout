@@ -17,7 +17,6 @@ of truth for the current downstream switches:
 - `EnableUpstreamUpdateCheck = false`
 - `EnableDownstreamUpdateCheck = true`
 - `EnableUpstreamPurchaseUi = false`
-- `EnableOnboarding = false`
 
 Experiments, telemetry, and update checking retain their upstream service
 implementations but return before contacting `FluentFlyoutApiClient` when the
