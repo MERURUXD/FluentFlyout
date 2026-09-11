@@ -24,7 +24,7 @@ These are requirements for changes, not a claim that all existing paths already 
 
 ## Before editing and reading development notes
 
-1. Inspect the working tree, branch, remotes, and current base SHA. Preserve unrelated user changes and task-material directories, including `fluentflyout_codex_prompts_6stage/` if present.
+1. Inspect the working tree, branch, remotes, and current base SHA. Preserve unrelated user changes.
 2. Read the relevant implementation and notes below. Record the intended scope, acceptance checks, and upstream conflict risk before changing code.
 3. Treat historical descriptions as context, not instructions to restore old behavior. If a note and implementation disagree, identify the mismatch rather than assuming either is proof of successful validation.
 
@@ -35,7 +35,6 @@ Development notes:
 - [Performance audit](docs/development/performance.md): structural changes and intended lifecycle guarantees, not measured CPU or memory results.
 - [Release process](docs/development/release.md): ZIP/version/release procedures; reading a procedure is not permission to publish.
 - [Historical baseline](docs/development/baseline.md): the original takeover snapshot, not the current runtime contract.
-- [Staged remediation prompts](docs/development/remediation-prompts/README.md): bounded task instructions and acceptance criteria; execute only the requested stage.
 
 ## Formatting and validation
 
@@ -58,6 +57,6 @@ git diff --check
 
 ## Change handoff and authorization
 
-Every stage handoff should include the summary, files changed, architecture decisions, validation commands/results, upstream compatibility/conflict risk, known risks, remaining work, and relevant commit hashes when commits exist. Label static inspection, automated tests, and desktop measurements separately.
+Every change handoff should include the summary, files changed, architecture decisions, validation commands/results, upstream compatibility/conflict risk, known risks, remaining work, and relevant commit hashes when commits exist. Label static inspection, automated tests, and desktop measurements separately.
 
 Do not create commits, push, or open a pull request unless the user authorizes it for the requested work. When authorized, use a scoped branch/PR and do not rewrite published `master` history. Permission to modify code or open a PR is not permission to merge, move release tags, publish releases, sign packages, or deploy. Check workflow triggers before an authorized push and ask if it would cause publishing beyond that authorization.

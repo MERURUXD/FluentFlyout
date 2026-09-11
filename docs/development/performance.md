@@ -84,8 +84,7 @@ selection with Spotify and browser sessions, app filtering, audio-device
 switches, lock-screen/Explorer/display recovery, taskbar recreation, settings
 migration/coexistence, controlled network capture, notifications, and
 shutdown-time resource release. Record each as pass, fail, not run, or blocked
-with a minimal reproduction and evidence path. See
-[`06-windows-validation.md`](remediation-prompts/06-windows-validation.md) for
-the acceptance matrix and [`windows-validation.md`](windows-validation.md) for
-the current evidence. Do not claim a percentage until the raw measurements
+with a minimal reproduction and evidence path. See the
+[current validation report](windows-validation.md) for the acceptance matrix
+and current evidence. Do not claim a percentage until the raw measurements
 exist.

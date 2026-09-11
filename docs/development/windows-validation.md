@@ -17,10 +17,8 @@ measured baseline for this run, and producing a comparable baseline would be a
 separate controlled measurement task. Therefore no performance percentage or
 resource improvement is reported.
 
-The checkout was intentionally dirty only because the pre-existing
-`fluentflyout_codex_prompts_6stage/` task material remained untracked. This
-means the development ZIP below is an artifact inspection, not a clean release
-candidate.
+The checkout used for this report was not clean. The development ZIP below is
+therefore an artifact inspection, not a clean release candidate.
 
 ## Static and automated evidence
 
@@ -55,7 +53,7 @@ Observed artifact facts:
 
 - manifest version: `2.15.0`;
 - build identity: `development+b5be956`;
-- source state: `dirty` (the task material described above);
+- source state: `dirty`;
 - archive SHA-256: `4a4ba1173360965263d03fb9da43ecf7bec452cd21b773cb66073921633e8ba4`;
 - archive entry count: 512; and
 - required entries present: `FluentFlyoutDownstream.exe`, `LICENSE`,
@@ -78,6 +76,69 @@ install, Store operation, or signing operation was performed.
 | Fresh settings, legacy migration, backup recovery, downstream/upstream coexistence | Static contract only | Requires a disposable Windows profile and a separately installed official product; real user profile was not used. |
 | Update/network boundary | Automated fixture pass; live capture not run | Tests use local responses; no real network capture or upstream service observation was claimed. |
 | ZIP version/SHA/source/licence inspection | Pass | Development archive facts above; it is not a clean release candidate. |
+
+## Controlled desktop acceptance checklist
+
+Use this checklist for the next real Windows run. It supplements the matrix
+above; a build or automated test does not mark a desktop item complete.
+
+### Test setup and evidence
+
+- [ ] Use an authorized Windows desktop with a disposable account or profile
+  and controlled media, audio, display, and network conditions.
+- [ ] Record the target and comparison commits, build configuration and
+  version, artifact source, and exact test commands. Use temporary directories
+  and backups; do not use production credentials or the user's primary profile.
+- [ ] Mark every item as pass, fail, not run, or blocked, with the minimal
+  reproduction and evidence path.
+
+### Function and lifecycle
+
+- [ ] Cold-start with taskbar, visualizer, and volume consumers never enabled.
+- [ ] Enable each optional consumer, disable the last consumer, and repeat the
+  enable/disable cycle; verify its timer, capture, subscriptions, callbacks,
+  and window stop or release.
+- [ ] Keep a shared consumer active while disabling another consumer; verify
+  that resources still needed by the shared consumer remain active.
+- [ ] Interleave device switching, lock-screen resume, Explorer/display
+  recovery, high-frequency flyout/taskbar updates, and taskbar close/recreate;
+  check for isolated capture, hidden-window growth, exceptions, and stale
+  callbacks.
+
+### Media, settings, and identity
+
+- [ ] Exercise Spotify and browser playback/pause combinations, app filtering,
+  `Automatic` and unknown-mode fallback, newly added unselected sessions, and
+  same-ID session close/restart with identical metadata. Confirm that Next Up,
+  volume targeting, and media controls use the same selected session.
+- [ ] With a disposable fixture, verify fresh settings, legacy migration,
+  backup recovery, explicit feature values, and downstream identity. Preserve
+  the original legacy file; test official-product coexistence only in a
+  controlled environment.
+
+### Network and artifact boundaries
+
+- [ ] Keep automated network checks on local responses or fixtures. If live
+  capture is performed, observe only the controlled process and distinguish the
+  supported downstream metadata request from user-initiated external links;
+  verify that upstream telemetry, experiments, and update requests are absent.
+- [ ] Unpack the ZIP and verify version, commit/SHA, source entry, and licence
+  materials. MSIX installation, Store operations, signing, and publishing are
+  outside this checklist's automatic authorization.
+
+### Comparable performance
+
+- [ ] Use the same machine, Windows build, power mode, display/scale, media
+  source, build configuration, and feature settings for the comparison and
+  target; build them to separate output directories.
+- [ ] For each scenario, run five cold starts with a fixed readiness wait and a
+  60–120 second sample window. Cover no-playback all-off, fixed playback
+  all-off, taskbar, taskbar plus visualizer, volume consumer, and each feature
+  enabled then disabled.
+- [ ] Record launch-to-ready time, CPU mean and peak, Working Set, Private
+  Bytes, timer/wakeup observations, and capture/window counts. Keep raw traces
+  and personal media data outside the repository, and make no percentage claim
+  without comparable measurements.
 
 ## Performance measurement status
 

@@ -10,7 +10,6 @@ This is the Stage 1 repository takeover record. It describes the checkout as ins
 - Branch at inspection: `master`
 - `HEAD`: `4947f695955e9e7181c0ea6c9c671704985b2cb0` (`Merge pull request #1120 from unchihugo/fix/issue-1115`)
 - `HEAD` and `origin/master` resolved to the same SHA at inspection. The historical fork-base SHA is not independently determinable from the repository metadata currently exposed for review; rerun the local remote/merge-base checks in the checkout if that historical relationship is needed.
-- The untracked `fluentflyout_codex_prompts_6stage/` directory is task material and is intentionally excluded from the Stage 1 deliverables.
 
 ## Project and build targets
 
