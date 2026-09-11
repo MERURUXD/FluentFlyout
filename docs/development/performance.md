@@ -1,118 +1,90 @@
-# Stage 3 performance audit and runtime changes
+# Current performance and lifecycle evidence
 
-This stage records a code-level performance audit of the downstream checkout and
-the small runtime changes selected from that audit. It is not a CPU, memory, or
-ETW benchmark; no profiler measurements are claimed here. The before/after
-observations below are structural facts that can be verified from the current
-control flow.
+This document separates code-confirmed lifecycle contracts from automated tests
+and real Windows measurements. It contains no CPU, memory, wake-up, or
+percentage-improvement claim unless a controlled desktop report records the
+comparison.
 
-## Baseline and audit boundary
+## Code-confirmed contracts
 
-The audit covered optional windows, the taskbar visualizer, periodic/background
-work, artwork loading, and startup ownership. Existing Stage 2/downstream
-changes were treated as pre-existing worktree state and were not reorganized.
+The current checkout makes optional work conditional at its ownership boundary:
 
-### Optional windows
+- Volume mixer construction, audio-device/session subscriptions, and the
+  one-second polling timer require an active volume/mixer/taskbar-volume
+  consumer. Releasing the last consumer closes the window and releases the
+  view-model resources.
+- Taskbar widget construction and its 1.5-second positioning timer require the
+  enabled widget and premium access. Disable/close stops the timer and closes
+  the window.
+- Taskbar visualizer allocation, loopback capture, watchdog, buffers, and system
+  subscriptions are lazy. Disable/dispose drains callbacks and rejects stale
+  in-flight restarts.
+- The seekbar timer runs only while the selected session is playing and the
+  visible seekbar is active. Display-environment refresh is a debounced one-shot
+  timer.
+- Taskbar-only media paths return before thumbnail decoding when there is no
+  taskbar consumer. The existing thumbnail and dominant-color caches remain;
+  artwork identity is reused instead of hashing the same stream twice.
 
-Before Stage 3, `MainWindow.MicaWindow_Loaded` unconditionally constructed both
-`VolumeMixerWindow` and `TaskbarWindow`.
+These are structural observations from `MainWindow`, the optional windows,
+`Visualizer`, `ResourceLifecycle`, and the focused tests. They are not measured
+resource costs and do not prove that all Windows interleavings are leak-free.
 
-- `VolumeMixerWindow` eagerly constructed `VolumeMixerViewModel`. The view model
-  attached to the default render device, enumerated audio sessions, subscribed
-  to default-device changes, and started a one-second `DispatcherTimer` even
-  when Volume Control and Volume Mixer were disabled.
-- `TaskbarWindow` called `Show()` and started a 1.5-second positioning timer in
-  its constructor. Its update path returned early when the widget was disabled,
-  but the timer and window still existed.
-- `NextUpWindow` and `LockWindow` were already created on demand. They were
-  audited and intentionally not rewritten.
+## Automated evidence
 
-The stage now creates the mixer only when a volume or taskbar-volume consumer
-actually needs its view model. The taskbar window is created only when the
-widget is enabled and premium access is available. Disabling the widget closes
-the window and stops its timer; display/Explorer recovery does not recreate a
-disabled window. Existing enable, disable, and recreation entry points remain
-the ownership boundary.
+The focused test project covers resource ownership, callback draining, seekbar
+timer decisions, volume-mixer consumers, media-session selection/display
+ownership, stable product identity, and downstream update metadata. Run the
+tests from a Windows .NET 10 environment with the exact configuration shown in
+the repository instructions; report the command and result in the stage
+handoff. A green test run is automated evidence, not a desktop measurement.
 
-The mixer view model now starts its device subscription and polling timer only
-while at least one concrete consumer is active. A hidden volume flyout keeps
-the resources while Volume Control remains enabled, while disabling the last
-consumer releases the timer, subscription, session handlers, and device.
+## Controlled measurement protocol
 
-### Visualizer
+For a comparable before/after result, use the same Windows 11 x64 host, Windows
+build, power mode, display scale/monitor layout, media source, build
+configuration, and isolated settings profile. Build the comparison and target
+to separate output directories and record the full source SHA for each.
 
-Before Stage 3, `TaskbarVisualizerControl` held a static eager
-`new Visualizer()`. Merely constructing the taskbar XAML therefore allocated a
-`WriteableBitmap`, FFT/bar buffers, and registered audio-device, session-switch,
-and power events. Capture itself started only when the setting was enabled, but
-the disabled state was not close to zero-cost.
+For each scenario, perform five cold starts. Use the same fixed readiness wait,
+then sample for 60–120 seconds. Record raw values for:
 
-The visualizer owner is now lazy and nullable. A disabled taskbar control does
-not create it. Enabling an existing control creates and attaches one instance;
-creating a taskbar window while the setting is already enabled does the same.
-Disabling releases the existing instance (including capture, buffers, device,
-watchdog, and system subscriptions) without creating a replacement. Closing
-the taskbar widget releases it as well, and shutdown disposal is idempotent.
-`Visualizer` now refuses restart after disposal or disable, cleans partial
-starts explicitly, rejects a stale in-flight start by generation, drains active
-capture callbacks before external disposal, and ignores queued bitmap work from
-an old generation. It also reuses the per-frame bar scratch buffer.
-The capture, FFT, visual quality, target frame rate, and baseline behavior were
-otherwise left unchanged.
+- launch-to-ready time, with “ready” defined as the tray/coordinator being
+  available;
+- process CPU mean and peak;
+- Working Set and Private Bytes;
+- timer/wake-up observations; and
+- relevant window, subscription, and audio-capture counts.
 
-### Timers and background work
+Keep raw traces and personal media data outside the repository unless a small,
+fully sanitized fixture is deliberately added. The summary must identify units,
+sampling method, warm/cold state, and every failed or discarded run. Do not
+convert noise or a single run into a performance percentage.
 
-The following existing behavior was confirmed rather than broadly refactored:
+## Required scenario matrix
 
-- the seekbar `System.Threading.Timer` runs only while the seekbar is active and
-  the selected session is playing;
-- the display-environment timer is a debounced, one-shot refresh timer;
-- the volume-mixer polling timer exists only with a live mixer view model;
-- the taskbar positioning timer exists only with a live taskbar widget;
-- visualizer capture/watchdog work exists only while the visualizer is running.
+| Scenario | Playback | Taskbar widget | Visualizer | Volume consumer | Lifecycle variant |
+| --- | --- | --- | --- | --- | --- |
+| Cold idle | none | off | off | off | never enabled |
+| Cold playback | fixed repeatable source | off | off | off | never enabled |
+| Taskbar | fixed source | on | off | off | enabled throughout |
+| Visualizer | fixed source | on | on | off | enabled throughout |
+| Volume | fixed source | off | off | on | enabled throughout |
+| Disable/release | fixed source | on, then off | on, then off | on, then off | last consumer closed |
 
-No new polling loop, audio capture, network activity, or timer was added for a
-disabled option.
+The release row must also be observed with a shared consumer retained, so one
+feature turning off does not get mistaken for releasing a resource still needed
+by another feature. Repeat the enable/disable cycle after display and Explorer
+recovery when that controlled profile is available.
 
-### Artwork
+## Runtime evidence still required
 
-The existing five-entry thumbnail and dominant-color LRU caches remain in
-place. The media-property path previously computed a stable thumbnail hash and
-then called `GetThumbnail`, which computed and read the same hash stream again.
-`GetThumbnailWithHash` now reuses the already computed stable identity without
-weakening the cache key.
-
-Taskbar-only playback/property paths now skip thumbnail decoding and dominant
-color work when no taskbar widget is desired. Main flyout and enabled Next Up
-paths still load artwork, and the media-property comparison still uses stable
-artwork identity rather than a title-only key. No image size, sampling quality,
-or accent-color algorithm was changed.
-
-## Before/after observations
-
-| Path | Before | After | Expected impact |
-| --- | --- | --- | --- |
-| Startup, Volume Control off | Mixer window, device/session setup, and 1 s polling were created | No mixer is created until a volume consumer requests it | Removes disabled-state device/session work and polling |
-| Startup, Taskbar Widget off | Taskbar window, `Show()`, and 1.5 s positioning timer were created | No taskbar window is created | Removes the disabled taskbar HWND and timer |
-| Taskbar Widget disable | Existing window could remain hidden with an early-return timer | Window is closed and the taskbar visualizer instance is released | Releases optional window/timer/capture/subscription work |
-| Visualizer off | Static visualizer allocated buffers and registered events | No visualizer instance is created | Removes disabled-state allocations and subscriptions |
-| Repeated media-property artwork | Stable hash could be read twice for one event | Existing hash is passed into thumbnail loading | Removes duplicate stream/hash work |
-| Taskbar absent/disabled | Taskbar update paths could decode artwork before a null-conditional UI call | Taskbar-only paths return before decode | Avoids work with no taskbar consumer |
-
-These are expected structural changes, not measured percentage improvements.
-
-## Validation boundary and risks
-
-The source/build checks for this stage are `git diff --check`, the established
-WPF x64 restore, and the `GitHub Release` x64 build. Static audits should also
-confirm that optional constructors are no longer unconditional, the visualizer
-has no eager static construction, and every created timer/subscription has a
-matching stop/unsubscribe/dispose path.
-
-Desktop GUI/audio, Explorer-restart, display-topology, migration, and controlled
-network-capture scenarios require a Windows test profile and are not inferred
-from a compile. The main remaining risks are runtime ordering around enabling a
-widget or visualizer after startup, recovery while Explorer is restarting, and
-audio-device changes during a visualizer restart. These paths retain the
-existing single-instance/recreate boundaries and should be exercised manually
-when a suitable desktop harness is available.
+The following cannot be inferred from a build or static audit: real media
+selection with Spotify and browser sessions, app filtering, audio-device
+switches, lock-screen/Explorer/display recovery, taskbar recreation, settings
+migration/coexistence, controlled network capture, notifications, and
+shutdown-time resource release. Record each as pass, fail, not run, or blocked
+with a minimal reproduction and evidence path. See
+[`06-windows-validation.md`](remediation-prompts/06-windows-validation.md) for
+the acceptance matrix and do not claim a percentage until the raw measurements
+exist.

@@ -6,6 +6,9 @@ body:
   - type: markdown
     attributes:
       value: |
+        This form is for the MERURUXD/FluentFlyout downstream build. For a
+        feature intended for the general product, use the [upstream issue tracker](https://github.com/unchihugo/FluentFlyout/issues).
+
         <p align="center">
         	<picture>
         		<source width="50%" alt="fluentflyout-title" media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921" />
@@ -18,8 +21,8 @@ body:
 
         Before continuing, confirm that you have done the following:
 
-        * I have searched that there is no [existing feature report](https://github.com/unchihugo/FluentFlyout/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement) regarding my feature request
-        * I have read the [FAQ page](https://fluentflyout.com/faq/) and there is no answer to my feature request
+        * I have searched the [downstream feature reports](https://github.com/MERURUXD/FluentFlyout/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement) for a duplicate
+        * I have read the current [downstream README](https://github.com/MERURUXD/FluentFlyout/blob/master/README.md) and release scope
 
   - type: textarea
     id: description
@@ -38,7 +41,7 @@ body:
     attributes:
       label: "Confirm that you have done the following:"
       options:
-        - label: "I have searched that there is no existing issue regarding my feature request"
+        - label: "I have searched that there is no existing downstream issue regarding my feature request"
           required: true
-        - label: "I have read the [FAQ](https://fluentflyout.com/faq/) and there is no answer to my feature request"
+        - label: "I have read the downstream README and there is no existing answer to my feature request"
           required: true

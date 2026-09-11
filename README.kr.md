@@ -7,16 +7,17 @@
 </p>
 
 <p align="center">
-	<img alt="GitHub Release" src="https://img.shields.io/github/v/release/unchihugo/FluentFlyout">
-	<img alt="Static Badge" src="https://img.shields.io/badge/downloads-500k%2B-blue?color=limegreen">
+	<a href="https://github.com/MERURUXD/FluentFlyout/releases"><img alt="Downstream releases" src="https://img.shields.io/github/v/release/MERURUXD/FluentFlyout?label=downstream%20stable"></a>
 	<a href="https://hosted.weblate.org/engage/fluentflyout/"><img src="https://hosted.weblate.org/widget/fluentflyout/svg-badge.svg" alt="Translation status"/></a>
 	<img alt="GitHub contributors" src="https://img.shields.io/github/contributors-anon/unchihugo/fluentflyout?labelColor=midnightblue&color=goldenrod">
 </p>
 <p align="center">
-  <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.md">English</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.zh.md">简体中文</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.nl.md">Nederlands</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.tr.md">Türkçe</a> | <strong>한국어</strong>
+  <a href="README.md">English</a> | <a href="README.zh.md">简体中文</a> | <a href="README.nl.md">Nederlands</a> | <a href="README.tr.md">Türkçe</a> | <strong>한국어</strong>
 </p>
 
 ---
+> **Downstream notice:** This Korean page retains upstream reference content. The supported downstream product is the Windows x64 portable ZIP from [MERURUXD/FluentFlyout Releases](https://github.com/MERURUXD/FluentFlyout/releases); see the [release guide](docs/development/release.md) and [privacy policy](PRIVACY-POLICY.md). The Microsoft Store, MSIX, and upstream release links below belong to [unchihugo/FluentFlyout](https://github.com/unchihugo/FluentFlyout), not this downstream product.
+
 
 FluentFlyout은 Fluent 2 디자인 원칙을 바탕으로 제작된 최신 Windows용 Flyout 앱입니다.  
 UI가 Windows 11과 자연스럽게 어우러져 미디어, 토글 키 등을 제어할 때 방해받지 않고 깔끔하며 네이티브 앱 같은 경험을 제공합니다.  

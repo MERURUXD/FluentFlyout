@@ -1,37 +1,58 @@
 ## Summary
 
-<!-- What does this PR do? Keep it concise but clear. -->
+<!-- State the bounded stage or issue and the downstream product/channel it covers. -->
 
-## Motivation
+## Motivation and scope
 
-<!-- Why is this change needed? Link issues if applicable. -->
+<!-- Explain why this is needed. Link an issue if applicable. List intentional non-goals. -->
 
-Closes #issue-number
+## Type of change
 
-## Type of Change
-
-<!-- Please check the type of change your PR introduces: -->
-
-- [ ] Feature
+- [ ] Documentation or policy
 - [ ] Bug fix
+- [ ] Test coverage
 - [ ] Refactor (no functional changes)
-- [ ] Style (formatting, naming)
 - [ ] Other
 
-## What Changed
+## What changed
 
-<!-- Bullet points of key changes made in this PR. -->
+<!-- Keep this list tied to the stated scope. -->
 
-- 
-- 
+-
+-
 
-## Additional Information
+## Validation evidence
 
-<!-- Any other information, such as screenshots -->
+### Static and documentation checks
+
+- [ ] Relative links, paths, commands, and cross-references checked
+- [ ] `git diff --check`
+
+### Automated checks
+
+<!-- List exact commands and results, or explain why they were not run. -->
+
+- Restore/build:
+- Format:
+- Focused tests:
+
+### Windows desktop evidence
+
+<!-- Separate real GUI/audio/media/network observations from CI/build results. -->
+
+- [ ] Not applicable to this change
+- [ ] Completed; describe profile, version, and evidence:
+- [ ] Not run; explain the environment or dependency blocker:
+
+## Compatibility and risk
+
+- Upstream conflict hotspot(s):
+- Existing behavior intentionally preserved:
+- Migration, rollback, or release-channel considerations:
 
 ## Checklist
-- [ ] Code changes are manually tested and working.
-- [ ] Formatting and naming are consistent with the project.
-- [ ] Self-review of changes is done.
-<!-- AI usage -->
-- [ ] AI tools were used (if yes, I reviewed and fully understand the changes myself).
+
+- [ ] I reviewed the final diff, including untracked-file scope.
+- [ ] I did not include credentials, personal data, raw logs, or user media.
+- [ ] I did not create a release, move a tag, publish a package, or change Store signing.
+- [ ] If AI tools were used, I reviewed and understand the resulting changes.

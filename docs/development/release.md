@@ -4,6 +4,12 @@ This checkout publishes a separate Windows x64 ZIP channel for the
 `MERURUXD/FluentFlyout` repository. It does not use the FluentFlyout Store,
 MSIX signing certificate, website dispatch, or upstream release workflow.
 
+The supported user-facing entry point is the downstream GitHub Releases page.
+The rolling `dev` prerelease is for development inspection and is not a stable
+update target. Stable release publication is a separate, explicitly authorized
+operation; ordinary documentation, pull-request, and validation work must not
+create tags, move `dev`, upload assets, or publish a release.
+
 ## Local build and package validation
 
 The shared `scripts/Build-DownstreamZip.ps1` entry point uses the
