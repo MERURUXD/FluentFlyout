@@ -1,49 +1,82 @@
-## Privacy Policy
+# Privacy Policy — FluentFlyout Downstream
 
-*Last updated: June 21, 2026*
+*Last updated: 2026-09-11*
 
-_We have updated our February 27, 2026 Privacy Policy to include information on how we collect and process new anonymous usage data, and how Cloudflare may collect additional data automatically._
+This policy describes the supported downstream Windows x64 portable ZIP in
+[`MERURUXD/FluentFlyout`](https://github.com/MERURUXD/FluentFlyout). It is not
+the privacy policy for the official upstream FluentFlyout product, its website,
+or Microsoft Store distribution. See the [upstream policy](https://github.com/unchihugo/FluentFlyout/blob/master/PRIVACY-POLICY.md)
+for that product.
 
-This Privacy Policy describes how your personal information is handled in FluentFlyout.
+## 1. What the downstream application sends
 
-### 1. Information We Collect
-FluentFlyout does not collect, store, or process any personally identifiable information (PII) such as your name, email address, or precise location. As a background utility application, it does not require any user-specific information to function. 
+The downstream policy is code-owned and is not re-enabled by imported settings:
 
-To help us understand how the application is used, improve performance and add features users like, we collect basic, anonymous usage data (see Section 2).
+- Upstream telemetry is disabled. The application does not send the upstream
+  event payloads, UUID/session identifiers, or experiment information used by
+  the official service.
+- Upstream experiments are disabled. The retained experiment service returns
+  without contacting the upstream API.
+- The supported build may request metadata from the downstream GitHub Releases
+  API when it has a stable `vMAJOR.MINOR.PATCH` identity. Development and rolling
+  `dev` builds skip this request. The response is used only to compare a stable
+  version and to show the fixed downstream release page; the updater never
+  downloads, executes, installs, or replaces application files.
+- Links opened by an explicit user action can visit GitHub, the upstream
+  website, Weblate, or another external destination. Those destinations have
+  their own privacy policies and may receive ordinary web-request metadata.
 
-Additionally, the platform through which you install the app (Microsoft Store) may collect certain technical and usage information automatically (see Section 3).
+This means the supported product is not “completely offline”: a stable update
+metadata check and user-selected external links are allowed network boundaries.
+The application does not claim to control data collected by GitHub, Microsoft,
+Cloudflare, the upstream website, or other sites.
 
-FluentFlyout's website is hosted on Cloudflare Pages (https://fluentflyout.com). Cloudflare may collect additional network and HTTP traffic data automatically (see Section 4).
+## 2. Local settings and logs
 
-### 2. Telemetry and Usage Data
-FluentFlyout collects limited, anonymous telemetry to help us maintain, optimize and improve the application.
+The downstream product writes its settings to:
 
-* **What we collect:** This data may include basic information about application events (such as whether a specific feature was enabled, or whether onboarding was successful).
-* **Anonymity:** This data is entirely anonymous. It does not contain any personal identifiers, names, locations, or network addresses such as IP. We cannot use this data to identify you or link it to any specific individual.
-* **Purpose:** We use this information solely to identify bugs, understand which features are most valuable to our users, and guide future development.
-* **Opt-out:** You can opt out of this anonymous data collection at any time by going to the FluentFlyout Settings menu and disabling "Anonymous Usage Data" under System.
+```text
+%AppData%\FluentFlyoutDownstream\settings.xml
+```
 
-### 3. Microsoft Store Analytics & Windows Diagnostics
-Depending on your installation method and Windows settings, Microsoft may automatically collect certain diagnostic and usage data:
+Logs are written to the same downstream directory. The product keeps a backup
+while replacing settings. If the downstream settings and backup do not exist on
+first run, an existing `%AppData%\FluentFlyout\settings.xml` or `.bak` may be
+read once as migration input. The legacy files are not a write destination;
+they are left unchanged. Migration creates a new downstream UUID and clears the
+persisted Store identity so the two products do not share that identity.
 
-*   **Microsoft Store Version:** If you installed FluentFlyout from the Microsoft Store, Microsoft collects standard analytics, including app acquisitions (downloads), active usage sessions, and hardware configuration (e.g., OS version, device type).
-*   **App Health:** Microsoft automatically collects "Health" data, such as crash reports, hang reports, and performance metrics (e.g., memory usage). This data is provided to the developer in an anonymous, aggregated format to help improve the application.
-*   **Windows Diagnostic Data:** For both the Store and MSIX (GitHub) versions, Windows may collect information about how the app performs if you have enabled "Diagnostic data" in your Windows Privacy Settings.
+Settings and logs can contain user-chosen configuration, media/app names, or
+diagnostic details. Review and redact them before sharing an issue or support
+request. Do not attach a complete settings file or log containing personal
+information unless it has been sanitized.
 
-For more information on what Microsoft collects, please refer to the [Microsoft Privacy Statement](https://privacy.microsoft.com/en-us/privacystatement).
+## 3. Windows and distribution services
 
-### 4. Cloudflare Data Collection
-FluentFlyout's website is hosted on Cloudflare Pages. Cloudflare may automatically collect network metadata and HTTP traffic, primarily consisting of IP addresses, device interaction, and server activity data. Cloudflare uses this data to route traffic, protect against malicious attacks (such as DDoS), and measure web analytics.
+The supported downstream channel is a portable ZIP. It is not an official
+Microsoft Store listing or signed MSIX distribution. Windows may still collect
+diagnostic data according to the user's Windows privacy settings, and GitHub
+may process repository, release, and API request metadata according to its own
+policies.
 
-No tracking or fingerprinting: Cloudflare does not use tracking or cookies to collect usage metrics, and our website does not store or collect anything.
+The repository retains upstream-derived MSIX/Store code and workflows for
+compatibility and future synchronization. Those paths are not the supported
+downstream ZIP distribution and this policy does not claim that every
+upstream-derived build configuration has identical network or Store behavior.
 
-For more information on what Cloudflare collects, please refer to [Cloudflare's Privacy Policy](https://www.cloudflare.com/privacypolicy/).
+## 4. Security and contact
 
-### 5. Third-Party Services
-We use Cloudflare Analytics Engine to securely collect the anonymous usage data described in Section 2. No personal data is shared with this service. They do not monetize, sell, or use your data to build advertising profiles.
+The application uses HTTPS for the downstream release metadata request. No
+credentials, tokens, or Store purchase data are required for the supported ZIP
+channel. Report a downstream issue through the repository's [issue chooser](https://github.com/MERURUXD/FluentFlyout/issues/new/choose)
+after removing secrets and personal data from the report.
 
-### 6. Data Security
-The anonymous usage data collected by the application is transmitted securely over HTTPS. Because we do not collect or store any personal information, there are no databases of personal user data to secure. We rely on the security of the Microsoft Store, Cloudflare and GitHub for the safe distribution of the application binaries.
+The downstream fork has not yet designated an independent privacy or Code of
+Conduct contact. The upstream contact in the inherited Code of Conduct belongs
+to the upstream project and should not be treated as a downstream commitment;
+the maintainer must confirm a downstream contact before one is published.
 
-### 7. Changes to This Privacy Policy
-We reserve the right to update this Privacy Policy at any time. Any changes will be reflected in the updated version available in the app’s repository.
+## 5. Changes to this policy
+
+Changes will be made in this repository and dated in the file. A change to the
+upstream product's policy does not automatically change this downstream policy.

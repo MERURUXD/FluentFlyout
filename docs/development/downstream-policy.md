@@ -1,9 +1,11 @@
-# Downstream policy and identity
+# Current downstream policy and identity
 
-Stage 2 gives this checkout an explicit downstream boundary while keeping the
-upstream media/session implementation and service classes mergeable. The
-policy is deliberately code-owned rather than user-configurable: an imported
-or legacy settings file cannot re-enable upstream infrastructure.
+This checkout has an explicit downstream boundary while keeping the upstream
+media/session implementation and service classes mergeable. The policy is
+deliberately code-owned rather than user-configurable: an imported or legacy
+settings file cannot re-enable upstream infrastructure. The statements below
+describe the current source contract; they are not a substitute for controlled
+Windows desktop or network evidence.
 
 ## Online-service policy
 
@@ -90,9 +92,22 @@ defaults to an existing settings file.
 
 ## Non-goals and verification boundary
 
-This stage does not delete optional implementations, remove localization or
+This policy does not delete optional implementations, remove localization or
 the Source Generator, rewrite media/session selection, change Store signing,
 or claim desktop/network/coexistence tests that were not exercised. Build and
 static audits cover the policy, release, and identity seams; desktop migration,
 coexistence, and controlled network-capture checks require a Windows desktop
 test profile.
+
+## Evidence classification
+
+- **Code/static:** policy switches, product identity, migration destination,
+  build-channel handling, and the updater's metadata-only behavior are checked
+  from the current source and release script.
+- **Automated:** focused tests cover policy-adjacent product version, update
+  metadata, resource lifecycle, and media-session seams when run with the
+  repository's Windows .NET 10 commands.
+- **Desktop/network:** migration, official-product coexistence, Windows Store
+  behavior, notifications, audio devices, GUI lifetime, and request capture
+  require a controlled Windows profile. Do not mark them verified from a build
+  or a green unit-test run.

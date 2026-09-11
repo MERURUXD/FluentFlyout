@@ -1,79 +1,95 @@
 name: Bug report
-description: Create a report to help us improve
-title: "[BUG] Add Title Here"
+description: Report a reproducible issue in the downstream build
+title: "[BUG] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        <p align="center">
-        	<picture>
-        		<source width="50%" alt="fluentflyout-title" media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921" />
-        		<source width="50%" alt="fluentflyout-title" media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/3e75e514-b9a6-40e3-b170-af9d29a82bb4" />
-        		<img width="50%" alt="fluentflyout-title" src="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921">
-        	</picture>
-        </p>
+        Please use this form for the MERURUXD/FluentFlyout downstream build.
+        For the official product, use the [upstream issue tracker](https://github.com/unchihugo/FluentFlyout/issues).
+        Remove account names, personal paths, media titles, tokens, and other personal information before posting.
 
-        # FluentFlyout Bug Report Form
+  - type: checkboxes
+    id: prior-search
+    attributes:
+      label: Before reporting
+      options:
+        - label: I searched the [downstream issues](https://github.com/MERURUXD/FluentFlyout/issues?q=is%3Aissue+is%3Aopen) for a duplicate.
+          required: true
+        - label: I checked the current [downstream README](https://github.com/MERURUXD/FluentFlyout/blob/master/README.md) and release scope.
+          required: true
 
-        Before continuing, confirm that you have done the following:
-
-        * I have searched that there is no [existing bug report](https://github.com/unchihugo/FluentFlyout/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug) regarding my issue
-        * I have read the [FAQ page](https://fluentflyout.com/faq/) and there is no answer to my issue
-        
   - type: textarea
     id: description
     attributes:
-      label: "Describe the bug"
-      description: "Write a clear and concise description of what the bug is."
+      label: Describe the bug
+      description: State what happened, what you expected, and whether it is reproducible.
     validations:
       required: true
-  - type: markdown
-    attributes:
-      value: "Prepare your logs: you can find them by right-clicking the Tray Icon or in Settings > Home."
+
   - type: textarea
-    id: logs
+    id: reproduction
     attributes:
-      label: "Logs"
-      description: "Attach your logs here (drag & drop)."
+      label: Reproduction steps
+      description: Include the media/app state, settings, and whether the issue follows enable-then-disable or restart/recovery.
+      placeholder: |
+        1. Start the downstream build with ...
+        2. Enable ...
+        3. Observe ...
     validations:
       required: true
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: "Screenshots & additional context"
-      description: "You can add screenshots and any other context about the problem if necessary."
+
   - type: input
-    id: info-fluentflyout-version
+    id: downstream-version
     attributes:
-      label: FluentFlyout Version
-      placeholder: "v1.2.3"
+      label: Downstream version or channel
+      description: For example, stable v2.15.0, rolling dev, or local source build.
+      placeholder: v2.15.0 / dev / source
     validations:
       required: true
+
   - type: input
-    id: info-windows-version
+    id: commit-sha
     attributes:
-      label: Windows Version
-      placeholder: "Windows 11 25H2"
+      label: Commit SHA
+      description: Optional for a stable ZIP; use the full SHA when reporting a source or development build.
+      placeholder: 40-character commit SHA
+
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows version and build
+      placeholder: Windows 11 25H2 / build 26xxx
     validations:
       required: true
+
   - type: dropdown
-    id: info-architecture
+    id: architecture
     attributes:
       label: Architecture
       options:
         - x64
-        - ARM64
+        - ARM64 (not a supported downstream ZIP target)
+        - Other
       default: 0
     validations:
       required: true
-  - type: checkboxes
-    id: checklist
+
+  - type: textarea
+    id: settings
     attributes:
-      label: "Checklist"
-      description: "Confirm that you have done the following:"
-      options:
-        - label: "I have searched that there is no existing bug report regarding my issue"
-          required: true
-        - label: "I have read the FAQ and there is no answer to my issue"
-          required: true
+      label: Relevant settings and environment
+      description: List only the settings needed to reproduce the issue. Do not paste the complete settings file.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs
+      description: Optional. Attach only the smallest redacted excerpt needed to diagnose the issue; remove personal paths, account names, media data, and secrets.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Screenshots and additional context
+      description: Add screenshots, crash details, or links to a minimal public reproduction if needed.

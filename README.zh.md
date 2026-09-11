@@ -7,16 +7,17 @@
 </p>
 
 <p align="center">
-	<img alt="GitHub Release" src="https://img.shields.io/github/v/release/unchihugo/FluentFlyout">
-	<img alt="Static Badge" src="https://img.shields.io/badge/downloads-500k%2B-blue?color=limegreen">
+	<a href="https://github.com/MERURUXD/FluentFlyout/releases"><img alt="Downstream releases" src="https://img.shields.io/github/v/release/MERURUXD/FluentFlyout?label=downstream%20stable"></a>
 	<a href="https://hosted.weblate.org/engage/fluentflyout/"><img src="https://hosted.weblate.org/widget/fluentflyout/svg-badge.svg" alt="Translation status"/></a>
 	<img alt="GitHub contributors" src="https://img.shields.io/github/contributors-anon/unchihugo/fluentflyout?labelColor=midnightblue&color=goldenrod">
 </p>
 <p align="center">
-  <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.md">English</a> | <strong>简体中文</strong> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.nl.md">Nederlands</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.tr.md">Türkçe</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.ru.md">Русский</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.kr.md">한국어</a>
+  <a href="README.md">English</a> | <strong>简体中文</strong> | <a href="README.nl.md">Nederlands</a> | <a href="README.tr.md">Türkçe</a> | <a href="README.ru.md">Русский</a> | <a href="README.kr.md">한국어</a>
 </p>
 
 ---
+> **下游提示：** 本页保留了上游 FluentFlyout 的中文参考内容。当前下游产品是 [MERURUXD/FluentFlyout](https://github.com/MERURUXD/FluentFlyout) 的 Windows x64 便携 ZIP，下载请使用[下游 Releases](https://github.com/MERURUXD/FluentFlyout/releases)，范围和版本渠道见[发布说明](docs/development/release.md)。下方 Microsoft Store、MSIX 和上游发布链接属于[官方上游项目](https://github.com/unchihugo/FluentFlyout)，不是本下游产品；隐私边界见[隐私说明](PRIVACY-POLICY.md)。
+
 FluentFlyout 是一个简单且现代的 Windows 音量控制弹窗，基于 Fluent 2 设计原则构建。它的用户界面与 Windows 10/11 无缝融合，为您提供一个无缝、干净、原生般的媒体控制体验。  
 
 FluentFlyout 能够在一个雅观的现代化的弹窗中显示媒体控制和信息，同时与系统的颜色主题相融合，具有流畅的动画效果，还提供多种布局位置和更多个性化设置。

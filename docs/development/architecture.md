@@ -1,14 +1,21 @@
-# Runtime architecture
+# Current runtime architecture
 
-This document is the Stage 1 snapshot of the current FluentFlyout downstream checkout. It records observed control flow and ownership so later downstream isolation can be implemented as small policy boundaries. It does not describe a new architecture and does not imply that the current eager paths are optimal.
+This document describes the current downstream checkout. It is an implementation
+map, not a proposal to replace the upstream media state machine. Recheck the
+source and focused tests before relying on a detail after an upstream sync.
 
 ## Solution shape
 
-The solution has three relevant layers:
-
-1. `FluentFlyoutWPF/` is the Windows desktop application. `App` owns process startup; `MainWindow` is the long-lived coordinator; pages, controls, view models, helper classes, and optional windows provide the UI and integrations.
-2. `FluentFlyout.SourceGenerators/` is a Roslyn analyzer/source generator. The WPF project passes `Pages/**/*.xaml` as `AdditionalFiles`; the generator scans indexable page markup and emits `SettingsWindow.SearchItems` data.
-3. `FluentFlyoutMSIX/` is the Windows App Packaging project. It references the WPF output and owns manifest/assets/signing/package concerns. It is intentionally separate from the compile-only downstream CI path.
+1. `FluentFlyoutWPF/` is the Windows desktop application. `App` owns process
+   startup; `MainWindow` is the long-lived coordinator; pages, controls,
+   view-models, helper classes, and optional windows provide the UI and
+   integrations.
+2. `FluentFlyout.SourceGenerators/` is a Roslyn analyzer/source generator. The
+   WPF project passes `Pages/**/*.xaml` as `AdditionalFiles`; indexable page
+   markup produces the settings search data.
+3. `FluentFlyoutMSIX/` owns the retained Windows packaging path, manifest,
+   assets, and signing/package concerns. It is separate from the downstream
+   compile-and-ZIP path in CI.
 
 ## Startup and shutdown
 
@@ -18,141 +25,148 @@ App.xaml StartupUri=MainWindow
         v
 App.OnStartup
   - register unhandled-exception and toast activation handlers
-  - await ExperimentsService.GetExperimentsAsync()
-  - continue WPF startup
+  - call ExperimentsService (the downstream policy returns before network I/O)
+  - continue the WPF startup path
         |
         v
 MainWindow constructor
-  - create/bind settings and media manager
-  - restore settings and startup/run registration
-  - create tray icon and cancellation state
-  - start media manager and low-level keyboard hook
-  - subscribe media-session open/focus, property/state/timeline/close, shell, and display-position events
-  - begin experiment, localization, update, and first-update work
+  - bind and restore downstream settings
+  - register downstream identity/startup/mutex/event values
+  - start media monitoring and the low-level keyboard hook
+  - subscribe media-session, shell, and display-environment events
+  - schedule policy-gated onboarding/experiment and update work
         |
         v
 MainWindow.Loaded
-  - hide/apply theme and attach WndProc hook
-  - initialize license state and save flags
-  - request experiments again
-  - create VolumeMixerWindow and TaskbarWindow
-  - update taskbar surface
+  - hide/apply theme and attach the window hook
+  - initialize license state and save the downstream settings
+  - refresh experiments (still policy-gated)
+  - refresh filtered media and optional surfaces on demand
         |
         v
-MainWindow cleanup / application exit
-  - stop timers and cancel async state
-  - unsubscribe media/shell/display handlers
-  - dispose visualizer and optional windows
-  - restore native volume OSD and shut down NLog
+CleanupResources / OnClosed
+  - mark cleanup, stop timers, cancel async state, and unsubscribe media events
+  - dispose seekbar/visualizer resources and unhook native handlers
+  - close lock, Next Up, taskbar, and mixer windows
+  - restore the native volume OSD and shut down logging
 ```
 
-The application uses `ShutdownMode=OnExplicitShutdown`; the tray and coordinator therefore outlive normal flyout visibility. The cleanup path stops the display timer, removes subscriptions/hooks, disposes the static visualizer, closes optional windows, and shuts down logging. No explicit media-manager stop was visible in the audited cleanup path; this is a follow-up verification point, not a Stage 1 change.
+`ShutdownMode=OnExplicitShutdown` keeps the tray/coordinator alive while the
+flyout is hidden. `CleanupResources` is idempotent at the coordinator boundary
+and the optional windows own their timers/subscriptions. The current cleanup
+path removes the `MainWindow` media event subscriptions but does not call an
+independent media-manager stop method; treat that upstream-owned lifetime as a
+remaining desktop verification point rather than assuming it is stopped by the
+documentation.
 
-## Media-session flow
+## Downstream policy and identity
 
-The media manager observes Windows media sessions and raises open, focus, property, state, timeline, and close events. Open/focus changes route through `RefreshFilteredMedia()` so a newly registered session can change the selected owner even when its first metadata event is not itself selected. The `MainWindow.Loaded` refresh also provides a post-start snapshot after the manager event subscriptions are installed. `MainWindow.GetActiveMediaSession()` is the single ownership lookup for the downstream as well as the upstream-compatible path:
+`FluentFlyoutWPF/Classes/Downstream/DownstreamPolicy.cs` is the code-owned gate:
 
-1. Read `CurrentMediaSessions`.
-2. Filter through `IsSessionAllowed` (the app-filtering policy); a filtered session is never eligible for downstream preference.
-3. Read the WindowsMediaController focused session once.
-4. In `Automatic` mode, prefer the focused allowed session and otherwise use the first allowed session, retaining the upstream behavior.
-5. In `Spotify Preferred` mode, prefer an allowed Spotify session only while it is playing. If Spotify exists but is not playing, prefer an allowed non-Spotify session that is playing, using the focused eligible player when possible. If neither preference applies, fall back to the same focused-then-first automatic selection.
-6. Reflect the selected session into every single-owner surface.
+- upstream telemetry, experiments, update checks, purchase UI, and onboarding
+  are disabled;
+- the downstream update check is enabled; and
+- imported settings cannot turn those upstream paths back on.
 
-The persisted `MediaSessionSelectionMode` values are deliberately small and closed: `0` is `Automatic` and `1` is `Spotify Preferred`. Unknown values degrade to `Automatic`; there is no Spotify Exclusive mode. Spotify is identified from the media-session application identity (`MediaSession.Id`), not from title/artist text or process enumeration, so a browser playing Spotify Web Player remains a browser session and multiple Chromium sessions remain distinguishable.
+The supported updater requests only the downstream GitHub stable-release
+metadata for a stable identity. Development and rolling `dev` identities do not
+request update metadata. The updater opens the fixed downstream release page on
+user action and never downloads, executes, installs, or replaces a binary.
 
-The selection policy receives only sessions already accepted by `IsSessionAllowed`. It reevaluates the current manager collection on every lookup and does not cache a selected or Spotify `MediaSession`; closing and restarting a player therefore resolves the currently registered session object naturally. The policy is limited to deciding whether Spotify Preferred has an override; automatic focused-session/first-session fallback remains in `MainWindow`.
+`ProductIdentity` keeps the downstream AppData directory, executable/display
+name, mutex, settings event, startup value, toast CLSID, and repository URLs
+separate from the official product. The supported release configuration is the
+portable downstream ZIP; retained MSIX/Store code and workflows are not evidence
+that the Store path is part of the supported downstream product.
 
-The single-session consumers that must continue to use this lookup are the main media flyout (`UpdateUI`), taskbar widget, previous/play/pause/next/repeat/shuffle/seek controls, active-media taskbar volume targeting, open-player activation, timeline/seek updates, Next Up metadata, and playback/property/session-close refresh handlers. Event handlers must verify that the event source is still the selected session instance before preparing metadata, then revalidate that ownership on the UI Dispatcher before committing a prepared result to any selected-session surface. A stale callback cannot move the display owner backward when it records deduplication state. Playback timers must use the selected session's current playback state rather than the event source's state. Metadata deduplication is scoped to a short-lived selected `MediaSession` instance and is invalidated on an ownership-changing close/open epoch; it is not a long-term selected-session cache. Session close/restart and setting changes refresh all persistent selected-session surfaces, including stale Next Up content. Next Up may retain only its own origin-session reference plus ID as a short-lived UI ownership token, so a same-ID restart cannot leave an old card visible; this is not a general selected-session cache.
+## Settings and defaults
 
-The required transition invariants are:
+`SettingsManager` writes to `%AppData%\FluentFlyoutDownstream\settings.xml` and
+uses a `.bak` backup. On a first downstream run only, it may read the legacy
+`%AppData%\FluentFlyout\settings.xml` or backup as migration input. It leaves
+the legacy files untouched, writes only to the downstream directory, preserves
+explicit values, creates a new UUID, and clears the persisted Store identity.
 
-| Scenario | Expected owner in `Spotify Preferred` |
-| --- | --- |
-| Spotify only, playing or paused | Spotify through normal selection |
-| Spotify playing + paused browser | Spotify |
-| Spotify paused + playing browser | Playing browser |
-| Spotify starts while browser is active | Browser until Spotify is actually playing; then Spotify |
-| Browser starts while Spotify is playing | Spotify remains preferred (the independent Pause Other Sessions option may pause the browser) |
-| Spotify closes | Recompute immediately; fall back to the remaining allowed session or clear ownership |
-| Spotify restarts | Resolve the newly registered Spotify session; never retain the closed object |
-| Browser closes | Recompute from the remaining allowed sessions |
-| Multiple Chromium sessions | Use Windows focus when an eligible playing session is needed; never infer Spotify from media title |
-| App Filtering whitelist/blacklist | Filtered sessions cannot win preference or ownership |
-| Paused sessions only | Do not force Spotify; use normal focused-then-first semantics |
-| Metadata-only change from an unselected session | Do not update selected-session UI |
-| Identical metadata after a session switch | Session identity invalidates property deduplication |
+Fresh defaults retain the media flyout, fullscreen protection, acrylic surfaces,
+and startup registration. Lock Keys, Next Up, taskbar widget/visualizer, volume
+control/mixer, update notifications, and anonymous telemetry start disabled.
+Existing settings are not overwritten by constructor defaults during
+deserialization. Settings changes are debounced before persistence.
 
-The seekbar timer remains configured for a 300 ms cadence but is active only when the feature is enabled and the selected session is playing. This path is upstream-heavy and should be changed through narrow policy/adapters rather than a broad state-machine rewrite.
+## Media-session flow and ownership
 
-## Optional windows and services
+`MainWindow` reads the current media-manager collection for each ownership
+decision. It first applies `IsSessionAllowed` app filtering, then applies the
+selected mode:
 
-### Taskbar widget and visualizer
+1. `Automatic` prefers the focused allowed session and otherwise the first
+   allowed session.
+2. `Spotify Preferred` prefers an allowed Spotify session only while it is
+   playing. A paused Spotify session does not displace a playing non-Spotify
+   session; the automatic focused-then-first fallback remains available.
+3. Unknown persisted mode values fall back to `Automatic`.
 
-`MainWindow.Loaded` creates `TaskbarWindow` unconditionally. The window starts a 1.5-second dispatcher timer and is shown; `UpdateUi` collapses/stops it when the widget is disabled or the user is not premium. Its XAML contains `TaskbarVisualizerControl` and `TaskbarWidgetControl`.
+Spotify is identified from the Windows media-session application identity, not
+from title text or process enumeration. The selection policy does not cache a
+long-lived `MediaSession`; close/restart resolves the currently registered
+instance. The selected owner is shared by the flyout, taskbar, controls,
+seek/timeline updates, Next Up, and active-media volume targeting.
 
-The visualizer control has static lifetime. Type initialization creates bitmap/FFT/bar state and subscribes to audio-device and system events even if `TaskbarVisualizerEnabled` is false. Enabling it starts NAudio WASAPI loopback capture; a watchdog checks the capture path and restarts it after device/session/power changes. Disposal removes subscriptions and stops capture. This is the clearest current candidate for a later lazy-lifecycle boundary.
+Property callbacks verify the source session before preparing data and recheck
+ownership on the WPF Dispatcher before committing it. Metadata deduplication is
+scoped to the selected session and invalidated by ownership-changing epochs.
+Next Up keeps only its own short-lived origin-session token. A stale callback or
+same-ID session restart must not move selected UI backward.
 
-### Volume mixer
+## Optional resources and lifecycle
 
-`MainWindow.Loaded` also creates `VolumeMixerWindow`. Construction creates its view model, which attaches the default audio device, refreshes application sessions, subscribes to `AudioDeviceMonitor`, and starts a one-second dispatcher timer independent of the Volume Control/Volume Mixer setting values. The window is shown by the flyout path and disposes its view model when closed.
+- The taskbar window is created only when the widget is enabled and premium
+  access is available. Its positioning timer exists only with that window;
+  disabling or closing the widget closes the window and stops the timer.
+- The volume mixer is created on demand for an active volume/mixer/taskbar
+  consumer. Its view-model device/session subscriptions and one-second timer
+  are released when the last consumer is released; a hidden volume flyout keeps
+  the shared consumer alive when appropriate.
+- The taskbar visualizer owns a nullable visualizer instance. It allocates audio
+  capture, buffers, watchdog work, and system subscriptions only while enabled,
+  drains in-flight callbacks on disable/dispose, and rejects stale restarts.
+- Next Up and Lock Keys remain lazy. The low-level keyboard hook is a separate
+  startup cost from the Lock Keys window.
+- The seekbar `System.Threading.Timer` is active only when the seekbar is
+  visible, supported, enabled, and the selected session is playing. The display
+  environment refresh is a debounced one-shot Dispatcher timer.
 
-The `VolumeControlEnabled` setting controls volume input/flyout behavior; `VolumeMixerEnabled` controls the page/widget behavior but does not prevent the initial window/view-model construction observed in this snapshot.
+These are lifecycle contracts backed by the Stage 2/3 focused tests and source
+inspection. They are not a claim that every Windows audio, Explorer, display,
+or shutdown interleaving has been manually exercised.
 
-### Next Up
+## Online, packaging, and validation boundaries
 
-`NextUpWindow` is lazy. It is created from media-property changes only if Next Up is enabled, the app is not fullscreen, the main media flyout is not visible (`IsVisible == false`), playback is active, and a thumbnail is available. A delayed close avoids tearing down the preview during transient media updates.
+The supported downstream online boundary is the GitHub stable-release metadata
+request described above. Upstream API, experiments, telemetry, Store, and MSIX
+implementations remain in the tree for mergeability or upstream compatibility,
+but the downstream policy makes the supported ZIP path explicit. The
+`downstream-build.yml` workflow validates restore, formatting, the x64 WPF build,
+focused tests, and a development ZIP without publishing. The dev-release
+workflow is separately gated to downstream `master` and can publish only after
+its same-SHA quality/package checks pass.
 
-### Lock keys
+Builds and focused tests do not prove GUI, audio, media-session, migration,
+coexistence, network-capture, signing, Store, or release behavior. Those claims
+require the controlled Windows validation described by
+[`06-windows-validation.md`](remediation-prompts/06-windows-validation.md) and
+the resulting evidence report, if one is available.
 
-`LockWindow` is lazy-created on lock-key key-up events when the feature is enabled. Caps Lock, Num Lock, Scroll Lock, and Insert defaults are enabled. The global low-level keyboard hook is installed by `MainWindow` at startup regardless of the lock-window setting, so hook cost and lock-window cost are separate concerns.
+## Upstream conflict hotspots
 
-## Settings flow
-
-`SettingsManager.Current` exposes the `UserSettings` singleton/view model. `SettingsManager.RestoreSettings()` deserializes values from `%AppData%\FluentFlyout\settings.xml` into `UserSettings` and keeps a `.bak` copy. Property changes are debounced for 500 ms before persistence; `CompleteInitialization` ends the load-time suppression period.
-
-Settings changes can directly affect coordinator behavior through generated/partial property callbacks. Examples observed in the snapshot include taskbar position/visibility updates, marquee updates, visualizer enable/disable forwarding, volume-control layout decisions, lock-key eligibility, notification/telemetry flags, and allowed-app filtering. Main-window startup separately checks the `Startup` setting for run registration; no `OnStartupChanged` callback was observed. The settings UI uses the source-generated search index from page XAML tagged `Indexable`.
-
-Important defaults include startup, media flyout, and lock keys enabled; taskbar widget, taskbar visualizer, volume control, and volume mixer disabled; anonymous telemetry and update notifications enabled. Defaults are evidence for the current checkout, not a policy decision for the future fork.
-
-## Online-service flow
-
-```text
-App startup / MainWindow.Loaded
-       -> ExperimentsService
-       -> FluentFlyoutApiClient (https://fluentflyout.com/api/)
-
-startup/manual update check
-       -> UpdateCheckerService
-       -> API metadata and external changelog/update URL
-
-user/app events (when allowed)
-       -> TelemetryService
-       -> API event POST
-
-Store build settings/purchase UI
-       -> LicenseManager / StoreContext
-       -> Windows Store license/add-on/purchase services
-```
-
-The API client uses a two-second `HttpClient` timeout and resets the client after a timeout. Experiments are requested in both `App.OnStartup` and the loaded window path. Telemetry is gated by `AnonymousTelemetryAllowed` but remains enabled by default in this snapshot. The `GITHUB_RELEASE` build defines premium as unlocked and avoids the Store-backed purchase path; other configurations use Windows Store licensing. Windows toast registration/activation is local, while changelog, update, Store, GitHub, and API links are externally reachable.
-
-Downstream isolation is intentionally deferred. A future policy layer must make the fork's online endpoints and telemetry behavior explicit, prevent upstream update advertisements, and preserve a clear opt-in boundary for any permitted service.
-
-## Packaging and CI
-
-The WPF project is the compile source. `build-msix.yml` and `FluentFlyoutMSIX/FluentFlyoutMSIX.wapproj` add Windows package metadata, assets, certificate decoding, and publishing artifacts. `dotnet-format.yml` provides formatting validation. The Stage 1 `.github/workflows/downstream-build.yml` validates restore and the `GitHub Release` x64 WPF build only; it does not sign, publish, access Store secrets, or modify the existing packaging workflows.
-
-## Primary upstream conflict hotspots
-
-| Area | Why it changes frequently / conflict risk | Safe downstream seam |
+| Area | Why it is sensitive | Preferred downstream seam |
 | --- | --- | --- |
-| `FluentFlyoutWPF/MainWindow.xaml.cs` | Long-lived coordinator combining startup, hooks, media, flyout, taskbar, timers, updates, and cleanup | Small policy service, adapter, or isolated partial only when necessary |
-| Media manager/session selection | Upstream behavior and Windows API assumptions are central to correctness | Session filter/selection policy with focused tests |
-| `ViewModels/UserSettings.cs` and settings pages | Generated properties/callbacks and XAML search metadata are cross-cutting | New policy settings and narrow callbacks; preserve generated contract |
-| Taskbar/visualizer/volume windows and controls | UI lifetime, timers, audio-device subscriptions, and premium gating interact | Lazy factories/lifecycle interfaces, introduced separately and measured |
-| API, experiments, telemetry, update, and Store classes | Network/privacy/release policy is fork-specific but upstream code may move | Explicit endpoint/policy abstraction with a small call-site surface |
-| `.github/workflows/*`, `FluentFlyoutMSIX/*` | Release signing, packaging, and upstream automation are operationally sensitive | Additive compile-only workflow; avoid rewriting publishing workflows |
-| Source generator and page XAML | Generator assumptions span all settings pages | Keep `AdditionalFiles`, `Indexable`, and `DynamicResource` conventions stable |
+| `FluentFlyoutWPF/MainWindow.xaml.cs` | Long-lived coordinator for startup, media, hooks, timers, and cleanup | Small policy or lifecycle adapter |
+| Media manager/session selection | Windows API and upstream behavior are correctness-sensitive | Filter/selection/ownership policy with focused tests |
+| Settings and XAML pages | Generated properties and search metadata cross-cut the UI | Narrow callbacks and policy files |
+| Taskbar/visualizer/mixer windows | UI lifetime, timers, devices, and capture interact | Explicit owner lifecycle and tests |
+| API, telemetry, update, and Store classes | Fork-specific privacy/release policy overlaps upstream code | Code-owned policy gate |
+| `.github/workflows/*` and `FluentFlyoutMSIX/*` | Signing, packaging, and publishing are operationally sensitive | Additive downstream workflow; preserve upstream path |
 
-Before a later edit, record the hotspot touched and whether a new file can hold the downstream-specific logic. Avoid scattering policy changes through this table's upstream-heavy files.
+Before editing a hotspot, verify the current source and record the intended
+scope. Do not use this document as permission for a media-state-machine rewrite.

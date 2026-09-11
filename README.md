@@ -7,16 +7,17 @@
 </p>
 
 <p align="center">
-	<img alt="Static Badge" src="https://img.shields.io/badge/downloads-500k%2B-blue?color=limegreen">
 	<a href="https://hosted.weblate.org/engage/fluentflyout/"><img src="https://hosted.weblate.org/widget/fluentflyout/svg-badge.svg" alt="Translation status"/></a>
 	<img alt="GitHub contributors" src="https://img.shields.io/github/contributors-anon/unchihugo/fluentflyout?labelColor=midnightblue&color=goldenrod">
 </p>
 <p align="center">
-  <strong>English</strong> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.zh.md">简体中文</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.nl.md">Nederlands</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.tr.md">Türkçe</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.ru.md">Русский</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.kr.md">한국어</a>
+  <strong>English</strong> | <a href="README.zh.md">简体中文</a> | <a href="README.nl.md">Nederlands</a> | <a href="README.tr.md">Türkçe</a> | <a href="README.ru.md">Русский</a> | <a href="README.kr.md">한국어</a>
 </p>
 
 ---
-> **Downstream notice:** This checkout is a personal downstream fork of [FluentFlyout](https://github.com/unchihugo/FluentFlyout), maintained under the [MERURUXD/FluentFlyout](https://github.com/MERURUXD/FluentFlyout) repository. It is not an official FluentFlyout release, Store listing, or update channel. The downstream build disables the upstream telemetry, experiments, and update infrastructure while preserving upstream attribution and general media support.
+> **Downstream notice:** This checkout is a personal downstream fork of [FluentFlyout](https://github.com/unchihugo/FluentFlyout), maintained in [MERURUXD/FluentFlyout](https://github.com/MERURUXD/FluentFlyout). The supported downstream product is a Windows x64 portable ZIP from the [downstream Releases page](https://github.com/MERURUXD/FluentFlyout/releases). `master` may produce a rolling `dev` prerelease; stable updates use immutable `vMAJOR.MINOR.PATCH` releases. The downstream policy blocks upstream telemetry, experiments, and update infrastructure, while the updater performs only a stable-release metadata check. This is not an official FluentFlyout release, Microsoft Store listing, MSIX installer, ARM64 build, or automatic installer.
+
+For the current downstream scope, privacy boundary, and contribution route, see the [release guide](docs/development/release.md), [privacy policy](PRIVACY-POLICY.md), and [contribution guide](.github/CONTRIBUTING.md). The upstream installation and Store material below is retained as clearly labelled reference information only.
 
 FluentFlyout Downstream is a modern Flyout app for Windows, built with Fluent 2 Design principles.
 The UI seemingly blends in with Windows 11, providing you an uninterrupted, clean, and native-like experience when controlling your media, lock keys, and more.  
@@ -105,8 +106,10 @@ The following upstream installation instructions are retained only as reference.
 7. The App Installer will pop up, press **"Install"**, or **"Update"** if you've installed FluentFlyout before
 
 ## Contributing 💖
-Please feel free to contribute in any way you can! Check out [CONTRIBUTING.md](https://github.com/unchihugo/FluentFlyout/blob/master/.github/CONTRIBUTING.md) to get started.
+Please use this fork's [downstream contribution guide](.github/CONTRIBUTING.md) for downstream bugs, documentation, policy, and ZIP/CI work. Changes intended for the general FluentFlyout project should follow the [upstream contribution guide](https://github.com/unchihugo/FluentFlyout/blob/master/.github/CONTRIBUTING.md).
 If you want to help with translations, please visit our [Weblate page](https://hosted.weblate.org/engage/fluentflyout/).
+
+For the downstream data boundary, see the [privacy policy](PRIVACY-POLICY.md).
 
 ### Translation Status
 <a href="https://hosted.weblate.org/engage/fluentflyout/">

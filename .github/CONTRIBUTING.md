@@ -1,22 +1,62 @@
-# How to contribute
-Any help towards improving FluentFlyout is greatly appreciated — whether it's new features, bug fixes, or translations!
+# Contributing to FluentFlyout Downstream
 
-## Developing
-To start developing, load the repository into Visual Studio (or your IDE of choice), make sure that FluentFlyout is closed (because it's a singleton app), and start writing!
-Make sure to create a new [fork](https://github.com/unchihugo/FluentFlyout/fork) of this repository when starting. You can then edit any code in your fork (using branches if needed). 
+Thank you for helping improve this personal downstream fork. Keep changes
+narrow, preserve the GPL-3.0-or-later license and upstream attribution, and
+describe which product and release channel you tested.
 
-Once you're ready with the updates, submit a [pull request](https://github.com/unchihugo/FluentFlyout/compare) describing what's changed, and be sure to tag any issues (if applicable) your pull request is taking care of!
+## Choose the right project
 
-AI usage: AI tools may be used to assist with programming, provided that you design the solution yourself and carefully review the generated code for issues and redundancy. Heavy reliance on AI without clear knowledge of what's going on with your changes will not be merged, but having a strong understanding of it will.
+- Report downstream-only behavior, downstream documentation, policy, identity,
+  ZIP, or CI issues in the [MERURUXD/FluentFlyout issue chooser](https://github.com/MERURUXD/FluentFlyout/issues/new/choose).
+- Send a change intended to benefit the general FluentFlyout project to the
+  [upstream repository](https://github.com/unchihugo/FluentFlyout) and follow
+  its contribution and CLA requirements. A downstream PR is not an upstream
+  contribution agreement.
+- Use the upstream [Weblate project](https://hosted.weblate.org/engage/fluentflyout/)
+  for translations unless the change is specifically downstream-only.
 
-## Translating
-You can translate here: https://hosted.weblate.org/engage/fluentflyout/
+## Local development
 
-The majority of FluentFlyout users (apart from English) come from China and India. If you could translate any of these two countries' languages, it would be greatly appreciated!
-Apart from those countries, the following are other popular ones that would greatly benefit from your help: Turkey, Mexico, several South American countries, and Russia. Of course, feel free to help contribute to languages not listed as well!
-  
-FluentFlyout uses **Weblate** to manage translations, ensuring advanced translation tooling, automated merges to FluentFlyout, and appropriate crediting when you update a language you have worked on.
+Use Windows with the .NET 10 SDK. Keep the application closed while testing;
+it is a single-instance tray application. From the repository root, the
+supported downstream compile/test entry points are:
 
-<a href="https://hosted.weblate.org/engage/fluentflyout/">
-<img src="https://hosted.weblate.org/widget/fluentflyout/multi-auto.svg" alt="Translation status" />
-</a>
+```powershell
+dotnet restore FluentFlyoutWPF\FluentFlyout.csproj -p:Platform=x64
+dotnet build FluentFlyoutWPF\FluentFlyout.csproj -c "GitHub Release" -p:Platform=x64 --no-restore
+dotnet test tests\FluentFlyoutWPF.Tests\FluentFlyoutWPF.Tests.csproj -c "GitHub Release" -p:Platform=x64 --no-restore
+dotnet format FluentFlyout.sln --verify-no-changes --verbosity diagnostic
+git diff --check
+```
+
+The `GitHub Release` configuration is the supported downstream x64 build
+configuration. The portable ZIP is separate from the retained upstream-derived
+MSIX/Store workflows; do not request signing secrets or publish a release from
+an ordinary contribution.
+
+## Issue reports
+
+Use the [bug report form](https://github.com/MERURUXD/FluentFlyout/issues/new?template=bug_report.yaml)
+for reproducible defects. Include the downstream channel, version and commit
+SHA, Windows build, architecture, relevant settings, reproduction steps, and
+whether the issue occurs after enabling then disabling an optional feature.
+Attach only sanitized logs; remove account names, file paths, media titles,
+tokens, and other personal information. A build passing does not replace a
+Windows desktop, audio, media-session, or network observation.
+
+## Pull requests
+
+Use a scoped branch and keep one stage or independent issue per PR. The PR
+description should separate:
+
+- static inspection and documentation checks;
+- restore, build, format, and focused automated tests;
+- Windows desktop/audio/network measurements; and
+- scenarios that were not run or are blocked by environment or dependency.
+
+Preserve existing media behavior unless the requested stage explicitly covers
+it. Do not merge a documented plan as if it were a completed runtime test, and
+do not create releases, move tags, or publish packages as part of review.
+
+AI tools may assist with planning or implementation, but contributors remain
+responsible for understanding, checking, and explaining every proposed change.

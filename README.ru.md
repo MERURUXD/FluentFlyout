@@ -7,16 +7,17 @@
 </p>
 
 <p align="center">
-	<img alt="GitHub Release" src="https://img.shields.io/github/v/release/unchihugo/FluentFlyout">
-	<img alt="Static Badge" src="https://img.shields.io/badge/downloads-500k%2B-blue?color=limegreen">
+	<a href="https://github.com/MERURUXD/FluentFlyout/releases"><img alt="Downstream releases" src="https://img.shields.io/github/v/release/MERURUXD/FluentFlyout?label=downstream%20stable"></a>
 	<a href="https://hosted.weblate.org/engage/fluentflyout/"><img src="https://hosted.weblate.org/widget/fluentflyout/svg-badge.svg" alt="Статус перевода"/></a>
 	<img alt="GitHub contributors" src="https://img.shields.io/github/contributors-anon/unchihugo/fluentflyout?labelColor=midnightblue&color=goldenrod">
 </p>
 <p align="center">
-  <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.md">English</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.zh.md">简体中文</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.nl.md">Nederlands</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.tr.md">Türkçe</a> | <strong>Русский</strong> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.kr.md">한국어</a>
+  <a href="README.md">English</a> | <a href="README.zh.md">简体中文</a> | <a href="README.nl.md">Nederlands</a> | <a href="README.tr.md">Türkçe</a> | <strong>Русский</strong> | <a href="README.kr.md">한국어</a>
 </p>
 
 ---
+> **Downstream notice:** This Russian page retains upstream reference content. The supported downstream product is the Windows x64 portable ZIP from [MERURUXD/FluentFlyout Releases](https://github.com/MERURUXD/FluentFlyout/releases); see the [release guide](docs/development/release.md) and [privacy policy](PRIVACY-POLICY.md). The Microsoft Store, MSIX, and upstream release links below belong to [unchihugo/FluentFlyout](https://github.com/unchihugo/FluentFlyout), not this downstream product.
+
 FluentFlyout — современное приложение для всплывающих уведомлений Windows, созданное на основе принципов дизайна Fluent 2.  
 Интерфейс органично вписывается в Windows 11, обеспечивая чистый и нативный опыт при управлении медиа, клавишами-переключателями и не только.
 

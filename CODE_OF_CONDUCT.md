@@ -1,5 +1,10 @@
 # Contributor Covenant Code of Conduct
 
+> This file is retained from the upstream FluentFlyout project. The enforcement
+> contact below belongs to the upstream community, not to this downstream fork.
+> An independent downstream enforcement contact is still pending maintainer
+> confirmation; do not treat the upstream address as a downstream commitment.
+
 ## Our Pledge
 
 We as members, contributors, and leaders pledge to make participation in our
@@ -58,9 +63,11 @@ representative at an online or offline event.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-hugoli.atwork@gmail.com.
+Instances of abusive, harassing, or otherwise unacceptable behavior in the
+upstream project may be reported to the community leaders responsible for
+upstream enforcement at hugoli.atwork@gmail.com. The downstream fork has not
+yet published a separate enforcement contact; the maintainer must confirm one
+before this document is presented as the downstream reporting route.
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the
