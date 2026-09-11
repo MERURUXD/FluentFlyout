@@ -86,9 +86,9 @@ unpackaged path.
 ## Fresh-install defaults
 
 The downstream defaults retain media flyout and fullscreen protection, while
-starting Next Up, Taskbar Visualizer, telemetry, and upstream update
-notifications disabled. Deserialization does not reapply these defaults to an
-existing settings file.
+starting Next Up, Taskbar Widget, Taskbar Visualizer, telemetry, and upstream
+update notifications disabled. Deserialization does not reapply these defaults
+to an existing settings file.
 
 ## Non-goals and verification boundary
 
