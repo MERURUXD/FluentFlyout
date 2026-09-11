@@ -78,8 +78,6 @@ public partial class MainWindow : MicaWindow
 
     internal TaskbarWindow? taskbarWindow;
 
-    private VolumeMixerWindow? volumeMixerWindow;
-
     private readonly DispatcherTimer _displayRefreshTimer;
     private string _pendingDisplayRefreshReason = "Unknown";
     private bool _displayRefreshInProgress;
@@ -335,129 +333,12 @@ public partial class MainWindow : MicaWindow
         && SettingsManager.Current.TaskbarWidgetEnabled
         && SettingsManager.Current.IsPremiumUnlocked;
 
-    private VolumeMixerWindow? EnsureVolumeMixerWindow(VolumeMixerConsumer consumer)
-    {
-        if (_isCleaningUp)
-            return null;
-
-        if (volumeMixerWindow != null)
-        {
-            volumeMixerWindow.ViewModel.AcquireConsumer(consumer);
-            return volumeMixerWindow;
-        }
-
-        try
-        {
-            if (Dispatcher.CheckAccess())
-            {
-                volumeMixerWindow ??= new VolumeMixerWindow();
-            }
-            else
-            {
-                Dispatcher.Invoke(() => volumeMixerWindow ??= new VolumeMixerWindow());
-            }
-
-            volumeMixerWindow?.ViewModel.AcquireConsumer(consumer);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to create Volume Mixer window on demand");
-        }
-
-        return volumeMixerWindow;
-    }
-
-    private void CloseVolumeMixerWindow()
-    {
-        var window = volumeMixerWindow;
-        volumeMixerWindow = null;
-
-        if (window == null)
-            return;
-
-        try
-        {
-            window.Close();
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to close Volume Mixer window");
-        }
-        finally
-        {
-            window.DisposeResources();
-        }
-    }
-
-    internal void ReleaseVolumeMixerConsumer(VolumeMixerConsumer consumer)
-    {
-        var window = volumeMixerWindow;
-        if (window == null)
-            return;
-
-        window.ViewModel.ReleaseConsumer(consumer);
-        if (!window.ViewModel.HasActiveConsumers)
-            CloseVolumeMixerWindow();
-    }
-
-    private void RecreateVolumeMixerWindowForDisplay()
-    {
-        var oldWindow = volumeMixerWindow;
-        if (oldWindow == null)
-            return;
-
-        var retainedConsumers = oldWindow.ViewModel.ActiveConsumers
-            & (VolumeMixerConsumer.VolumeControl | VolumeMixerConsumer.Mixer);
-        bool wasExpanded = oldWindow.ViewModel.IsExpanded;
-
-        CloseVolumeMixerWindow();
-
-        if (retainedConsumers == VolumeMixerConsumer.None || _isCleaningUp)
-            return;
-
-        VolumeMixerWindow? newWindow = null;
-        try
-        {
-            newWindow = new VolumeMixerWindow();
-            volumeMixerWindow = newWindow;
-
-            if ((retainedConsumers & VolumeMixerConsumer.VolumeControl) != 0)
-                newWindow.ViewModel.AcquireConsumer(VolumeMixerConsumer.VolumeControl);
-
-            if (wasExpanded && SettingsManager.Current.VolumeMixerEnabled)
-                newWindow.ViewModel.IsExpanded = true;
-        }
-        catch (Exception ex)
-        {
-            newWindow?.DisposeResources();
-            if (ReferenceEquals(volumeMixerWindow, newWindow))
-                volumeMixerWindow = null;
-            Logger.Error(ex, "Failed to recreate Volume Mixer window after a display change");
-        }
-    }
-
-    internal void OnVolumeMixerEnabledChanged(bool enabled)
-    {
-        if (!enabled && volumeMixerWindow?.ViewModel.IsExpanded == true)
-            volumeMixerWindow.ViewModel.IsExpanded = false;
-    }
-
-    internal void OnVolumeControlDisabled()
-    {
-        if (volumeMixerWindow?.ViewModel.IsExpanded == true)
-            volumeMixerWindow.ViewModel.IsExpanded = false;
-
-        ReleaseVolumeMixerConsumer(VolumeMixerConsumer.VolumeControl);
-    }
-
     private void CloseTaskbarWindow()
     {
         var window = taskbarWindow;
         taskbarWindow = null;
 
         TaskbarVisualizerControl.StopVisualizer();
-        ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarTooltip);
-        ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarScroll);
 
         if (window == null)
             return;
@@ -657,7 +538,7 @@ public partial class MainWindow : MicaWindow
         if (!reserveNativeVolumeOsdSpace)
             return 16;
 
-        return SettingsManager.Current.VolumeControlEnabled && SettingsManager.Current.VolumeControlAboveMediaFlyout ? 16 : 80;
+        return 80;
     }
 
     private (double left, double top) GetFinalPosition(Rect windowRect, Rect workArea, bool reserveNativeVolumeOsdSpace = false)
@@ -878,9 +759,6 @@ public partial class MainWindow : MicaWindow
         var activeSession = GetActiveMediaSession();
         if (!mediaManager.IsStarted || activeSession?.ControlSession is not { } activeControlSession)
         {
-            ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarTooltip);
-            if (SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 2)
-                ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarScroll);
             taskbarWindow.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
             return;
         }
@@ -1399,13 +1277,6 @@ public partial class MainWindow : MicaWindow
                 if (mediaKeysPressed || (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded && volumeKeysPressed))
                     result = TryShowMediaFlyoutDebounced();
 
-                if (SettingsManager.Current.VolumeControlEnabled)
-                {
-                    var volumeWindow = EnsureVolumeMixerWindow(VolumeMixerConsumer.VolumeControl);
-                    volumeWindow?.ViewModel.SyncMasterFromDevice();
-                    volumeWindow?.ShowFlyout();
-                }
-
                 if (!result)
                 {
                     return CallNextHookEx(_hookId, nCode, wParam, lParam);
@@ -1478,24 +1349,14 @@ public partial class MainWindow : MicaWindow
                 await Task.Delay(100, token); // check if mouse is over every 100ms
 
                 bool mouseOverMedia = WindowHelper.IsMouseOverWindow(this);
-                bool mouseOverVolume = SettingsManager.Current.VolumeControlAboveMediaFlyout
-                    && SettingsManager.Current.VolumeControlEnabled
-                    && volumeMixerWindow != null
-                    && volumeMixerWindow.IsVisible
-                    && WindowHelper.IsMouseOverWindow(volumeMixerWindow); // sync with VolumeMixerWindow
 
-                if (!mouseOverMedia && !mouseOverVolume && !SettingsManager.Current.MediaFlyoutAlwaysDisplay)
+                if (!mouseOverMedia && !SettingsManager.Current.MediaFlyoutAlwaysDisplay)
                 {
                     await Task.Delay(SettingsManager.Current.Duration, token);
 
                     mouseOverMedia = WindowHelper.IsMouseOverWindow(this);
-                    mouseOverVolume = SettingsManager.Current.VolumeControlAboveMediaFlyout
-                        && SettingsManager.Current.VolumeControlEnabled
-                        && volumeMixerWindow != null
-                        && volumeMixerWindow.IsVisible
-                        && WindowHelper.IsMouseOverWindow(volumeMixerWindow);
 
-                    if (!mouseOverMedia && !mouseOverVolume)
+                    if (!mouseOverMedia)
                     {
                         CloseAnimation(this);
                         _isHiding = true;
@@ -2088,10 +1949,6 @@ public partial class MainWindow : MicaWindow
                 CloseNextUpWindow();
 
             CloseTaskbarWindow();
-            CloseVolumeMixerWindow();
-
-            // restore native volume OSD
-            VolumeMixerWindow.ShowVolumeOsd();
 
             // dispose mutex
             singleton?.Dispose();
@@ -2224,8 +2081,6 @@ public partial class MainWindow : MicaWindow
         // keep DPI, work-area, taskbar-parent, or UI Automation state from the old topology.
         if (nextUpWindow != null)
             CloseNextUpWindow();
-
-        RecreateVolumeMixerWindowForDisplay();
 
         RecreateTaskbarWindow();
     }

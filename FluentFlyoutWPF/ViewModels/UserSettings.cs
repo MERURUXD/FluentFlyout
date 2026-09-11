@@ -7,9 +7,7 @@ using FluentFlyout.Classes.Settings;
 using FluentFlyout.Classes.Utils;
 using FluentFlyout.Controls;
 using FluentFlyoutWPF.Classes;
-using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Models;
-using FluentFlyoutWPF.Windows;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Windows;
@@ -256,9 +254,6 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool NextUpAcrylicWindowEnabled { get; set; }
 
-    [ObservableProperty]
-    public partial bool VolumeMixerAcrylicWindowEnabled { get; set; }
-
     /// <summary>
     /// User's preferred app language (e.g., "system" for system default)
     /// </summary>
@@ -395,13 +390,6 @@ public partial class UserSettings : ObservableObject
     public partial bool TaskbarWidgetScrollingEnabled { get; set; }
 
     /// <summary>
-    /// Controls whether scrolling over the taskbar widget adjusts master or player volume.
-    /// 0: Off, 1: Master volume, 2: Player volume
-    /// </summary>
-    [ObservableProperty]
-    public partial int TaskbarWidgetScrollVolumeMode { get; set; }
-
-    /// <summary>
     /// Gets or sets a value indicating whether the taskbar widget scrolling text should loop forever.
     /// </summary>
     [ObservableProperty]
@@ -518,46 +506,6 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool TaskbarVisualizerBaselineAutoHide { get; set; }
 
-    [ObservableProperty]
-    public partial bool VolumeControlEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool VolumeControlAboveMediaFlyout { get; set; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(VolumeControlDurationText))]
-    public partial int VolumeControlDuration { get; set; }
-
-    [XmlIgnore]
-    public string VolumeControlDurationText
-    {
-        get => VolumeControlDuration.ToString();
-        set
-        {
-            if (int.TryParse(value, out var result))
-            {
-                VolumeControlDuration = result switch
-                {
-                    > 10000 => 10000,
-                    < 0 => 0,
-                    _ => result
-                };
-            }
-            else
-            {
-                VolumeControlDuration = 3000;
-            }
-
-            OnPropertyChanged();
-        }
-    }
-
-    [ObservableProperty]
-    public partial bool VolumeMixerEnabled { get; set; }
-
-    [ObservableProperty]
-    public partial bool VolumeMixerHighlightActiveApps { get; set; }
-
     /// <summary>
     /// The audio peak level for the taskbar visualizer from 1 to 3.
     /// This is used to calibrate the visualizer bar height to the audio output.
@@ -664,7 +612,6 @@ public partial class UserSettings : ObservableObject
         FontFamily = "Segoe UI Variable, Microsoft YaHei UI, Yu Gothic UI";
         MediaFlyoutAcrylicWindowEnabled = true;
         NextUpAcrylicWindowEnabled = true;
-        VolumeMixerAcrylicWindowEnabled = true;
         TaskbarWidgetEnabled = false;
         TaskbarWidgetSelectedMonitor = 0;
         TaskbarWidgetPosition = 0;
@@ -678,7 +625,6 @@ public partial class UserSettings : ObservableObject
         TaskbarWidgetControlsPosition = 1;
         TaskbarWidgetAnimated = true;
         TaskbarWidgetScrollingEnabled = false;
-        TaskbarWidgetScrollVolumeMode = 1;
         TaskbarWidgetScrollingTextSpeed = 20;
         TaskbarWidgetScrollingTextLoopForever = false;
         TaskbarVisualizerEnabled = false;
@@ -692,11 +638,6 @@ public partial class UserSettings : ObservableObject
         TaskbarVisualizerAudioSensitivity = 2;
         TaskbarVisualizerAudioPeakLevel = 3;
         TaskbarVisualizerBaselineAutoHide = false;
-        VolumeControlEnabled = false;
-        VolumeControlAboveMediaFlyout = false;
-        VolumeControlDuration = 3000;
-        VolumeMixerEnabled = false;
-        VolumeMixerHighlightActiveApps = false;
         AcrylicBlurOpacity = 175;
         UseAlbumArtAsAccentColor = false;
         LastUpdateNotificationUnixSeconds = 0;
@@ -903,14 +844,6 @@ public partial class UserSettings : ObservableObject
         UpdateTaskbarMarquees();
     }
 
-    partial void OnTaskbarWidgetScrollVolumeModeChanged(int oldValue, int newValue)
-    {
-        if (oldValue == newValue || _initializing) return;
-
-        if (newValue == 0 && Application.Current?.MainWindow is MainWindow mainWindow)
-            mainWindow.ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarScroll);
-    }
-
     private void UpdateTaskbarMarquees()
     {
         MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
@@ -974,37 +907,6 @@ public partial class UserSettings : ObservableObject
 
         MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
         mainWindow?.RefreshFilteredMedia();
-    }
-
-    partial void OnVolumeMixerHighlightActiveAppsChanged(bool oldValue, bool newValue)
-    {
-        if (oldValue == newValue || _initializing) return;
-
-        // Check premium status before allowing highlight to be enabled
-        if (newValue && !SettingsManager.Current.IsPremiumUnlocked)
-        {
-            VolumeMixerHighlightActiveApps = false;
-            return;
-        }
-    }
-
-    partial void OnVolumeControlEnabledChanged(bool oldValue, bool newValue)
-    {
-        if (newValue == true || oldValue == newValue || _initializing) return;
-
-        if (Application.Current?.MainWindow is MainWindow mainWindow)
-            mainWindow.OnVolumeControlDisabled();
-
-        // re-enable native volume flyout
-        VolumeMixerWindow.ShowVolumeOsd();
-    }
-
-    partial void OnVolumeMixerEnabledChanged(bool oldValue, bool newValue)
-    {
-        if (oldValue == newValue || _initializing) return;
-
-        if (Application.Current?.MainWindow is MainWindow mainWindow)
-            mainWindow.OnVolumeMixerEnabledChanged(newValue);
     }
 
     partial void OnSeekbarEnabledChanged(bool oldValue, bool newValue)
