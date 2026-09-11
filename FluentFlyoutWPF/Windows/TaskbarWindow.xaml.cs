@@ -776,14 +776,6 @@ on_error:
         });
     }
 
-    public void RefreshAppVolumeTooltip()
-    {
-        if (_isClosing)
-            return;
-
-        Widget.RefreshAppVolumeTooltip();
-    }
-
     private (bool, Rect) GetTaskbarXamlElementRect(IntPtr taskbarHandle, ref AutomationElement? elementCache, string elementName)
     {
         if (taskbarHandle == IntPtr.Zero)

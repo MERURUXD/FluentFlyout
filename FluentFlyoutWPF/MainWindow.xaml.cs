@@ -472,53 +472,6 @@ public partial class MainWindow : MicaWindow
         }
     }
 
-    public float? GetActiveMediaAppVolume()
-    {
-        if (!ShouldHaveTaskbarWindow || GetActiveMediaSession() is not { } activeSession)
-        {
-            ReleaseVolumeMixerConsumer(VolumeMixerConsumer.TaskbarTooltip);
-            return null;
-        }
-
-        if (EnsureVolumeMixerWindow(VolumeMixerConsumer.TaskbarTooltip)?.ViewModel is not { } volumeMixerViewModel)
-            return null;
-
-        int? processId = MediaPlayerData.GetAndCacheProcessId(activeSession.Id);
-        return processId.HasValue
-            ? volumeMixerViewModel.Sessions.FirstOrDefault(session => session.ProcessId == processId.Value)?.Volume
-            : null;
-    }
-
-    public void AdjustTaskbarVolume(float delta)
-    {
-        if (!ShouldHaveTaskbarWindow
-            || SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 0
-            || (SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 2 && GetActiveMediaSession() is null)
-            || EnsureVolumeMixerWindow(VolumeMixerConsumer.TaskbarScroll)?.ViewModel is not { } volumeMixerViewModel)
-            return;
-
-        switch (SettingsManager.Current.TaskbarWidgetScrollVolumeMode)
-        {
-            // 0 = disabled, 1 = master volume, 2 = active media session
-            case 1:
-                bool success = volumeMixerViewModel.TryAdjustMasterVolume(delta);
-
-                if (success && SettingsManager.Current.VolumeControlEnabled)
-                    volumeMixerWindow?.ShowFlyout();
-                break;
-
-            case 2:
-                if (GetActiveMediaSession() is not { } activeSession) return;
-
-                int? processId = MediaPlayerData.GetAndCacheProcessId(activeSession.Id);
-                if (processId.HasValue)
-                {
-                    volumeMixerViewModel.TryAdjustSessionVolume(processId.Value, delta);
-                }
-                break;
-        }
-    }
-
     private void CloseNextUpWindow(bool resetCurrentTitle = false)
     {
         var window = nextUpWindow;
@@ -1043,27 +996,6 @@ public partial class MainWindow : MicaWindow
         {
             UpdateUI(expectedSession);
             HandlePlayBackState(controlSession.GetPlaybackInfo()?.PlaybackStatus);
-        }
-    }
-
-    internal void RefreshTaskbarVolumeTooltip()
-    {
-        if (!Dispatcher.CheckAccess())
-        {
-            Dispatcher.BeginInvoke(RefreshTaskbarVolumeTooltip, DispatcherPriority.Background);
-            return;
-        }
-
-        if (!ShouldHaveTaskbarWindow || taskbarWindow?.IsClosing != false)
-            return;
-
-        try
-        {
-            taskbarWindow.RefreshAppVolumeTooltip();
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to refresh the taskbar volume tooltip");
         }
     }
 

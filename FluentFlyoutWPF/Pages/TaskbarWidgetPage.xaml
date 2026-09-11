@@ -197,23 +197,6 @@
                 </ComboBox>
             </ui:CardControl>
 
-            <ui:CardControl x:Name="TaskbarWidgetScrollVolumeTitleCard" Tag="Indexable" Grid.Row="15" Icon="{ui:SymbolIcon Speaker224}" Margin="0,0,0,3">
-                <ui:CardControl.Header>
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{DynamicResource TaskbarWidgetScrollVolumeTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
-                            <ui:InfoBadge Value=" NEW " FontWeight="Medium" FontSize="10" Margin="6,-2,0,-2" Severity="Success" />
-                        </StackPanel>
-                        <TextBlock Text="{DynamicResource TaskbarWidgetScrollVolumeDescription}" FontSize="12" Opacity="0.5" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ComboBox SelectedIndex="{Binding TaskbarWidgetScrollVolumeMode}" IsEnabled="{Binding IsPremiumUnlocked}" Style="{StaticResource DefaultComboBoxStyle}">
-                    <ComboBoxItem Content="{DynamicResource AnimationSpeedOff}" />
-                    <ComboBoxItem Content="{DynamicResource TaskbarWidgetScrollVolumeMaster}" />
-                    <ComboBoxItem Content="{DynamicResource TaskbarWidgetScrollVolumePlayer}" />
-                </ComboBox>
-            </ui:CardControl>
-
             <ui:CardExpander x:Name="TaskbarWidgetScrollingTextCard" Tag="Indexable" Grid.Row="14" Icon="{ui:SymbolIcon TextDirectionHorizontalRight24}" ContentPadding="0" Margin="0,0,0,12">
                 <ui:CardExpander.Header>
                     <Grid ColumnDefinitions="*, Auto">

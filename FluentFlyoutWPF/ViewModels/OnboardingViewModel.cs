@@ -52,12 +52,6 @@ public class OnboardingViewModel : ObservableObject
             Description = Application.Current.TryFindResource("MediaFlyoutDescription").ToString(),
             ImageSource = "/Resources/Onboarding/MediaFlyout.png"
         },
-        new OnboardingStep
-        {
-            Title = Application.Current.TryFindResource("VolumeFlyoutTitle").ToString(),
-            Description = Application.Current.TryFindResource("VolumeFlyoutDescription").ToString(),
-            ImageSource = "/Resources/FluentFlyoutVolumeDemo.png"
-        },
     ];
 
     public int CurrentStepIndex
@@ -72,7 +66,6 @@ public class OnboardingViewModel : ObservableObject
                 OnPropertyChanged(nameof(NextButtonText));
                 OnPropertyChanged(nameof(IsLastStep));
                 OnPropertyChanged(nameof(IsMediaStep));
-                OnPropertyChanged(nameof(IsVolumeStep));
                 OnPropertyChanged(nameof(CanGoBack));
                 GoBackCommand.NotifyCanExecuteChanged();
             }
@@ -88,8 +81,6 @@ public class OnboardingViewModel : ObservableObject
     public bool IsLastStep => CurrentStepIndex >= Steps.Count - 1;
 
     public bool IsMediaStep => CurrentStepIndex == 0;
-
-    public bool IsVolumeStep => CurrentStepIndex == 1;
 
     public bool CanGoBack => CurrentStepIndex > 0;
 

@@ -58,7 +58,6 @@ public partial class VolumeMixerWindow : MicaWindow
         _normalWidth = Width;
 
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
-        ViewModel.SessionVolumeChanged += OnSessionVolumeChanged;
     }
 
     // one day we might want to convert these to an interface
@@ -190,11 +189,6 @@ public partial class VolumeMixerWindow : MicaWindow
         }
     }
 
-    private void OnSessionVolumeChanged(object? sender, EventArgs e)
-    {
-        _mainWindow.RefreshTaskbarVolumeTooltip();
-    }
-
     internal void DisposeResources()
     {
         if (_resourcesDisposed)
@@ -204,7 +198,6 @@ public partial class VolumeMixerWindow : MicaWindow
         _cts.Cancel();
         _cts.Dispose();
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
-        ViewModel.SessionVolumeChanged -= OnSessionVolumeChanged;
         ViewModel.Dispose();
     }
 

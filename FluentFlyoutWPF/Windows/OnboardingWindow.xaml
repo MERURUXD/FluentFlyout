@@ -123,23 +123,6 @@
                                     -->
                                 </StackPanel>
 
-                                <StackPanel Visibility="{Binding IsVolumeStep, Converter={StaticResource BoolToVisibleCollapsedConverter}}">
-                                    <TextBlock Text="{DynamicResource EnableVolumeFlyoutTitle}" FontSize="14" FontWeight="SemiBold" />
-                                    <TextBlock Text="{DynamicResource EnableVolumeFlyoutDescription}" Margin="0,4,0,0" FontSize="12" Opacity="0.75" TextWrapping="Wrap" />
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <ui:ToggleSwitch IsChecked="{Binding Settings.VolumeControlEnabled, Mode=TwoWay}" VerticalAlignment="Center" />
-                                        <TextBlock Margin="8,0,0,0" Text="{Binding Settings.VolumeControlEnabled, Converter={StaticResource BoolToEnabledDisabledConverter}}" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                    <StackPanel Opacity="{Binding Settings.VolumeControlEnabled, Converter={StaticResource BoolToFullHalfOpacityConverter}}">
-                                        <TextBlock Text="{DynamicResource VolumeMixerSectionTitle}" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,0" />
-                                        <TextBlock Text="{DynamicResource EnableVolumeMixerDescription}" Margin="0,4,0,0" FontSize="12" Opacity="0.75" TextWrapping="Wrap" />
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <ui:ToggleSwitch IsChecked="{Binding Settings.VolumeMixerEnabled, Mode=TwoWay}" VerticalAlignment="Center" IsEnabled="{Binding Settings.VolumeControlEnabled}" />
-                                            <TextBlock Margin="8,0,0,0" Text="{Binding Settings.VolumeMixerEnabled, Converter={StaticResource BoolToEnabledDisabledConverter}}" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                </StackPanel>
-
                             </StackPanel>
                         </ui:PassiveScrollViewer>
                     </Grid>
