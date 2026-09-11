@@ -155,7 +155,7 @@ Builds and focused tests do not prove GUI, audio, media-session, migration,
 coexistence, network-capture, signing, Store, or release behavior. Those claims
 require the controlled Windows validation described by
 [`06-windows-validation.md`](remediation-prompts/06-windows-validation.md) and
-the resulting evidence report, if one is available.
+the [current validation report](windows-validation.md).
 
 ## Upstream conflict hotspots
 
