@@ -23,7 +23,7 @@ namespace FluentFlyoutWPF.Classes
         // Keep at 2: only an exact 2:1 minification turns WPF's default Linear
         // filter into a true box average. Other factors discard the supersampling.
         private const int Supersample = 2;
-        private const int RibbonSpectrumPointCount = 5;
+        private const int RibbonSpectrumPointCount = 7;
         private readonly int ImageWidth = 76 * Supersample;
         private readonly int ImageHeight = 32 * Supersample;
         private readonly int BarSpacing = 2 * Supersample;

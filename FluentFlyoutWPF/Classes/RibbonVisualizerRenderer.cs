@@ -8,8 +8,9 @@ namespace FluentFlyoutWPF.Classes;
 internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
 {
     private const int RibbonCount = 3;
-    private const int ControlPointCount = 5;
+    private const int ControlPointCount = 7;
     private const byte BaseAlpha = 80;
+    private const float TwoPi = 2f * MathF.PI;
 
     private static readonly Color[] RibbonColors =
     [
@@ -18,10 +19,14 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         Color.FromRgb(168, 85, 247)
     ];
 
-    private static readonly float[] SourceOffsets = [-0.055f, 0f, 0.055f];
-    private static readonly float[] PhaseOffsets = [0f, 1.7f, 3.4f];
-    private static readonly float[] PhaseSpeeds = [0.48f, 0.38f, 0.56f];
-    private static readonly float[] HeightScales = [0.31f, 0.28f, 0.30f];
+    private static readonly float[] SpectrumOffsets = [-0.10f, 0f, 0.10f];
+    private static readonly float[] PhaseOffsets = [0f, 2.0943952f, 4.1887903f];
+    private static readonly float[] PhaseSpeeds = [0.18f, 0.24f, 0.14f];
+    private static readonly float[] WaveCycles = [2.05f, 2.55f, 3.05f];
+    private static readonly float[] LayerBiases = [-0.04f, 0f, 0.04f];
+    private static readonly float[] DisplacementScales = [0.16f, 0.145f, 0.155f];
+    private static readonly float[] BaseThicknessScales = [0.017f, 0.018f, 0.017f];
+    private static readonly float[] AudioThicknessScales = [0.010f, 0.011f, 0.010f];
 
     public void Render(
         Span<byte> buffer,
@@ -31,14 +36,14 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         ReadOnlySpan<float> amplitudes,
         in VisualizerRenderOptions options)
     {
-        if (imageWidth <= 0 || imageHeight <= 0 || amplitudes.Length == 0)
+        if (imageWidth <= 0 || imageHeight <= 0 || amplitudes.Length == 0 || !HasAudio(amplitudes))
             return;
 
         Span<float> controlPoints = stackalloc float[ControlPointCount];
 
         for (int ribbon = 0; ribbon < RibbonCount; ribbon++)
         {
-            BuildControlPoints(amplitudes, controlPoints, ribbon, options.ElapsedSeconds);
+            BuildAudioControlPoints(amplitudes, controlPoints, ribbon);
             DrawRibbon(
                 buffer,
                 stride,
@@ -46,30 +51,20 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
                 imageHeight,
                 controlPoints,
                 RibbonColors[ribbon],
-                HeightScales[ribbon]);
+                ribbon,
+                options.ElapsedSeconds);
         }
     }
 
-    private static void BuildControlPoints(
+    private static void BuildAudioControlPoints(
         ReadOnlySpan<float> amplitudes,
         Span<float> controlPoints,
-        int ribbon,
-        double elapsedSeconds)
+        int ribbon)
     {
         for (int point = 0; point < ControlPointCount; point++)
         {
-            float normalizedPosition = point / (ControlPointCount - 1f) + SourceOffsets[ribbon];
-            float audioAmplitude = SampleSpectrum(amplitudes, normalizedPosition);
-
-            float phase = (float)(elapsedSeconds * PhaseSpeeds[ribbon])
-                + PhaseOffsets[ribbon]
-                + point * 0.85f;
-            float proceduralMotion = 0.5f + 0.5f * MathF.Sin(phase);
-
-            // Keep the procedural part subordinate to audio and unable to create
-            // a visible waveform by itself during silence.
-            controlPoints[point] = ClampUnit(
-                (audioAmplitude * 0.80f) + (audioAmplitude * 0.20f * proceduralMotion));
+            float normalizedPosition = point / (ControlPointCount - 1f) + SpectrumOffsets[ribbon];
+            controlPoints[point] = SampleSpectrum(amplitudes, normalizedPosition);
         }
     }
 
@@ -80,23 +75,16 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         int imageHeight,
         ReadOnlySpan<float> controlPoints,
         Color color,
-        float heightScale)
+        int ribbon,
+        double elapsedSeconds)
     {
-        float centerY = imageHeight * 0.5f;
-
         for (int x = 0; x < imageWidth; x++)
         {
             float normalizedX = imageWidth == 1 ? 0f : x / (imageWidth - 1f);
-            float envelope = MathF.Sin(MathF.PI * normalizedX);
-            envelope *= envelope;
-            float amplitude = ClampUnit(SampleSmoothCurve(controlPoints, normalizedX) * envelope);
-            float halfHeight = amplitude * imageHeight * heightScale;
-
-            if (halfHeight <= 0f)
-                continue;
-
-            float top = centerY - halfHeight;
-            float bottom = centerY + halfHeight;
+            float centerY = SampleCenterline(controlPoints, normalizedX, ribbon, imageHeight, elapsedSeconds);
+            float halfThickness = SampleHalfThickness(controlPoints, normalizedX, ribbon, imageHeight);
+            float top = centerY - halfThickness;
+            float bottom = centerY + halfThickness;
             int firstY = Math.Max(0, (int)MathF.Floor(top));
             int endY = Math.Min(imageHeight, (int)MathF.Ceiling(bottom));
 
@@ -114,6 +102,49 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
                 BlendPixel(buffer, index, color, alpha);
             }
         }
+    }
+
+    internal static float SampleCenterline(
+        ReadOnlySpan<float> controlPoints,
+        float normalizedX,
+        int ribbon,
+        int imageHeight,
+        double elapsedSeconds)
+    {
+        int ribbonIndex = NormalizeRibbonIndex(ribbon);
+        float audioAmplitude = ClampUnit(SampleSmoothCurve(controlPoints, normalizedX));
+        float phase = TwoPi * ((WaveCycles[ribbonIndex] * ClampUnit(normalizedX))
+            - (PhaseSpeeds[ribbonIndex] * (float)elapsedSeconds))
+            + PhaseOffsets[ribbonIndex];
+        float wave = MathF.Sin(phase);
+        float audioInfluence = 0.55f + (0.45f * audioAmplitude);
+
+        return (imageHeight * 0.5f)
+            + (LayerBiases[ribbonIndex] * imageHeight)
+            + (wave
+                * imageHeight
+                * DisplacementScales[ribbonIndex]
+                * SampleEdgeEnvelope(normalizedX)
+                * audioInfluence);
+    }
+
+    internal static float SampleHalfThickness(
+        ReadOnlySpan<float> controlPoints,
+        float normalizedX,
+        int ribbon,
+        int imageHeight)
+    {
+        int ribbonIndex = NormalizeRibbonIndex(ribbon);
+        float audioAmplitude = ClampUnit(SampleSmoothCurve(controlPoints, normalizedX));
+
+        return imageHeight * (BaseThicknessScales[ribbonIndex]
+            + (audioAmplitude * AudioThicknessScales[ribbonIndex]));
+    }
+
+    internal static float SampleEdgeEnvelope(float normalizedX)
+    {
+        normalizedX = ClampUnit(normalizedX);
+        return 0.65f + (0.35f * MathF.Sin(MathF.PI * normalizedX));
     }
 
     internal static float SampleSpectrum(ReadOnlySpan<float> amplitudes, float normalizedX)
@@ -167,6 +198,22 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
             return 0f;
 
         return Math.Clamp(value, 0f, 1f);
+    }
+
+    private static bool HasAudio(ReadOnlySpan<float> amplitudes)
+    {
+        for (int i = 0; i < amplitudes.Length; i++)
+        {
+            if (amplitudes[i] > 0.001f)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static int NormalizeRibbonIndex(int ribbon)
+    {
+        return Math.Clamp(ribbon, 0, RibbonCount - 1);
     }
 
     private static void BlendPixel(Span<byte> buffer, int index, Color color, byte alpha)

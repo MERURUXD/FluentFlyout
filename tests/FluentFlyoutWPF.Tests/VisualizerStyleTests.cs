@@ -79,61 +79,104 @@ public sealed class VisualizerStyleTests
     {
         const int width = 152;
         const int height = 64;
-        byte[] buffer = new byte[width * height * 4];
-        var options = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 12.5);
-
-        new RibbonVisualizerRenderer().Render(buffer, width * 4, width, height, new float[10], in options);
-
-        Assert.All(buffer, value => Assert.Equal(0, value));
-    }
-
-    [Fact]
-    public void RibbonFrameIsFilledAtCenterAndTapersAtEdges()
-    {
-        const int width = 152;
-        const int height = 64;
-        byte[] buffer = new byte[width * height * 4];
-        var options = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 0);
-
-        new RibbonVisualizerRenderer().Render(buffer, width * 4, width, height, new float[10].Select(_ => 1f).ToArray(), in options);
-
-        Assert.Equal(0, buffer[3]);
-        Assert.Equal(0, buffer[(width - 1) * 4 + 3]);
-        Assert.True(buffer[(width / 2) * 4 + (height / 2) * width * 4 + 3] > 0);
-    }
-
-    [Fact]
-    public void RibbonFrameIsMirroredAndPhaseChangesOnlyTheAudioShape()
-    {
-        const int width = 152;
-        const int height = 64;
-        float[] amplitudes = [0.1f, 0.8f, 0.2f, 0.7f, 0.1f];
         byte[] firstFrame = new byte[width * height * 4];
         byte[] secondFrame = new byte[width * height * 4];
-        var firstOptions = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 0);
-        var secondOptions = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 6);
+        var options = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 12.5);
+        var laterOptions = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 32.5);
         var renderer = new RibbonVisualizerRenderer();
 
-        renderer.Render(firstFrame, width * 4, width, height, amplitudes, in firstOptions);
-        renderer.Render(secondFrame, width * 4, width, height, amplitudes, in secondOptions);
+        renderer.Render(firstFrame, width * 4, width, height, new float[7], in options);
+        renderer.Render(secondFrame, width * 4, width, height, new float[7], in laterOptions);
 
-        bool phaseChangedFrame = false;
-        for (int y = 0; y < height; y++)
+        Assert.All(firstFrame, value => Assert.Equal(0, value));
+        Assert.All(secondFrame, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public void RibbonGeometryUsesSignedCenterlineAndThinThickness()
+    {
+        const int width = 152;
+        const int height = 64;
+        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
+        float centerY = height * 0.5f;
+        float[] centerline = Enumerable.Range(0, width)
+            .Select(x => RibbonVisualizerRenderer.SampleCenterline(amplitudes, x / (width - 1f), 0, height, 0.37))
+            .ToArray();
+
+        Assert.Contains(centerline, value => value < centerY - 1f);
+        Assert.Contains(centerline, value => value > centerY + 1f);
+
+        float halfThickness = RibbonVisualizerRenderer.SampleHalfThickness(amplitudes, 0.5f, 0, height);
+        Assert.InRange(halfThickness, 1f, 2f);
+    }
+
+    [Fact]
+    public void RibbonCenterlineContainsAtLeastTwoWaveCycles()
+    {
+        const int width = 152;
+        const int height = 64;
+        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
+        float[] centerline = Enumerable.Range(0, width)
+            .Select(x => RibbonVisualizerRenderer.SampleCenterline(amplitudes, x / (width - 1f), 0, height, 0.37))
+            .ToArray();
+        int directionChanges = 0;
+        int previousDirection = 0;
+
+        for (int i = 1; i < centerline.Length; i++)
         {
-            for (int x = 0; x < width; x++)
-            {
-                int index = (y * width + x) * 4;
-                int mirroredIndex = ((height - 1 - y) * width + x) * 4;
+            float delta = centerline[i] - centerline[i - 1];
+            if (MathF.Abs(delta) < 0.02f)
+                continue;
 
-                Assert.Equal(firstFrame[index + 3], firstFrame[mirroredIndex + 3]);
-                if (firstFrame[index] != secondFrame[index]
-                    || firstFrame[index + 1] != secondFrame[index + 1]
-                    || firstFrame[index + 2] != secondFrame[index + 2]
-                    || firstFrame[index + 3] != secondFrame[index + 3])
-                    phaseChangedFrame = true;
-            }
+            int direction = delta > 0f ? 1 : -1;
+            if (previousDirection != 0 && direction != previousDirection)
+                directionChanges++;
+
+            previousDirection = direction;
         }
 
-        Assert.True(phaseChangedFrame);
+        Assert.True(directionChanges >= 3);
+    }
+
+    [Fact]
+    public void RibbonLayersAreSeparatedAndFlowHorizontally()
+    {
+        const int height = 64;
+        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
+        float[] firstTime = Enumerable.Range(0, 3)
+            .Select(ribbon => RibbonVisualizerRenderer.SampleCenterline(amplitudes, 0.37f, ribbon, height, 0.25))
+            .ToArray();
+        float[] secondTime = Enumerable.Range(0, 3)
+            .Select(ribbon => RibbonVisualizerRenderer.SampleCenterline(amplitudes, 0.37f, ribbon, height, 1.5))
+            .ToArray();
+
+        Assert.True(firstTime.Max() - firstTime.Min() > 1f);
+        Assert.Contains(firstTime.Zip(secondTime), pair => MathF.Abs(pair.First - pair.Second) > 0.5f);
+    }
+
+    [Fact]
+    public void RibbonFftAmplitudeModulatesNearbyGeometry()
+    {
+        const int height = 64;
+        float[] quietSpectrum = [0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f];
+        float[] localPeakSpectrum = [0.1f, 0.1f, 0.1f, 1f, 0.1f, 0.1f, 0.1f];
+
+        float localDelta = MathF.Abs(
+            RibbonVisualizerRenderer.SampleHalfThickness(localPeakSpectrum, 0.5f, 1, height)
+            - RibbonVisualizerRenderer.SampleHalfThickness(quietSpectrum, 0.5f, 1, height));
+        float distantDelta = MathF.Abs(
+            RibbonVisualizerRenderer.SampleHalfThickness(localPeakSpectrum, 0.02f, 1, height)
+            - RibbonVisualizerRenderer.SampleHalfThickness(quietSpectrum, 0.02f, 1, height));
+
+        Assert.True(localDelta > 0.3f);
+        Assert.True(localDelta > distantDelta + 0.1f);
+    }
+
+    [Fact]
+    public void RibbonEdgeEnvelopeRemainsGentle()
+    {
+        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(0f), 0.64f, 0.66f);
+        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(1f), 0.64f, 0.66f);
+        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(0.5f), 0.99f, 1f);
     }
 }
