@@ -107,7 +107,7 @@ public sealed class VisualizerStyleTests
         Assert.Contains(centerline, value => value > centerY + 1f);
 
         float halfThickness = RibbonVisualizerRenderer.SampleHalfThickness(amplitudes, 0.5f, 0, height);
-        Assert.InRange(halfThickness, 1f, 2f);
+        Assert.InRange(halfThickness, 1.5f, 3f);
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public sealed class VisualizerStyleTests
     }
 
     [Fact]
-    public void RibbonLayersAreSeparatedAndFlowHorizontally()
+    public void RibbonLayersRemainRelatedAndMotionIsLocal()
     {
         const int height = 64;
         float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
@@ -150,8 +150,46 @@ public sealed class VisualizerStyleTests
             .Select(ribbon => RibbonVisualizerRenderer.SampleCenterline(amplitudes, 0.37f, ribbon, height, 1.5))
             .ToArray();
 
-        Assert.True(firstTime.Max() - firstTime.Min() > 1f);
-        Assert.Contains(firstTime.Zip(secondTime), pair => MathF.Abs(pair.First - pair.Second) > 0.5f);
+        Assert.True(firstTime.Max() - firstTime.Min() > 0.25f);
+        Assert.All(firstTime.Zip(secondTime), pair => Assert.InRange(MathF.Abs(pair.First - pair.Second), 0f, 1.5f));
+    }
+
+    [Fact]
+    public void RibbonRendersAThickFilledFootprintAroundTheAnchoredCenterline()
+    {
+        const int width = 152;
+        const int height = 64;
+        byte[] buffer = new byte[width * height * 4];
+        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
+        var options = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 0.37);
+
+        new RibbonVisualizerRenderer().Render(buffer, width * 4, width, height, amplitudes, in options);
+
+        int columnsWithMultiplePixels = 0;
+        bool hasUpperFootprint = false;
+        bool hasLowerFootprint = false;
+
+        for (int x = 0; x < width; x++)
+        {
+            int pixelsInColumn = 0;
+            for (int y = 0; y < height; y++)
+            {
+                int index = (y * width + x) * 4;
+                if (buffer[index + 3] == 0)
+                    continue;
+
+                pixelsInColumn++;
+                hasUpperFootprint |= y < (height / 2) - 2;
+                hasLowerFootprint |= y > (height / 2) + 2;
+            }
+
+            if (pixelsInColumn >= 3)
+                columnsWithMultiplePixels++;
+        }
+
+        Assert.True(columnsWithMultiplePixels > width / 2);
+        Assert.True(hasUpperFootprint);
+        Assert.True(hasLowerFootprint);
     }
 
     [Fact]

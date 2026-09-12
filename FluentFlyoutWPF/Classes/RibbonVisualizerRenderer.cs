@@ -19,14 +19,14 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         Color.FromRgb(168, 85, 247)
     ];
 
-    private static readonly float[] SpectrumOffsets = [-0.10f, 0f, 0.10f];
-    private static readonly float[] PhaseOffsets = [0f, 2.0943952f, 4.1887903f];
-    private static readonly float[] PhaseSpeeds = [0.18f, 0.24f, 0.14f];
-    private static readonly float[] WaveCycles = [2.05f, 2.55f, 3.05f];
-    private static readonly float[] LayerBiases = [-0.04f, 0f, 0.04f];
-    private static readonly float[] DisplacementScales = [0.16f, 0.145f, 0.155f];
-    private static readonly float[] BaseThicknessScales = [0.017f, 0.018f, 0.017f];
-    private static readonly float[] AudioThicknessScales = [0.010f, 0.011f, 0.010f];
+    private static readonly float[] SpectrumOffsets = [-0.08f, 0f, 0.08f];
+    private static readonly float[] PhaseOffsets = [-0.12f, 0f, 0.12f];
+    private static readonly float[] LocalMotionSpeeds = [0.34f, 0.28f, 0.40f];
+    private static readonly float[] WaveCycles = [1.95f, 2.05f, 2.15f];
+    private static readonly float[] LayerBiases = [-0.035f, 0f, 0.035f];
+    private static readonly float[] DisplacementScales = [0.12f, 0.13f, 0.12f];
+    private static readonly float[] BaseThicknessScales = [0.022f, 0.024f, 0.022f];
+    private static readonly float[] AudioThicknessScales = [0.018f, 0.016f, 0.018f];
 
     public void Render(
         Span<byte> buffer,
@@ -112,20 +112,24 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         double elapsedSeconds)
     {
         int ribbonIndex = NormalizeRibbonIndex(ribbon);
+        normalizedX = ClampUnit(normalizedX);
         float audioAmplitude = ClampUnit(SampleSmoothCurve(controlPoints, normalizedX));
-        float phase = TwoPi * ((WaveCycles[ribbonIndex] * ClampUnit(normalizedX))
-            - (PhaseSpeeds[ribbonIndex] * (float)elapsedSeconds))
-            + PhaseOffsets[ribbonIndex];
-        float wave = MathF.Sin(phase);
-        float audioInfluence = 0.55f + (0.45f * audioAmplitude);
+        float anchoredPhase = (TwoPi * WaveCycles[ribbonIndex] * normalizedX) + PhaseOffsets[ribbonIndex];
+        float anchoredShape = MathF.Sin(anchoredPhase);
+        float localMotionPhase = (TwoPi * LocalMotionSpeeds[ribbonIndex] * (float)elapsedSeconds)
+            + (TwoPi * 1.15f * normalizedX)
+            + (ribbonIndex * 0.7f);
+        float localMotion = 1f + (0.08f * MathF.Sin(localMotionPhase));
+        float audioInfluence = 0.30f + (0.70f * audioAmplitude);
 
         return (imageHeight * 0.5f)
             + (LayerBiases[ribbonIndex] * imageHeight)
-            + (wave
+            + (anchoredShape
+                * localMotion
+                * audioInfluence
                 * imageHeight
                 * DisplacementScales[ribbonIndex]
-                * SampleEdgeEnvelope(normalizedX)
-                * audioInfluence);
+                * SampleEdgeEnvelope(normalizedX));
     }
 
     internal static float SampleHalfThickness(
