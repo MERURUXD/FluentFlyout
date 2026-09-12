@@ -63,17 +63,6 @@ public sealed class VisualizerStyleTests
         Assert.Equal((VisualizerRenderStyle)expected, Visualizer.ResolveVisualizerStyle(persistedValue));
     }
 
-    [Theory]
-    [InlineData(0f, 0f)]
-    [InlineData(0.5f, 0.5f)]
-    [InlineData(1f, 1f)]
-    [InlineData(-1f, 0f)]
-    [InlineData(2f, 1f)]
-    public void SpectrumSamplingInterpolatesAndClamps(float normalizedX, float expected)
-    {
-        Assert.Equal(expected, RibbonVisualizerRenderer.SampleSpectrum([0f, 0.5f, 1f], normalizedX), precision: 5);
-    }
-
     [Fact]
     public void SilentRibbonFrameDoesNotCreateProceduralPixels()
     {
@@ -93,43 +82,36 @@ public sealed class VisualizerStyleTests
     }
 
     [Fact]
-    public void RibbonGeometryUsesFixedCenterlineAndFilledThickness()
+    public void RibbonUsesOnlyGlobalAudioAmplitude()
     {
-        const int height = 64;
-        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
-        float halfHeight = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.5f, 1, height);
-        float repeatedHalfHeight = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.5f, 1, height);
-
-        Assert.Equal(halfHeight, repeatedHalfHeight);
-        Assert.InRange(halfHeight, 7f, 12f);
+        Assert.Equal(1f, RibbonVisualizerRenderer.ComputeGlobalAmplitude([1f, 0f, 0f, 0f, 0f, 0f, 0f]));
+        Assert.Equal(1f, RibbonVisualizerRenderer.ComputeGlobalAmplitude([0f, 0f, 0f, 0f, 0f, 0f, 1f]));
+        Assert.Equal(0f, RibbonVisualizerRenderer.ComputeGlobalAmplitude(new float[7]));
+        Assert.Equal(0f, RibbonVisualizerRenderer.ComputeGlobalAmplitude([float.NaN, float.PositiveInfinity]));
     }
 
     [Fact]
-    public void RibbonHalfHeightContainsThreeFixedLobes()
+    public void GlobalAttenuationMatchesIos9Reference()
     {
-        const int height = 64;
-        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
-        float leftLobe = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.18f, 1, height);
-        float centerLobe = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.50f, 1, height);
-        float rightLobe = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.82f, 1, height);
-        float leftValley = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.34f, 1, height);
-        float rightValley = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.66f, 1, height);
-
-        Assert.True(leftLobe > leftValley + 1f);
-        Assert.True(centerLobe > leftValley + 1f);
-        Assert.True(rightLobe > rightValley + 1f);
+        Assert.Equal(1f, RibbonVisualizerRenderer.GlobalAttenuation(0f), precision: 5);
+        Assert.Equal(0.4096f, RibbonVisualizerRenderer.GlobalAttenuation(1f), precision: 5);
+        Assert.Equal(0.0625f, RibbonVisualizerRenderer.GlobalAttenuation(2f), precision: 5);
     }
 
     [Fact]
-    public void RibbonRendersAThickFilledFootprintAroundTheFixedCenterline()
+    public void RibbonRendersAThickMirroredFilledFootprint()
     {
         const int width = 152;
         const int height = 64;
         byte[] buffer = new byte[width * height * 4];
         float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
-        var options = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 0.37);
-
-        new RibbonVisualizerRenderer().Render(buffer, width * 4, width, height, amplitudes, in options);
+        var renderer = new RibbonVisualizerRenderer();
+        for (int frame = 0; frame <= 60; frame++)
+        {
+            Array.Clear(buffer);
+            var options = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, frame / 30d);
+            renderer.Render(buffer, width * 4, width, height, amplitudes, in options);
+        }
 
         int columnsWithMultiplePixels = 0;
         bool hasUpperFootprint = false;
@@ -153,52 +135,30 @@ public sealed class VisualizerStyleTests
                 columnsWithMultiplePixels++;
         }
 
-        Assert.True(columnsWithMultiplePixels > width / 2);
+        Assert.True(columnsWithMultiplePixels > width / 8);
         Assert.True(hasUpperFootprint);
         Assert.True(hasLowerFootprint);
     }
 
     [Fact]
-    public void RibbonFrameDoesNotChangeWithElapsedTime()
+    public void RibbonAnimationChangesIndependentLayerState()
     {
         const int width = 152;
         const int height = 64;
         byte[] firstFrame = new byte[width * height * 4];
         byte[] secondFrame = new byte[width * height * 4];
         float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
-        var firstOptions = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 0);
-        var secondOptions = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 12.5);
-
         var renderer = new RibbonVisualizerRenderer();
-        renderer.Render(firstFrame, width * 4, width, height, amplitudes, in firstOptions);
-        renderer.Render(secondFrame, width * 4, width, height, amplitudes, in secondOptions);
+        for (int frame = 0; frame <= 60; frame++)
+        {
+            Array.Clear(firstFrame);
+            var options = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, frame / 30d);
+            renderer.Render(firstFrame, width * 4, width, height, amplitudes, in options);
+        }
 
-        Assert.Equal(firstFrame, secondFrame);
-    }
+        var laterOptions = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 2.5);
+        renderer.Render(secondFrame, width * 4, width, height, amplitudes, in laterOptions);
 
-    [Fact]
-    public void RibbonFftAmplitudeModulatesNearbyGeometry()
-    {
-        const int height = 64;
-        float[] quietSpectrum = [0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f];
-        float[] localPeakSpectrum = [0.1f, 0.1f, 0.1f, 1f, 0.1f, 0.1f, 0.1f];
-
-        float localDelta = MathF.Abs(
-            RibbonVisualizerRenderer.SampleHalfHeight(localPeakSpectrum, 0.5f, 1, height)
-            - RibbonVisualizerRenderer.SampleHalfHeight(quietSpectrum, 0.5f, 1, height));
-        float distantDelta = MathF.Abs(
-            RibbonVisualizerRenderer.SampleHalfHeight(localPeakSpectrum, 0.02f, 1, height)
-            - RibbonVisualizerRenderer.SampleHalfHeight(quietSpectrum, 0.02f, 1, height));
-
-        Assert.True(localDelta > 0.3f);
-        Assert.True(localDelta > distantDelta + 0.1f);
-    }
-
-    [Fact]
-    public void RibbonEdgeEnvelopeRemainsGentle()
-    {
-        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(0f), 0.71f, 0.73f);
-        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(1f), 0.71f, 0.73f);
-        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(0.5f), 0.99f, 1f);
+        Assert.Contains(firstFrame.Zip(secondFrame), pair => pair.First != pair.Second);
     }
 }

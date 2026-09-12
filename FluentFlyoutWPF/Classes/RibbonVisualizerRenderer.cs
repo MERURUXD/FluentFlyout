@@ -5,11 +5,26 @@ using System.Windows.Media;
 
 namespace FluentFlyoutWPF.Classes;
 
+// The iOS 9 Siri waveform state and curve math in this renderer is adapted from:
+// - https://github.com/halildurmus/siri_wave (BSD-3-Clause)
+// - https://github.com/kopiro/siriwave (MIT)
+// - https://github.com/mapo80/SiriWave (MIT)
+// The FluentFlyout palette, bitmap rasterization and audio-amplitude adapter remain
+// downstream-specific. The referenced projects retain their original notices.
 internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
 {
     private const int RibbonCount = 3;
-    private const int LobeCount = 3;
-    private const int ControlPointCount = 7;
+    private const int MinimumCurveCount = 2;
+    private const int MaximumCurveCount = 5;
+    private const float GraphX = 25f;
+    private const float AmplitudeFactor = 0.8f;
+    private const float AttenuationFactor = 4f;
+    private const float DeadPixel = 2f;
+    private const float DespawnFactor = 0.02f;
+    private const float TargetFrameRate = 30f;
+    private const float PhaseFactor = 1f;
+    private const float MinimumDespawnTimeoutSeconds = 0.5f;
+    private const float MaximumDespawnTimeoutSeconds = 2f;
     private const byte BaseAlpha = 80;
 
     private static readonly Color[] RibbonColors =
@@ -19,12 +34,14 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         Color.FromRgb(168, 85, 247)
     ];
 
-    private static readonly float[] SpectrumOffsets = [-0.06f, 0f, 0.06f];
-    private static readonly float[] LobeCenters = [0.18f, 0.50f, 0.82f];
-    private static readonly float[] LobeWidths = [0.24f, 0.27f, 0.24f];
-    private static readonly float[] LobeHeightScales = [0.105f, 0.13f, 0.105f];
-    private static readonly float[] RibbonHeightScales = [1.00f, 0.92f, 0.84f];
-    private static readonly float[] BaseThicknessScales = [0.024f, 0.022f, 0.020f];
+    private readonly WaveLayerState[] _layers =
+    [
+        new(),
+        new(),
+        new()
+    ];
+
+    private double _lastElapsedSeconds = double.NaN;
 
     public void Render(
         Span<byte> buffer,
@@ -34,54 +51,143 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         ReadOnlySpan<float> amplitudes,
         in VisualizerRenderOptions options)
     {
-        if (imageWidth <= 0 || imageHeight <= 0 || amplitudes.Length == 0 || !HasAudio(amplitudes))
+        if (imageWidth <= 0 || imageHeight <= 0 || amplitudes.Length == 0)
             return;
 
-        Span<float> controlPoints = stackalloc float[ControlPointCount];
-        Span<float> lobeHeights = stackalloc float[LobeCount];
+        float audioAmplitude = ComputeGlobalAmplitude(amplitudes);
+        double elapsedSeconds = SanitizeElapsedSeconds(options.ElapsedSeconds);
+        float deltaSeconds = GetDeltaSeconds(elapsedSeconds);
+
+        UpdateLayerStates(elapsedSeconds, deltaSeconds);
+
+        // The reference renderer still owns all curve state while silent, but
+        // global amplitude zero must never expose procedural pixels.
+        if (audioAmplitude <= 0.001f)
+            return;
 
         for (int ribbon = 0; ribbon < RibbonCount; ribbon++)
         {
-            BuildAudioControlPoints(amplitudes, controlPoints, ribbon);
-            BuildLobeHeights(controlPoints, lobeHeights, ribbon);
-            DrawRibbon(
+            WaveLayerState layer = _layers[ribbon];
+            float maxY = DrawLayer(
                 buffer,
                 stride,
                 imageWidth,
                 imageHeight,
-                lobeHeights,
-                RibbonColors[ribbon],
-                ribbon);
+                layer,
+                audioAmplitude,
+                RibbonColors[ribbon]);
+
+            if (maxY < DeadPixel && layer.PreviousMaxY > maxY)
+                SpawnLayer(layer, elapsedSeconds);
+
+            layer.PreviousMaxY = maxY;
         }
     }
 
-    private static void BuildAudioControlPoints(
-        ReadOnlySpan<float> amplitudes,
-        Span<float> controlPoints,
-        int ribbon)
+    internal static float ComputeGlobalAmplitude(ReadOnlySpan<float> amplitudes)
     {
-        for (int point = 0; point < ControlPointCount; point++)
+        float maximum = 0f;
+
+        for (int i = 0; i < amplitudes.Length; i++)
         {
-            float normalizedPosition = point / (ControlPointCount - 1f) + SpectrumOffsets[ribbon];
-            controlPoints[point] = SampleSpectrum(amplitudes, normalizedPosition);
+            float amplitude = amplitudes[i];
+            if (float.IsNaN(amplitude) || float.IsInfinity(amplitude))
+                continue;
+
+            maximum = MathF.Max(maximum, Math.Clamp(amplitude, 0f, 1f));
+        }
+
+        return maximum;
+    }
+
+    internal static float GlobalAttenuation(float x)
+    {
+        float denominator = AttenuationFactor + (x * x);
+        return MathF.Pow(AttenuationFactor / denominator, AttenuationFactor);
+    }
+
+    private static void SpawnLayer(WaveLayerState layer, double elapsedSeconds)
+    {
+        layer.Spawned = true;
+        layer.SpawnSeconds = elapsedSeconds;
+        layer.PreviousMaxY = 0f;
+        layer.CurveCount = Random.Shared.Next(MinimumCurveCount, MaximumCurveCount + 1);
+
+        for (int curveIndex = 0; curveIndex < layer.CurveCount; curveIndex++)
+        {
+            layer.Curves[curveIndex] = new CurveState
+            {
+                Phase = 0f,
+                Amplitude = 0f,
+                DespawnTimeoutSeconds = RandomRange(MinimumDespawnTimeoutSeconds, MaximumDespawnTimeoutSeconds),
+                Offset = RandomRange(-3f, 3f),
+                Speed = RandomRange(0.5f, 1f),
+                FinalAmplitude = RandomRange(0.3f, 1f),
+                Width = RandomRange(1f, 3f),
+                Verse = RandomRange(-1f, 1f)
+            };
+        }
+
+        for (int curveIndex = layer.CurveCount; curveIndex < MaximumCurveCount; curveIndex++)
+            layer.Curves[curveIndex] = default;
+    }
+
+    private void UpdateLayerStates(double elapsedSeconds, float deltaSeconds)
+    {
+        float frameStep = Math.Clamp(deltaSeconds * TargetFrameRate, 0f, 3f);
+
+        for (int ribbon = 0; ribbon < RibbonCount; ribbon++)
+        {
+            WaveLayerState layer = _layers[ribbon];
+            if (!layer.Spawned)
+                SpawnLayer(layer, elapsedSeconds);
+
+            for (int curveIndex = 0; curveIndex < layer.CurveCount; curveIndex++)
+            {
+                CurveState curve = layer.Curves[curveIndex];
+                bool despawning = elapsedSeconds >= layer.SpawnSeconds + curve.DespawnTimeoutSeconds;
+                float amplitudeDelta = DespawnFactor * frameStep;
+
+                curve.Amplitude = Math.Clamp(
+                    curve.Amplitude + (despawning ? -amplitudeDelta : amplitudeDelta),
+                    0f,
+                    curve.FinalAmplitude);
+                curve.Phase = WrapPhase(curve.Phase + (curve.Speed * deltaSeconds * PhaseFactor));
+                layer.Curves[curveIndex] = curve;
+            }
         }
     }
 
-    private static void DrawRibbon(
+    private static float DrawLayer(
         Span<byte> buffer,
         int stride,
         int imageWidth,
         int imageHeight,
-        ReadOnlySpan<float> lobeHeights,
-        Color color,
-        int ribbon)
+        WaveLayerState layer,
+        float audioAmplitude,
+        Color color)
     {
         float centerY = imageHeight * 0.5f;
+        float maxY = 0f;
 
         for (int x = 0; x < imageWidth; x++)
         {
             float normalizedX = imageWidth == 1 ? 0f : x / (imageWidth - 1f);
-            float halfHeight = CalculateHalfHeight(lobeHeights, normalizedX, ribbon, imageHeight);
+            float graphPosition = (normalizedX * 2f - 1f) * GraphX;
+            float relativePosition = SampleRelativePosition(graphPosition, layer);
+            float edgeAttenuation = GlobalAttenuation((graphPosition / GraphX) * 2f);
+            float halfHeight = AmplitudeFactor
+                * (imageHeight * 0.5f)
+                * audioAmplitude
+                * relativePosition
+                * edgeAttenuation;
+
+            maxY = MathF.Max(maxY, halfHeight);
+            if (halfHeight <= 0f)
+                continue;
+
+            // The positive and negative reference paths are mirrored around a
+            // fixed centerline and closed into one filled ribbon footprint.
             float top = centerY - halfHeight;
             float bottom = centerY + halfHeight;
             int firstY = Math.Max(0, (int)MathF.Floor(top));
@@ -98,140 +204,62 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
                 if (index + 3 >= buffer.Length)
                     continue;
 
-                BlendPixel(buffer, index, color, alpha);
+                BlendPixelPlus(buffer, index, color, alpha);
             }
         }
+
+        return maxY;
     }
 
-    private static void BuildLobeHeights(
-        ReadOnlySpan<float> controlPoints,
-        Span<float> lobeHeights,
-        int ribbon)
+    private static float SampleRelativePosition(float graphPosition, WaveLayerState layer)
     {
-        int ribbonIndex = NormalizeRibbonIndex(ribbon);
+        if (layer.CurveCount <= 0)
+            return 0f;
 
-        for (int lobe = 0; lobe < LobeCount; lobe++)
+        float value = 0f;
+        float denominator = Math.Max(1, layer.CurveCount - 1);
+
+        for (int curveIndex = 0; curveIndex < layer.CurveCount; curveIndex++)
         {
-            float audioAmplitude = ClampUnit(SampleSmoothCurve(controlPoints, LobeCenters[lobe]));
-            lobeHeights[lobe] = audioAmplitude * LobeHeightScales[lobe] * RibbonHeightScales[ribbonIndex];
-        }
-    }
-
-    internal static float SampleHalfHeight(
-        ReadOnlySpan<float> controlPoints,
-        float normalizedX,
-        int ribbon,
-        int imageHeight)
-    {
-        Span<float> lobeHeights = stackalloc float[LobeCount];
-        BuildLobeHeights(controlPoints, lobeHeights, ribbon);
-        return CalculateHalfHeight(lobeHeights, normalizedX, ribbon, imageHeight);
-    }
-
-    private static float CalculateHalfHeight(
-        ReadOnlySpan<float> lobeHeights,
-        float normalizedX,
-        int ribbon,
-        int imageHeight)
-    {
-        int ribbonIndex = NormalizeRibbonIndex(ribbon);
-        float halfHeight = BaseThicknessScales[ribbonIndex];
-
-        for (int lobe = 0; lobe < LobeCount; lobe++)
-            halfHeight += lobeHeights[lobe] * SampleLobeFalloff(normalizedX, lobe);
-
-        return imageHeight * halfHeight * SampleEdgeEnvelope(normalizedX);
-    }
-
-    internal static float SampleEdgeEnvelope(float normalizedX)
-    {
-        normalizedX = ClampUnit(normalizedX);
-        float centerWeight = 4f * normalizedX * (1f - normalizedX);
-        return 0.72f + (0.28f * centerWeight);
-    }
-
-    internal static float SampleLobeFalloff(float normalizedX, int lobe)
-    {
-        int lobeIndex = Math.Clamp(lobe, 0, LobeCount - 1);
-        normalizedX = ClampUnit(normalizedX);
-        float distance = MathF.Abs(normalizedX - LobeCenters[lobeIndex]) / LobeWidths[lobeIndex];
-        if (distance >= 1f)
-            return 0f;
-
-        float value = 1f - distance;
-        return value * value * (3f - (2f * value));
-    }
-
-    internal static float SampleSpectrum(ReadOnlySpan<float> amplitudes, float normalizedX)
-    {
-        if (amplitudes.Length == 0)
-            return 0f;
-
-        if (amplitudes.Length == 1)
-            return ClampUnit(amplitudes[0]);
-
-        normalizedX = ClampUnit(normalizedX);
-        float position = normalizedX * (amplitudes.Length - 1);
-        int lower = (int)MathF.Floor(position);
-        int upper = Math.Min(lower + 1, amplitudes.Length - 1);
-        float fraction = position - lower;
-
-        return ClampUnit(amplitudes[lower] + ((amplitudes[upper] - amplitudes[lower]) * fraction));
-    }
-
-    internal static float SampleSmoothCurve(ReadOnlySpan<float> points, float normalizedX)
-    {
-        if (points.Length == 0)
-            return 0f;
-
-        if (points.Length == 1)
-            return ClampUnit(points[0]);
-
-        normalizedX = ClampUnit(normalizedX);
-        float position = normalizedX * (points.Length - 1);
-        int segment = Math.Min((int)MathF.Floor(position), points.Length - 2);
-        float t = position - segment;
-
-        float p0 = points[Math.Max(0, segment - 1)];
-        float p1 = points[segment];
-        float p2 = points[segment + 1];
-        float p3 = points[Math.Min(points.Length - 1, segment + 2)];
-
-        float t2 = t * t;
-        float t3 = t2 * t;
-        float value = 0.5f * ((2f * p1)
-            + (-p0 + p2) * t
-            + (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2
-            + (-p0 + 3f * p1 - 3f * p2 + p3) * t3);
-
-        return ClampUnit(value);
-    }
-
-    private static float ClampUnit(float value)
-    {
-        if (float.IsNaN(value) || float.IsInfinity(value))
-            return 0f;
-
-        return Math.Clamp(value, 0f, 1f);
-    }
-
-    private static bool HasAudio(ReadOnlySpan<float> amplitudes)
-    {
-        for (int i = 0; i < amplitudes.Length; i++)
-        {
-            if (amplitudes[i] > 0.001f)
-                return true;
+            CurveState curve = layer.Curves[curveIndex];
+            float staticOffset = 4f * (-1f + (curveIndex / denominator * 2f));
+            float x = (graphPosition / curve.Width) - staticOffset - curve.Offset;
+            float sine = MathF.Sin((curve.Verse * x) - curve.Phase);
+            value += MathF.Abs(curve.Amplitude * sine * GlobalAttenuation(x));
         }
 
-        return false;
+        return Math.Clamp(value / layer.CurveCount, 0f, 1f);
     }
 
-    private static int NormalizeRibbonIndex(int ribbon)
+    private float GetDeltaSeconds(double elapsedSeconds)
     {
-        return Math.Clamp(ribbon, 0, RibbonCount - 1);
+        float deltaSeconds = double.IsNaN(_lastElapsedSeconds)
+            ? 1f / TargetFrameRate
+            : (float)Math.Clamp(elapsedSeconds - _lastElapsedSeconds, 0d, 0.1d);
+
+        _lastElapsedSeconds = elapsedSeconds;
+        return deltaSeconds;
     }
 
-    private static void BlendPixel(Span<byte> buffer, int index, Color color, byte alpha)
+    private static double SanitizeElapsedSeconds(double elapsedSeconds)
+    {
+        return double.IsNaN(elapsedSeconds) || double.IsInfinity(elapsedSeconds)
+            ? 0d
+            : Math.Max(0d, elapsedSeconds);
+    }
+
+    private static float WrapPhase(float phase)
+    {
+        phase %= 2f * MathF.PI;
+        return phase < 0f ? phase + (2f * MathF.PI) : phase;
+    }
+
+    private static float RandomRange(float minimum, float maximum)
+    {
+        return minimum + ((float)Random.Shared.NextDouble() * (maximum - minimum));
+    }
+
+    private static void BlendPixelPlus(Span<byte> buffer, int index, Color color, byte alpha)
     {
         if (alpha == 0)
             return;
@@ -248,15 +276,43 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
             return;
         }
 
-        int inverseSourceAlpha = 255 - sourceAlpha;
-        int retainedDestinationAlpha = (destinationAlpha * inverseSourceAlpha + 127) / 255;
-        int outputAlpha = sourceAlpha + retainedDestinationAlpha;
+        int outputAlpha = Math.Min(255, destinationAlpha + sourceAlpha);
         if (outputAlpha == 0)
             return;
 
-        buffer[index] = (byte)((color.B * sourceAlpha + buffer[index] * retainedDestinationAlpha + outputAlpha / 2) / outputAlpha);
-        buffer[index + 1] = (byte)((color.G * sourceAlpha + buffer[index + 1] * retainedDestinationAlpha + outputAlpha / 2) / outputAlpha);
-        buffer[index + 2] = (byte)((color.R * sourceAlpha + buffer[index + 2] * retainedDestinationAlpha + outputAlpha / 2) / outputAlpha);
+        buffer[index] = (byte)Math.Clamp(
+            ((buffer[index] * destinationAlpha) + (color.B * sourceAlpha) + (outputAlpha / 2)) / outputAlpha,
+            0,
+            255);
+        buffer[index + 1] = (byte)Math.Clamp(
+            ((buffer[index + 1] * destinationAlpha) + (color.G * sourceAlpha) + (outputAlpha / 2)) / outputAlpha,
+            0,
+            255);
+        buffer[index + 2] = (byte)Math.Clamp(
+            ((buffer[index + 2] * destinationAlpha) + (color.R * sourceAlpha) + (outputAlpha / 2)) / outputAlpha,
+            0,
+            255);
         buffer[index + 3] = (byte)outputAlpha;
+    }
+
+    private sealed class WaveLayerState
+    {
+        public readonly CurveState[] Curves = new CurveState[MaximumCurveCount];
+        public bool Spawned;
+        public double SpawnSeconds;
+        public float PreviousMaxY;
+        public int CurveCount;
+    }
+
+    private struct CurveState
+    {
+        public float Phase;
+        public float Amplitude;
+        public float DespawnTimeoutSeconds;
+        public float Offset;
+        public float Speed;
+        public float FinalAmplitude;
+        public float Width;
+        public float Verse;
     }
 }
