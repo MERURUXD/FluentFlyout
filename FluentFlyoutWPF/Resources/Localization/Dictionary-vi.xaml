@@ -181,4 +181,36 @@ Bạn có thể hỗ trợ dịch tại</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Lặp lại văn bản vô hạn theo một hướng thay vì cuộn qua lại.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Tốc độ cuộn</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">Tốc độ cuộn văn bản (pixel/giây). Mặc định là 20.</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Không in mờ</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> In mờ bên trái</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> In mờ bên dưới</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> In mờ toàn phần</system:String>
+    <system:String x:Key="BackgroundBlurTitle">In mờ ảnh bìa trên nền</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Căn giữa tiêu đề và tên tác giả</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Căn giữa tiêu đề và tên tác giả</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Ẩn tên ứng dụng đang phát, nút lặp lại và nút xáo trộn</system:String>
+    <system:String x:Key="CompactLayoutTitle">Flyout tối giản</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Vị trí giao diện</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(mặc định: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Thời gian hiển thị</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Hiển thị vô thời hạn</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Hiển thị flyout đến khi ấn nút đóng</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Không hiển thị flyout khi nhấn các phím: tăng, giảm, tắt âm lượng</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Không hiển thị flyout khi nhấn các phím: tăng, giảm, tắt âm lượng</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Khi đổi sang nội dung nào, các nội dung khác sẽ tự động ngừng phát</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Tự động tạm dừng nội dung khác</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Phía trên, ở giữa</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Phía trên, bên trái</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Phía trên, bên phải</system:String>
+    <system:String x:Key="RepeatButtonDescription">Lựa chọn giữa lặp lại một lần hoặc liên tục</system:String>
+    <system:String x:Key="RepeatButtonTitle">Nút lặp lại*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Hiển thị nguồn phát</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Cho phép tua đi tua lại nội dung</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Thanh thời gian*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Cho phép xáo trộn danh sách phát</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Nút xáo trộn*</system:String>
+    <system:String x:Key="TextBlockText1">Hiển thị flyout</system:String>
+    <system:String x:Key="TextBlockText2">Chọn kiểu in mờ</system:String>
+    <system:String x:Key="TextBlockText3">Hiển thị flyout</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Một số trình duyệt/trình phát không hỗ trợ chức năng lặp lại, phát ngẫu nhiên và điều khiển bằng thanh tìm kiếm.</system:String>
 </ResourceDictionary>

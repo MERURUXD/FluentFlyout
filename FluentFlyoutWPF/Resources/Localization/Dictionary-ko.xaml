@@ -181,4 +181,37 @@
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">텍스트를 한 방향으로 계속 스크롤하기.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">스크롤 속도</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">텍스트 스크롤 속도 설정(픽셀/초). 기본값은 20.</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> 없음</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> 스타일 1 (앨범아트 글로우)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> 스타일 2 (상승 글로우)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> 스타일 3 (흐림 효과)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">배경 블러</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">텍스트를 왼쪽 대신 가운데로 정렬</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">제목 및 아티스트 가운데 정렬</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">더 슬림하고 덜 거슬리는 레이아웃
+반복, 셔플, 플레이어 정보를 숨김</system:String>
+    <system:String x:Key="CompactLayoutTitle">레이아웃 간소화</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Flyout 위치</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(기본값: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Flyout 표시 지속 시간</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">항상 표시</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Flyout이 닫기 버튼을 누를 때까지 계속 표시됨</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">볼륨 높이기/줄이기/음소거를 누를 때 Flyout을 표시하지 않기</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">볼륨 키 입력 무시</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">새로운 미디어를 재생하거나 포커싱을 변경하면, 다른 활성 세션들은 자동으로 일시 정지됨</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">다른 미디어 자동 일시 정지</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> 상단 중앙</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> 좌측 상단</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> 우측 상단</system:String>
+    <system:String x:Key="RepeatButtonDescription">모두 반복 또는 한 곡 반복 선택, 적용 시 Flyout 너비 증가</system:String>
+    <system:String x:Key="RepeatButtonTitle">반복 버튼*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">미디어 플레이어 이름 표시</system:String>
+    <system:String x:Key="ShowSeekbarDescription">플레이어가 지원하는 경우 상호 작용 가능한 진행 바가 자동으로 표시</system:String>
+    <system:String x:Key="ShowSeekbarTitle">진행 바 표시*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">적용 시 Flyout 너비 증가</system:String>
+    <system:String x:Key="ShuffleButtonTitle">셔플 버튼*</system:String>
+    <system:String x:Key="TextBlockText1">미디어 Flyout 활성화</system:String>
+    <system:String x:Key="TextBlockText2">배경 흐림 스타일을 목록에서 선택</system:String>
+    <system:String x:Key="TextBlockText3">미디어 키를 누를 때 Flyout 표시</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*일부 브라우저/플레이어는 반복, 셔플 및 진행 바 제어를 지원하지 않습니다.</system:String>
 </ResourceDictionary>

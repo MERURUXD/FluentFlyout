@@ -181,4 +181,37 @@
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">スクロールの速度</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">テキストがスクロールする速度 (ピクセル/秒)。既定値は 20。</system:String>
     <system:String x:Key="TaskbarVisualizerBaselineAutoHideDescription">オーディオが再生されていないときは、ベースラインを自動的に非表示にします</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> なし</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> スタイル 1 (カバー グロー)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> スタイル 2 (ライジング グロー)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> スタイル 3 (ぼかし)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">背景のぼかし</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">テキストを左揃えではなく中央に配置します</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">タイトルとアーティストを中央揃え</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">シンプルで邪魔になりにくいレイアウト
+リピート、シャッフル、およびプレイヤー情報を非表示にします</system:String>
+    <system:String x:Key="CompactLayoutTitle">コンパクト レイアウト</system:String>
+    <system:String x:Key="FlyoutPositionTitle">ポップアップ表示の位置</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(既定値: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">ポップアップの表示時間</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">常に表示</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">閉じるボタンをクリックするまで、ポップアップ表示は開いたままになります</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">音量アップ/ダウン/ミュート時にポップアップ表示をしません</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">音量キーを除外</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">新しいメディアを再生またはアクティブにした際、他のアクティブなセッションは自動的に一時停止されます</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">他のメディアを自動的に一時停止</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> 上部中央</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> 左上</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> 上段 右側</system:String>
+    <system:String x:Key="RepeatButtonDescription">すべてリピート、または一曲リピートから選択します。ポップアップの幅が広くなります</system:String>
+    <system:String x:Key="RepeatButtonTitle">リピート ボタン*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">メディアプレイヤー名を表示</system:String>
+    <system:String x:Key="ShowSeekbarDescription">プレイヤーがシークバーに対応している場合、操作可能なシークバーが自動的に表示されます</system:String>
+    <system:String x:Key="ShowSeekbarTitle">シークバーを表示*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">ポップアップの幅が広くなります</system:String>
+    <system:String x:Key="ShuffleButtonTitle">シャッフル ボタン*</system:String>
+    <system:String x:Key="TextBlockText1">メディアのポップアップを有効化</system:String>
+    <system:String x:Key="TextBlockText2">モダンな背景ぼかしスタイルをプリセットから選択</system:String>
+    <system:String x:Key="TextBlockText3">メディアキーを押したときにポップアップを表示する</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*一部のブラウザやプレイヤーは、リピート、シャッフル、およびシークバーの操作に対応していません。</system:String>
 </ResourceDictionary>

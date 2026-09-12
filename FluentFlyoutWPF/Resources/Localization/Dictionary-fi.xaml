@@ -20,4 +20,34 @@
     <system:String x:Key="TaskbarWidgetHideCompletelyDescription">PIilottaa koko widgetin kun mitään mediaa eio le saatavilla sen sijaan että näyttäisi mediaikonin</system:String>
     <system:String x:Key="HomeTitle">Koti</system:String>
     <system:String x:Key="Enabled">Käytössä</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Ei mitään</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Tyyli 1 (Cover hohka)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Tyyli 2 (Nouseva Hohka)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Tyyli 3 (Sumeus)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Taustan Sumennus</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Kohdista teksti keskelle vasemman laidan sijaan</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Keskitä Kappaleen Nimi ja Artisti</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Laihempi ja vähempi häiritsevä asettelu
+piilottaa toistamisen, shufflen sekä soittimen tiedot</system:String>
+    <system:String x:Key="CompactLayoutTitle">Kompakti Asettelu</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Flyoutin Sijainti</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(oletus: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Flyout Näkyvissä (Aika)</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Näytä Aina</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Kun toistat tai valitset toisen median, muut aktiiviset sessiot keskeytyvät automaattisesti</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Keskeytä Muut Toistetut Mediat Automaattisesti</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Keskellä Ylhäällä</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Vasen Ylä</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Oikealla Ylhäällä</system:String>
+    <system:String x:Key="RepeatButtonDescription">Valitse toistetaanko kaikki vai yksi kappale, lisää flyoutin leveyttä</system:String>
+    <system:String x:Key="RepeatButtonTitle">Toistopainike*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Näytä Mediatoimistimen Nimi</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Interaktiivinen hakupalkki joka näkyy automaattisesti jos mediatoistin tukee sitä</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Näytä Hakupalkki*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Lisää flyoutin leveyttä</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Sekoituspainike*</system:String>
+    <system:String x:Key="TextBlockText1">Aktivoi Media Flyout</system:String>
+    <system:String x:Key="TextBlockText2">Valikoi esivalinta moderneista taustan sumennustyyleistä</system:String>
+    <system:String x:Key="TextBlockText3">Näytä flyout kun painat mediapainikkeita</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Jotkin selaimet/toistimet eivät tue toistoa, sekoitusta taikka hakupalkki-toimintoja.</system:String>
 </ResourceDictionary>

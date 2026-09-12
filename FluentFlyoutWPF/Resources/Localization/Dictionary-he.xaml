@@ -152,4 +152,37 @@
     <system:String x:Key="TaskbarWidgetAutoHideDescription">מסתיר את הישומון אוטומטית כשהמדיה נעצרת</system:String>
     <system:String x:Key="TaskbarWidgetShowPauseOverlayTitle">הצג סמל השהיה מעל התוכן</system:String>
     <system:String x:Key="TaskbarWidgetShowPauseOverlayDescription">כאשר המדיה מושהית, יוצג סמל השהיה מעל עטיפת האלבום</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> ללא</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> סגנון 1 (זוהר עטיפה)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> סגנון 2 (זוהר מתרומם)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> סגנון 3 (טשטוש)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">טשטוש רקע</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">יישור טקסט למרכז במקום לשמאל</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">מרכז את הכותרת והאמן</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">פריסה דקה ופחות פולשנית
+מסתירה חזרה, ערבוב ומידע על הנגן</system:String>
+    <system:String x:Key="CompactLayoutTitle">פריסה קומפקטית</system:String>
+    <system:String x:Key="FlyoutPositionTitle">מיקום החלון הנשלף</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(ברירת מחדל: 3000 מילישניות)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">משך הצגת החלון הנשלף</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">תצוגה פעילה תמיד</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">החלון הנשלף נשאר פתוח עד שתלחצו על כפתור הסגירה</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">אל תציג את החלון הקופץ בעת לחיצה על הגברת/הנמכת עוצמה או השתקה</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">הסתר מקשי עוצמת קול</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">כאשר אתה מנגן או מתמקד במדיה חדשה, הפעלות אחרות פעילות מושהים אוטומטית</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">השהה מדיה אחרת באופן אוטומטי</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> למעלה במרכז</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> למעלה משמאל</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> למעלה מימין</system:String>
+    <system:String x:Key="RepeatButtonDescription">בחר בין חזרה על הכל או על שיר אחד, מגדיל את רוחב החלון הנשלף</system:String>
+    <system:String x:Key="RepeatButtonTitle">כפתור חזרה*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">הצג את שם נגן המדיה</system:String>
+    <system:String x:Key="ShowSeekbarDescription">סרגל חיפוש אינטראקטיבי יוצג אוטומטית אם הנגן תומך בכך</system:String>
+    <system:String x:Key="ShowSeekbarTitle">הצגת סרגל החיפוש*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">מגדיל את רוחב החלון הנשלף</system:String>
+    <system:String x:Key="ShuffleButtonTitle">כפתור ערבוב*</system:String>
+    <system:String x:Key="TextBlockText1">הפעלת חלון נשלף של מדיה</system:String>
+    <system:String x:Key="TextBlockText2">בחר מתוך סגנונות מודרניים מוגדרים מראש של טשטוש רקע</system:String>
+    <system:String x:Key="TextBlockText3">מציג חלון נשלף בעת לחיצה על מקש מדיה</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*חלק מהדפדפנים/נגנים אינם תומכים בחזרה, ערבוב או שליטה בסרגל חיפוש.</system:String>
 </ResourceDictionary>

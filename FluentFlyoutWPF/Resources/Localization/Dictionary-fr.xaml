@@ -181,4 +181,37 @@ Vous pouvez contribuer aux traductions sur</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Faire défiler le texte indéfiniment dans une seule direction au lieu d'un défilement aller-retour.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Vitesse de défilement</system:String>
     <system:String x:Key="SearchSettings">Rechercher les paramètres</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Aucun</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Style 1 (Couverture Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Style 2 (Lueur montante)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Style 3 (Flou)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Flou d'arrière-plan</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Aligner le texte au centre au lieu de la gauche</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Centrer le titre et l'artiste</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Mise en page plus fine et moins intrusive
+masque les options de répétition, de lecture aléatoire et les informations du lecteur</system:String>
+    <system:String x:Key="CompactLayoutTitle">Disposition compacte</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Position du volet</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(par défaut : 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Durée d'affichage du volet</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Affichage Permanent</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Le menu déroulant reste ouvert jusqu'à ce que vous cliquiez sur le bouton Fermer</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Ne pas montrer le volet quand la touche d'augmentation/diminution/muet de volume est appuyé</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Exclure les Touches de Volume</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Lorsque vous reproduisez ou sélectionnez de nouveau média, les autres sessions actives seront mises en pause automatiquement</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Mettre en pause automatiquement les autres médias</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> En haut au milieu</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> En haut à gauche</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> En haut à droite</system:String>
+    <system:String x:Key="RepeatButtonDescription">Choisissez entre répéter tout ou répéter un seul élément, cela augmente la largeur du volet déroulant</system:String>
+    <system:String x:Key="RepeatButtonTitle">Bouton répéter*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Afficher le nom du lecteur multimédia</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Une barre de progression interactive sera affichée si le lecteur la prend en charge</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Afficher la barre de recherche*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Augmente la largeur du volet</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Bouton lecture aléatoire*</system:String>
+    <system:String x:Key="TextBlockText1">Activer le volet multimédia</system:String>
+    <system:String x:Key="TextBlockText2">Choisir un flou d'arrière-plan moderne à partir d'un préréglée</system:String>
+    <system:String x:Key="TextBlockText3">Afficher un volet quand vous appuyez sur une touche multimédia</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Certains navigateurs/lecteurs ne prennent pas en charge les fonctions de répétition, de lecture aléatoire et la barre de progression.</system:String>
 </ResourceDictionary>

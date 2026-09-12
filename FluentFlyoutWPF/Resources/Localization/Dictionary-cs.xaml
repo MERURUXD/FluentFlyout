@@ -150,4 +150,37 @@ Můžete pomoct s překlady na</system:String>
     <system:String x:Key="TaskbarVisualizerOutputDeviceDescription">Uprav, co vizualizér slyší, přepnutím výstupového zařízení pro FluentFlyout.</system:String>
     <system:String x:Key="LegacyTaskbarWidthTitle">Starší systém šířky na hlavním panelu</system:String>
     <system:String x:Key="LegacyTaskbarWidthDescription">Použije starší sytém pro šířku na hlavním panelu pro panelové Widgety</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Žádné</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Styl 1 (Cover Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Styl 2 (Rising Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Styl 3 (Blur)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Rozmazání pozadí</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Vycentruje text doprostřed místo doleva</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Vycentrovat název písničky a autora</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Užší a méně rušivé rozvržení
+skryje opakování,náhodné přehrávání a informace přehrávače</system:String>
+    <system:String x:Key="CompactLayoutTitle">Kompaktní rozvržení</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Pozice plovoucího přehrávače</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(výchozí: 3000ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Zmizení plovoucího přehrávače</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Vždy zobrazovat</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Plovoucí přehrávač zůstane zobrazený, dokud ho nezavřete tlačítkem</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Neukazovat plovoucí přehrávač při změně hlasitosti/zltumení</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Nedetekovat tlačítka hlasitosti</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Když přehráváte nebo se soustředíte na nová média, ostatní aktivní relace se automaticky pozastaví</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Automaticky zastaví ostatní média</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Nahoře uprostřed</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Nahoře vlevo</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Nahoře vpravo</system:String>
+    <system:String x:Key="RepeatButtonDescription">Vyberte si mezi opakování všech nebo jedné písničky, rozšíří plovoucí přehrávač</system:String>
+    <system:String x:Key="RepeatButtonTitle">Tlačítko opakování*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Ukazovat název přehrávače</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Automaticky zobrazí interaktivní časovou osu, pokud ji přehrávač podporuje</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Ukazovat časovou osu*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Rozšíří plovoucí okno</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Tlačítko náhodného přehrávání*</system:String>
+    <system:String x:Key="TextBlockText1">Povolit plovoucí přehrávač</system:String>
+    <system:String x:Key="TextBlockText2">Vyberte si z moderních stylů rozostření pozadí</system:String>
+    <system:String x:Key="TextBlockText3">Zobrazí plovoucí okno při zmáčknutí klávesy pro ovládání médií</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Některé prohlížeče/přehrávače nepodporují opakování, náhodné přehrávání a ovládání časové osy.</system:String>
 </ResourceDictionary>

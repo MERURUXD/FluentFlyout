@@ -181,4 +181,37 @@ Możesz pomóc w tworzeniu tłumaczeń na stronie</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Przewijaj tekst nieskończenie w jedną stronę zamiast przewijania w przód i w tył.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Prędkość Przewijania</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">Prędkość przewijania tekstu (pikseli na sekundę). Domyślna wartość to 20.</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Brak</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Styl 1 (Blask Okładki)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Styl 2 (Wschodzący Blask)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Styl 3 (Rozmycie)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Rozmycie Tła</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Wyrównaj tekst do środka zamiast do lewej﻿</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Wyśrodkuj Tytuł oraz Artystę</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Smuklejszy i mniej inwazyjny układ:
+ukrywa powtarzanie, odtwarzanie losowe oraz informacje o odtwarzaczu</system:String>
+    <system:String x:Key="CompactLayoutTitle">Układ Kompaktowy</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Pozycja Panelu</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(domyślnie: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Czas Wyświetlania Panelu</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Wyświetlaj Zawsze</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Panel pozostaje otwarty aż do kliknięcia w przycisk zamknięcia</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Nie wyświetlaj panelu gdy wciśnięty jest przycisk zwiększenia/zmniejszenia/wyciszenia głośności dźwięku</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Wyklucz klawisze głośności</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Gdy odtwarzasz lub skupiasz się na nowych mediach, inne aktywne sesje są automatycznie wstrzymywane﻿</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Automatycznie Wstrzymaj Inne Media﻿</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> U Góry Pośrodku</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Górny Lewy Róg</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Prawy Górny Róg</system:String>
+    <system:String x:Key="RepeatButtonDescription">Wybierz między powtarzaniem wszystkiego lub jednego, zwiększa szerokość panelu</system:String>
+    <system:String x:Key="RepeatButtonTitle">Przycisk Powtarzania*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Pokaż nazwę Odtwarzacza</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Interaktywny pasek przewijania wyświetli się automatycznie, jeśli odtwarzacz go obsługuje﻿</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Pokaż Pasek Przewijania*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Zwiększa szerokość panelu</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Przycisk Odtwarzania Losowego*</system:String>
+    <system:String x:Key="TextBlockText1">Włącz Panel Mediów</system:String>
+    <system:String x:Key="TextBlockText2">Wybierz jeden z predefiniowanych stylów rozmycia tła</system:String>
+    <system:String x:Key="TextBlockText3">Wyświetla panel po naciśnięciu klawisza multimediów</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Niektóre przeglądarki/odtwarzacze nie obsługują funkcji powtarzania, losowego odtwarzania i sterowania paskiem przewijania.</system:String>
 </ResourceDictionary>
