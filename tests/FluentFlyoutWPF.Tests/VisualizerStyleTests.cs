@@ -88,6 +88,8 @@ public sealed class VisualizerStyleTests
         Assert.Equal(1f, RibbonVisualizerRenderer.ComputeGlobalAmplitude([0f, 0f, 0f, 0f, 0f, 0f, 1f]));
         Assert.Equal(0f, RibbonVisualizerRenderer.ComputeGlobalAmplitude(new float[7]));
         Assert.Equal(0f, RibbonVisualizerRenderer.ComputeGlobalAmplitude([float.NaN, float.PositiveInfinity]));
+        Assert.Equal(0.25f, RibbonVisualizerRenderer.ScaleGlobalAmplitude(0.1f), precision: 5);
+        Assert.Equal(1f, RibbonVisualizerRenderer.ScaleGlobalAmplitude(0.5f));
     }
 
     [Fact]

@@ -17,12 +17,15 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
     private const int MinimumCurveCount = 2;
     private const int MaximumCurveCount = 5;
     private const float GraphX = 25f;
-    private const float AmplitudeFactor = 0.8f;
+    // The reference uses 0.8. A slightly larger factor keeps its curves visible
+    // after the existing 2x bitmap is displayed in the small taskbar widget.
+    private const float AmplitudeFactor = 1.2f;
     private const float AttenuationFactor = 4f;
     private const float DeadPixel = 2f;
     private const float DespawnFactor = 0.02f;
     private const float TargetFrameRate = 30f;
     private const float PhaseFactor = 1f;
+    private const float GlobalAmplitudeBoost = 2.5f;
     private const float MinimumDespawnTimeoutSeconds = 0.5f;
     private const float MaximumDespawnTimeoutSeconds = 2f;
     private const byte BaseAlpha = 80;
@@ -54,7 +57,7 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         if (imageWidth <= 0 || imageHeight <= 0 || amplitudes.Length == 0)
             return;
 
-        float audioAmplitude = ComputeGlobalAmplitude(amplitudes);
+        float audioAmplitude = ScaleGlobalAmplitude(ComputeGlobalAmplitude(amplitudes));
         double elapsedSeconds = SanitizeElapsedSeconds(options.ElapsedSeconds);
         float deltaSeconds = GetDeltaSeconds(elapsedSeconds);
 
@@ -98,6 +101,14 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         }
 
         return maximum;
+    }
+
+    internal static float ScaleGlobalAmplitude(float amplitude)
+    {
+        if (float.IsNaN(amplitude) || float.IsInfinity(amplitude))
+            return 0f;
+
+        return Math.Clamp(amplitude * GlobalAmplitudeBoost, 0f, 1f);
     }
 
     internal static float GlobalAttenuation(float x)
