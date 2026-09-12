@@ -143,6 +143,8 @@ same-ID session restart must not move selected UI backward.
 - The taskbar visualizer owns a nullable visualizer instance. It allocates audio
   capture, buffers, watchdog work, and system subscriptions only while enabled,
   drains in-flight callbacks on disable/dispose, and rejects stale restarts.
+  Its persisted renderer style defaults to Classic Bars; the experimental Fluent
+  Ribbon style shares the same capture, FFT, smoothing, and lifecycle pipeline.
 - Next Up remains lazy and keeps only its own short-lived origin-session token.
 - The seekbar `System.Threading.Timer` is active only when the seekbar is
   visible, supported, enabled, and the selected session is playing. The display

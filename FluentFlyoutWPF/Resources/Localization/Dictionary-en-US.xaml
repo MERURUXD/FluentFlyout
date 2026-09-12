@@ -46,6 +46,10 @@
     <System:String x:Key="TaskbarVisualizerDescription">A real-time audio visualizer on your taskbar. Designed to have minimal performance impact on modern systems.</System:String>
     <System:String x:Key="TaskbarVisualizerEnabledTitle">Enable Taskbar Visualizer (Experimental)</System:String>
     <System:String x:Key="TaskbarVisualizerEnabledDescription">Experimental: This feature will only work if the Taskbar Widget is enabled</System:String>
+    <System:String x:Key="TaskbarVisualizerStyleTitle">Visualizer Style</System:String>
+    <System:String x:Key="TaskbarVisualizerStyleDescription">Choose how the audio spectrum is drawn</System:String>
+    <System:String x:Key="TaskbarVisualizerStyleClassicBars">Classic Bars</System:String>
+    <System:String x:Key="TaskbarVisualizerStyleFluentRibbon">Fluent Ribbon</System:String>
     <System:String x:Key="TaskbarVisualizerPositionTitle">Visualizer Position Relative to Taskbar Widget</System:String>
     <System:String x:Key="TaskbarVisualizerBarCountTitle">Bar Count</System:String>
     <System:String x:Key="TaskbarVisualizerBarCountDescription">The amount of visualizer bars</System:String>

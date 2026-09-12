@@ -435,6 +435,18 @@ public partial class UserSettings : ObservableObject
     public partial bool TaskbarVisualizerEnabled { get; set; }
 
     /// <summary>
+    /// Selects the taskbar visualizer renderer. 0 is Classic Bars and 1 is Fluent Ribbon.
+    /// </summary>
+    [ObservableProperty]
+    public partial int TaskbarVisualizerStyle { get; set; }
+
+    partial void OnTaskbarVisualizerStyleChanged(int oldValue, int newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+        Visualizer.OnRenderStyleChanged();
+    }
+
+    /// <summary>
     /// Returns whether app filtering is enabled or disabled.
     /// </summary>
     [ObservableProperty]
@@ -621,6 +633,7 @@ public partial class UserSettings : ObservableObject
         TaskbarWidgetScrollingTextSpeed = 20;
         TaskbarWidgetScrollingTextLoopForever = false;
         TaskbarVisualizerEnabled = false;
+        TaskbarVisualizerStyle = 0;
         AppFilteringEnabled = false;
         AppFilteringMode = 0;
         TaskbarVisualizerPosition = 1;
@@ -861,15 +874,19 @@ public partial class UserSettings : ObservableObject
     partial void OnTaskbarVisualizerBaselineChanged(bool oldValue, bool newValue)
     {
         if (oldValue == newValue || _initializing || newValue == false) return;
-        TaskbarVisualizerHasContent = true;
+        if (Visualizer.ResolveVisualizerStyle(TaskbarVisualizerStyle) == VisualizerRenderStyle.ClassicBars)
+            TaskbarVisualizerHasContent = true;
     }
 
     partial void OnTaskbarVisualizerBaselineAutoHideChanged(bool oldValue, bool newValue)
     {
         if (oldValue == newValue || _initializing) return;
-        // If newValue is true, refresh the visualizer by hiding it:
-        // if audio is playing, it will be shown again, if not, it will remain hidden.
-        TaskbarVisualizerHasContent = !newValue;
+        if (Visualizer.ResolveVisualizerStyle(TaskbarVisualizerStyle) == VisualizerRenderStyle.ClassicBars)
+        {
+            // If newValue is true, refresh the visualizer by hiding it:
+            // if audio is playing, it will be shown again, if not, it will remain hidden.
+            TaskbarVisualizerHasContent = !newValue;
+        }
     }
 
     partial void OnUseAlbumArtAsAccentColorChanged(bool oldValue, bool newValue)
