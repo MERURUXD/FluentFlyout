@@ -9,6 +9,7 @@
           - 'FluentFlyoutWPF/SettingsWindow.{xaml,xaml.cs}'
           - 'FluentFlyoutWPF/Pages/HomePage.{xaml,xaml.cs}'
           - 'FluentFlyoutWPF/Pages/AboutPage.{xaml,xaml.cs}'
+          - 'FluentFlyoutWPF/Pages/MediaFlyoutPage.{xaml,xaml.cs}'
           - 'FluentFlyoutWPF/Pages/SystemPage.{xaml,xaml.cs}'
 
 'Next Up Flyout':

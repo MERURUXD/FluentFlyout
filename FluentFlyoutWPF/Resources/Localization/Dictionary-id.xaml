@@ -181,4 +181,37 @@ Anda dapat membantu berkontribusi dalam menerjemahkan di</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Kecepatan Gulir</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Gulirkan teks terus-menerus ke satu arah, bukan bolak-balik.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">Kecepatan gulir teks (piksel/detik). Nilai bawaan adalah 20.</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Tidak Ada</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Gaya 1 (Cover Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Gaya 2 (Rising Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Gaya 3 (Blur)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Blur Latar Belakang</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Sesuaikan teks ke tengah daripada ke kiri</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Judul dengan Nama Artis ditengah</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Layout yang lebih ramping dan tidak mencolok
+menyembunyikan tombol ulangi (repeat), acak (shuffle), serta informasi pemutar</system:String>
+    <system:String x:Key="CompactLayoutTitle">Tata Letak Ringkas</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Posisi Flyout</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(default: 3000 milidetik)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Durasi Flyout akan tampil</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Selalu Tampilkan</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Flyout akan tetap terbuka hingga anda menutupnya dengan tombol tutup</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Jangan tampilkan flyout ketika menekan volume atas/bawah/bisu</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Kecualikan tombol volume</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Ketika anda putar atau fokus pada media baru, sesi pemutran lain akan otomatis dijeda</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Jeda Media Lain secara Otomatis</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Tengah Atas</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Kiri Atas</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Kanan Atas</system:String>
+    <system:String x:Key="RepeatButtonDescription">Pilih diantara ulangi semua atau ulangi satu, meningkatkan lebar flyout</system:String>
+    <system:String x:Key="RepeatButtonTitle">Tombol Ulangi*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Tampilkan nama pemutar media</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Seekbar yang dapat berinteraksi akan otomatis muncul jika player mendukungnya</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Tampilkan Seekbar</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Tingkatkan lebar flyout</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Tombol Acak*</system:String>
+    <system:String x:Key="TextBlockText1">Aktifkan Media Flyout</system:String>
+    <system:String x:Key="TextBlockText2">Pilih sebuah preset latar belakang blur modern yang telah dibuat</system:String>
+    <system:String x:Key="TextBlockText3">Tampilkan sebuah flyout jika anda menekan sebuah tombol kunci media</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Beberapa browser tidak mendukung mengulangi(repeat), acak(shuffle) dan kontrol seekbar.</system:String>
 </ResourceDictionary>

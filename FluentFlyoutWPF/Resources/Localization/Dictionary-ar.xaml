@@ -181,4 +181,37 @@
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">سرعة التمرير</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">سرعة تمرير النصوص (بكسل/ثانية). الإفتراضي هو 20.</system:String>
     <system:String x:Key="SearchSettings">إعدادات البحث</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> بدون</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> .النمط 1 (شكل متوهج)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> .النمط 2 (توهج متصاعد)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> . النمط 3 (ضبابي)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">تمويه الخلفية</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">محاذاة النص إلى المنتصف بدلاً من اليسار</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">توسيط العنوان والفنان</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">تصميم أنحف وأقل إزدحام
+يخفي أزرار التكرار والعشوائية ومعلومات المشغل</system:String>
+    <system:String x:Key="CompactLayoutTitle">شكل مصغر</system:String>
+    <system:String x:Key="FlyoutPositionTitle">موقع أداة التحكم</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(الافتراضي: 3000 مللي ثانية)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">مدة ظهور أداة التحكم</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">دائماً ظاهرة</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">تبقى اداة التحكم ظاهرة حتى الضغط على زر الإغلاق</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">لا تعرض اداة التحكم عند الضغط على أزرار رفع/ خفض/ كتم الصوت</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">إستثناء مفاتيح الصوت</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">عند تشغيل الوسائط الجديدة أو التركيز عليها، يتم إيقاف الجلسات النشطة الأخرى تلقائيًا</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">إيقاف الوسائط الأخرى تلقائيًا</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> الأعلى منتصف</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> الأعلى يساراً</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> الأعلى اليمين</system:String>
+    <system:String x:Key="RepeatButtonDescription">اختر بين تكرار الكل أو تكرار واحد، مما يزيد من عرض القائمة المنبثقة</system:String>
+    <system:String x:Key="RepeatButtonTitle">زر التكرار*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">إظهار اسم مشغل الوسائط</system:String>
+    <system:String x:Key="ShowSeekbarDescription">سيتم عرض شريط البحث التفاعلي تلقائيًا إذا كان المشغل يدعمه</system:String>
+    <system:String x:Key="ShowSeekbarTitle">إظهار الخط الزمني</system:String>
+    <system:String x:Key="ShuffleButtonDescription">يزيد عرض أداة التحكم</system:String>
+    <system:String x:Key="ShuffleButtonTitle">زر الخلط*</system:String>
+    <system:String x:Key="TextBlockText1">تفعيل الوسائط المنبثقة</system:String>
+    <system:String x:Key="TextBlockText2">اختر من بين مجموعة مسبقة من أشكال الخلفية الحديثة</system:String>
+    <system:String x:Key="TextBlockText3">عرض نافذة منبثقة عند الضغط على مفتاح الوسائط</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*بعض المتصفحات/المشغلات لا تدعم التكرار والخلط والتحكم في شريط البحث.</system:String>
 </ResourceDictionary>

@@ -182,4 +182,37 @@
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverTitle">Непрерывная прокрутка</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Скорость прокрутки</system:String>
     <system:String x:Key="OpenMediaPlayerText">Открыть плеер</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Отключено</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Стиль 1 (Свечение обложки)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Стиль 2 (Восходящее свечение)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Стиль 3 (Размытие)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Размытие фона</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Выравнивает текст по центру, а не по левой стороне</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Центрировать название трека и имя исполнителя</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Более простой и менее навязчивый макет
+скрывает кнопки повтора, случайного порядка и название плеера</system:String>
+    <system:String x:Key="CompactLayoutTitle">Компактный режим</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Расположение всплывающего плеера</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(по умолчанию: 3000 мс)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Время отображения панели</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Всегда отображать</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Всплывающее меню остается открытым, пока вы не закроете его</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Не отображает всплывающее меню при нажатии кнопок увеличения/уменьшения громкости/отключения звука</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Исключить клавиши регулировки громкости</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">При начале воспроизведения из другого плеера активный плеер будет автоматически приостановлен</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Автоматически приостанавливать другой плеер</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Вверху по центру</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Вверху слева</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Вверху справа</system:String>
+    <system:String x:Key="RepeatButtonDescription">Отображает кнопку выбора режима повторения (увеличивает ширину окна)</system:String>
+    <system:String x:Key="RepeatButtonTitle">Кнопка повтора*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Отображать название плеера (приложения)</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Интерактивный временной статус-бар будет отображаться автоматически, если плеер это поддерживает</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Отображать индикатор времени*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Увеличивает ширину окна</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Кнопка перемешивания*</system:String>
+    <system:String x:Key="TextBlockText1">Включить всплывающий плеер</system:String>
+    <system:String x:Key="TextBlockText2">Выберите пресет стиля размытия фона</system:String>
+    <system:String x:Key="TextBlockText3">Отображает плеер, при нажатии на медиа-клавиши</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Некоторые браузеры/плееры не поддерживают управление повтором, перемешиванием и перемоткой.</system:String>
 </ResourceDictionary>

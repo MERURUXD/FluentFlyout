@@ -181,4 +181,37 @@
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Metni ileri geri kaydırmak yerine tek yönde sonsuz döngüye al.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Kaydırma Hızı</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">Metnin kayma hızı (piksel/saniye). Varsayılan: 20.</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Hiçbiri</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Stil 1 (Kapak Parıltısı)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Stil 2 (Yükselen Parıltı)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Stil 3 (Bulanıklık)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Arka Plan Bulanıklığı</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Metni sola değil ortaya hizala</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Başlığı ve Sanatçıyı Ortala</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Daha ince ve daha az göze çarpan düzen
+tekrar, karıştırma ve oynatıcı bilgilerini gizler</system:String>
+    <system:String x:Key="CompactLayoutTitle">Kompakt Düzen</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Açılır Pencere Pozisyonu</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(varsayılan: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Açılır Pencere Kalış Süresi</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Her Zaman Göster</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Kapat düğmesine tıklayana kadar açılır pencere açık kalır</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Ses açma/kısma/sessize alma tuşlarına basıldığında açılır menüyü göstermeyin.</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Ses Tuşlarını Hariç Tut</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Yeni medyayı oynatırken veya ona odaklanırken, diğer aktif oturumlar otomatik olarak duraklatılır</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Diğer Medyaları Otomatik Olarak Duraklat</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Üst Orta</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Sol Üst</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Sağ Üst</system:String>
+    <system:String x:Key="RepeatButtonDescription">Tümünü tekrarla veya birini tekrarla arasında seçim yapın, açılır pencere genişliğini artırır</system:String>
+    <system:String x:Key="RepeatButtonTitle">Tekrar Düğmesi*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Medya Oynatıcı Adını Göster</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Eğer oynatıcı destekliyorsa, etkileşimli ilerleme çubuğu otomatik olarak görüntülenecektir</system:String>
+    <system:String x:Key="ShowSeekbarTitle">İlerleme Çubuğunu Göster*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Açılır pencere genişliğini artırır</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Karıştır Düğmesi*</system:String>
+    <system:String x:Key="TextBlockText1">Medya Penceresini Etkinleştir</system:String>
+    <system:String x:Key="TextBlockText2">Önceden ayarlanmış modern arka plan bulanıklığı stilleri arasından seçim yapın</system:String>
+    <system:String x:Key="TextBlockText3">Bir medya tuşuna bastığınızda açılır pencereyi görüntüleyin</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Bazı tarayıcılar/oynatıcılar tekrar, karıştırma ve ilerleme çubuğu kontrolünü desteklemez.</system:String>
 </ResourceDictionary>

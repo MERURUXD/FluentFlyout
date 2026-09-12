@@ -18,7 +18,6 @@ public sealed class DownstreamSurfaceContractTests
 
         var retiredTypes = new[]
         {
-            "MediaFlyoutPage",
             "VolumeMixerPage",
             "LockKeysPage",
             "OnboardingWindow",
@@ -34,6 +33,8 @@ public sealed class DownstreamSurfaceContractTests
         {
             Assert.DoesNotContain(retiredType, typeNames);
         }
+
+        Assert.Contains("MediaFlyoutPage", typeNames);
     }
 
     [Fact]
@@ -43,7 +44,7 @@ public sealed class DownstreamSurfaceContractTests
             .Select(item => item.TargetPageType.Name)
             .ToHashSet(StringComparer.Ordinal);
 
-        foreach (var retiredPage in new[] { "MediaFlyoutPage", "VolumeMixerPage", "LockKeysPage" })
+        foreach (var retiredPage in new[] { "VolumeMixerPage", "LockKeysPage" })
         {
             Assert.DoesNotContain(retiredPage, targetPageNames);
         }

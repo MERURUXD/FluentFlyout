@@ -27,4 +27,36 @@
     <system:String x:Key="TaskbarWidgetBackgroundBlurTitle">Pozadinsko Zamućenje</system:String>
     <system:String x:Key="TaskbarWidgetBackgroundBlurDescription">Dodaj efekt pozadinskog zamućenja widgetu za traku</system:String>
     <system:String x:Key="TaskbarWidgetHideCompletelyTitle">Kompletno Sakrij Kada Nema Nikakvog Medija</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Nijedan</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Stil 1 (Pozadinski Sjaj)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Stil 2 (Izlazeći Sjaj)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Stil 3 (Zamućenje)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Zamućenje pozadine</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Poravnaj tekst u sredinu umjesto ulijevo</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Centriraj naslov i izvođača</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Tanji i manje nametljiv raspored skriva ponavljanje,
+nasumičnu reprodukciju i informacije o mediju</system:String>
+    <system:String x:Key="CompactLayoutTitle">Kompaktni raspored</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Pozicija iskočnog prozora</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(zadano: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Trajanje prikaza iskočnog prozora</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Uvijek na ekranu</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Ne prikazuj iskočni prozor tijekom pritiskanja tipke za poglašavanje/utišavanje</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Izostavi Medijske Tipke</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Kada pustite ili promijenite fokus na novi medij, ostale aktivne sesije će se automatski pauzirati</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Pauziraj druge medije automatski</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Sredina gore</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Gore lijevo</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Gore desno</system:String>
+    <system:String x:Key="RepeatButtonDescription">Odaberi između ponavljanja svih ili ponavljanja jedne, povećava širinu iskočnog prozora</system:String>
+    <system:String x:Key="RepeatButtonTitle">Gumb za ponavljanje*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Prikaži naziv aplikacije medija</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Interaktivna traka za traženje će se automatski prikazati ako ju aplikacija podržava</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Prikaži traku za traženje*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Povećava širinu iskočnog prozora</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Gumb za nasumično reproduciranje*</system:String>
+    <system:String x:Key="TextBlockText1">Omogući iskočni prozor za medije</system:String>
+    <system:String x:Key="TextBlockText2">Odaberite iz unaprijed postavljenih modernih stilova zamućenja pozadine</system:String>
+    <system:String x:Key="TextBlockText3">Prikaži iskočni prozor pritiskom tipki za medije</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Neki preglednici/aplikacije ne podržavaju ponavljanje, nasumičnu reprodukciju i traku za traženje.</system:String>
 </ResourceDictionary>

@@ -181,4 +181,37 @@ Môžete pomôcť s prekladmi na</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Nekonečná slučka textu jedným smerom namiesto posúvania tam a späť.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Rýchlosť Posúvania</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">Rýchlosť, ktorou sa text posúva (pixel za sekundu). Predvolené: 20.</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Žiadne</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Štýl 1 (Cover Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Štýl 2 (Rising Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Štýl 3 (Blur)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Rozmazanie Pozadia</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Zarovnať text do stredu namiesto doľava</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Vycentrovať Názov a Autora</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Štíhlejšie a menej rušivé rozloženie
+skrýva informácie o opakovaní, náhodnom prehrávaní a prehrávači</system:String>
+    <system:String x:Key="CompactLayoutTitle">Kompaktné Rozloženie</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Pozícia Plávajúceho okna</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(predvolené: 3000ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Doba Zotrvania Plávajúceho okna</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Vždy Zobraziť</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Plávajúce okno zostane otvorené, kým nekliknete na tlačidlo zavrieť</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Nezobrazovať plávajúce okno pri stlačení tlačidla na zvýšenie/zníženie hlasitosti/stlmenie zvuku</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Vylúčiť Klávesy Hlasitosti</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Keď prehrávate alebo sa sústredíte na nové médiá, ostatné aktívne relácie sa automaticky pozastavia</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Automatické Pozastavenie Ostatných Médií</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Stred hore</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Vľavo hore</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Vpravo hore</system:String>
+    <system:String x:Key="RepeatButtonDescription">Vyberte medzi opakovaním všetkých alebo jednej pesničky, zväčšuje šírku plávajúceho okna</system:String>
+    <system:String x:Key="RepeatButtonTitle">Tlačidlo Opakovania*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Zobraziť názov Prehrávača</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Interaktívna časová os sa automaticky zobrazí, ak ju prehrávač podporuje</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Zobraziť Časovú os*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Zväčšuje šírku plávajúceho okna</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Tlačidlo Náhodného prehrávania*</system:String>
+    <system:String x:Key="TextBlockText1">Povoliť Plávajúce okno Prehrávača</system:String>
+    <system:String x:Key="TextBlockText2">Vyberte si z prednastavených moderných štýlov rozmazania pozadia</system:String>
+    <system:String x:Key="TextBlockText3">Zobraziť plávajúce okno keď stačíte klávesu pre ovládanie médií</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Niektoré prehliadače/prehrávače nepodporujú ovládanie opakovania, náhodného prehrávania a časovej osi.</system:String>
 </ResourceDictionary>

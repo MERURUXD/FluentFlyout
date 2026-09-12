@@ -181,4 +181,37 @@ Du kannst helfen, die App zu übersetzen auf</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Lassen Sie den Text in einer Richtung endlos durchlaufen, anstatt ihn hin und her scrollen zu lassen.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Scrollgeschwindigkeit</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">Geschwindigkeit, mit der der Text scrollt (Pixel/Sekunde). Der Standardwert ist 20.</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> · Keine</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Stil 1 (Cover Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Stil 2 (Rising Glow)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Stil 3 (Unschärfe)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Hintergrund-Unschärfe</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Text mittig statt links ausrichten</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Titel und Künstler zentrieren</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Minimaleres und weniger ablenkendes Layout
+verbirgt autom. Wiederholung, Shuffle und Player-Information</system:String>
+    <system:String x:Key="CompactLayoutTitle">Kompaktes Layout</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Position des Flyouts</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(standardmäßig: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Anzeigedauer des Flyouts</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Display immer eingeschaltet</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">Das Flyout bleibt geöffnet, bis die Schließen-Schaltfläche geklickt wird</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Beim Ändern der Lautstärke oder Stummschalten kein Flyout anzeigen</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Lautstärketasten ausschließen</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Wenn Du neue Medien abspielst oder fokussierst, werden andere aktive Mediensitzungen automatisch pausiert</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Pausiere andere Medien automatisch</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Oben mittig</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Oben links</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Oben rechts</system:String>
+    <system:String x:Key="RepeatButtonDescription">Wähle zwischen "Alle wiederholen" und "Eins wiederholen", vergrößert die Breite des Flyouts</system:String>
+    <system:String x:Key="RepeatButtonTitle">Wiederholungsknopf</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Name des Media Players anzeigen</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Eine interaktive Suchleiste wird automatisch angezeigt, wenn der Player dies unterstützt</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Suchleiste anzeigen*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Erhöht die Breite des Flyouts</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Shuffle-Knopf*</system:String>
+    <system:String x:Key="TextBlockText1">Aktiviere Media Flyout</system:String>
+    <system:String x:Key="TextBlockText2">Wähle aus einer Reihe moderner Hintergrundstile</system:String>
+    <system:String x:Key="TextBlockText3">Zeigt ein Flyout an, wenn eine Medientaste gedrückt wird.</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Einige Browser/Player unterstützen die automatische Wiederholung, Shuffle und Suchleiste nicht.</system:String>
 </ResourceDictionary>

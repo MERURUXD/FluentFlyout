@@ -99,16 +99,16 @@ deserialization. Settings changes are debounced before persistence.
 
 ## Public settings surface
 
-The downstream settings navigation exposes only Home, Taskbar Widget, Taskbar
-Visualizer, Next Up, System, and About. Home's functional dashboard mirrors
-that core surface with four cards: Taskbar Widget, Taskbar Visualizer, Next Up,
-and System. The Media Flyout settings page, Volume Mixer page, and Lock Keys
-page are retired from production; the Main Media Flyout runtime remains an
-independent coordinator surface.
+The downstream settings navigation exposes Home, Media Flyout, Taskbar Widget,
+Taskbar Visualizer, Next Up, System, and About. Home's functional dashboard
+mirrors the other core surfaces with four cards: Taskbar Widget, Taskbar
+Visualizer, Next Up, and System. The Media Flyout settings page binds the
+existing `UserSettings` properties and does not own or replace `MainWindow`'s
+runtime/session infrastructure. The Volume Mixer page and Lock Keys page remain
+retired from production.
 
 The taskbar widget's click path still calls `MainWindow.ShowMediaFlyout` and
-remains a supported interaction. Retiring those settings pages does not disable
-the Main Media Flyout runtime or its shared media/session infrastructure.
+remains a supported interaction.
 
 ## Media-session flow and ownership
 
@@ -166,7 +166,7 @@ its same-SHA quality/package checks pass.
 Builds and focused tests do not prove GUI, audio, media-session, migration,
 coexistence, network-capture, signing, Store, or release behavior. Those claims
 require the controlled Windows validation summarized in the
-[current validation report](windows-validation.md).
+[Stage 4 validation report](windows-validation.md).
 
 ## Upstream conflict hotspots
 

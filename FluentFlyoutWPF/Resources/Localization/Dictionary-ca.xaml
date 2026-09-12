@@ -181,4 +181,37 @@ Pots ajudar a contribuir amb les traduccions a</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextLoopForeverDescription">Repetir el text en un bucle infinit en una direcció en comptes de desplaçar-se endavant i endarrere.</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Velocitat de Desplaçament</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">Velocitat a la qual es desplaça el text (píxels/segon). El valor per defecte és 20.</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Cap</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Estil 1 (Il·luminació de la Portada)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Estil 2 (Il·luminat Difuminat)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Estil 3 (Difuminat)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Desenfocament del fons</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">Alinear el texte al centre en comptes de l'esquerra</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Centrar títol i artista</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Un disseny més prim i menys intrusiu
+Oculta els botons de repetició, aleatori i la informació del reproductor</system:String>
+    <system:String x:Key="CompactLayoutTitle">Disposició compacta</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Posició del Flyout</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(per defecte: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Duració del Flyout</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Mostra Sempre</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">El menú desplegable roman obert fins que feu clic al botó de tancament</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">No mostrar el flyout quan es premi volum amunt/avall/silenci</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Exclou Tecles de Volum</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Quan reprodueixes o et centres en nous continguts multimèdia, altres sessions actives es posen en pausa automàticament</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Pausa altres continguts multimèdia automàticament</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Centre superior</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Superior Esquerra</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Superior Dreta</system:String>
+    <system:String x:Key="RepeatButtonDescription">Tria entre repetir tot o repetir un, augmenta l'amplada del flyout</system:String>
+    <system:String x:Key="RepeatButtonTitle">Botó de repetició*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Mostrar nom del reproductor de media</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Una barra de progrés apareixerà si el reproductor ho suporta</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Mostra barra de progrés*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Augmenta l'amplada del flyout</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Botó de barreja*</system:String>
+    <system:String x:Key="TextBlockText1">Habilitar Flyout Multimèdia</system:String>
+    <system:String x:Key="TextBlockText2">Tria des d'un conjunt predeterminat d'estils de desenfocament moderns</system:String>
+    <system:String x:Key="TextBlockText3">Es mostra un flyout quan es prem una tecla multimèdia</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Alguns navegadors/reproductors no suporten controls per repetir, aleatori o la barra de progrés.</system:String>
 </ResourceDictionary>

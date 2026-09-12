@@ -171,4 +171,37 @@ Segíts te is a fordításban a(z)</system:String>
     <system:String x:Key="RemoveButton">Eltávolítás</system:String>
     <system:String x:Key="TaskbarWidgetFixedWidthTitle">Widget szélességének rögzítése</system:String>
     <system:String x:Key="TaskbarWidgetFixedWidthDescription">A widget szélességét tartsa állandóan, ne pedig a címhez és az előadó nevéhez igazítsa</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> Nincs</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> Stílus 1 (Borítófény)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> Stílus 2 (Fényáramlás)</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> Stílus 3 (Elmosódás)</system:String>
+    <system:String x:Key="BackgroundBlurTitle">Háttér elmosódás</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">A szöveg középre igazítása a bal helyett</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">Cím és előadó középre igazítása</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">Keskenyebb és kevésbé zavaró elrendezés
+elrejti az ismétlés, keverés és lejátszó információkat</system:String>
+    <system:String x:Key="CompactLayoutTitle">Kompakt elrendezés</system:String>
+    <system:String x:Key="FlyoutPositionTitle">Flyout pozíció</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(alapértelmezett: 3000 ms)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">Flyout ablak megjelenítési ideje</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">Mindig megjelenít</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">A flyout nyitva marad, amíg be nem zárja a bezárás gombbal</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">Ne jelenítse meg a flyout-ot a hangerő fel/le/némítás gombok megnyomásakor</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">Hangerő gombok kizárása</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">Amikor új média lejátszása indul, vagy az fókuszba kerül, a többi aktív munkamenet automatikusan szünetel</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">Más média automatikus szüneteltetése</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> Felső közép</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> Bal felső</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> Felső jobb</system:String>
+    <system:String x:Key="RepeatButtonDescription">Válasszon az összes ismétlése vagy egy ismétlése között, növeli a flyout szélességét</system:String>
+    <system:String x:Key="RepeatButtonTitle">Ismétlés gomb*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">Jelenítse meg a médialejátszó nevét</system:String>
+    <system:String x:Key="ShowSeekbarDescription">Ha a lejátszó támogatja, egy interaktív idősáv automatikusan megjelenik</system:String>
+    <system:String x:Key="ShowSeekbarTitle">Mutassa az idősávot</system:String>
+    <system:String x:Key="ShuffleButtonDescription">Növeli a flyout szélességét</system:String>
+    <system:String x:Key="ShuffleButtonTitle">Keverés gomb*</system:String>
+    <system:String x:Key="TextBlockText1">Média Flyout engedélyezése</system:String>
+    <system:String x:Key="TextBlockText2">Válasszon egy előre beállított modern háttér elmosódás stílust</system:String>
+    <system:String x:Key="TextBlockText3">Flyout megjelenítése a média gomb megnyomásakor</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*Néhány böngésző/lejátszó nem támogatja az ismétlés, keverés és idősáv vezérlést.</system:String>
 </ResourceDictionary>

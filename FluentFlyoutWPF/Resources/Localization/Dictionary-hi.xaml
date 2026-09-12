@@ -181,4 +181,37 @@
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">ऊपर-नीचे करने की गति</system:String>
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedDescription">लेख ऊपर-नीचे करनो की गति (पिक्सेल/सेकंड)। प्रीसेट 20 है।</system:String>
     <system:String x:Key="TaskbarVisualizerBaselineAutoHideDescription">जब कोई ऑडियो नहीं चल रहा हो, तो बेसलाइन को अपने-आप छिपा दो</system:String>
+    <system:String x:Key="BackgroundBlurOption1" xml:space="preserve"> कोई नहीं</system:String>
+    <system:String x:Key="BackgroundBlurOption2" xml:space="preserve"> स्टाइल 1 (कवर ग्लो)</system:String>
+    <system:String x:Key="BackgroundBlurOption3" xml:space="preserve"> उज्ज्वल चमक</system:String>
+    <system:String x:Key="BackgroundBlurOption4" xml:space="preserve"> धुंधला</system:String>
+    <system:String x:Key="BackgroundBlurTitle">दृश्य धुंधला</system:String>
+    <system:String x:Key="CenterTitleArtistDescription">टेक्स्ट को बाईं ओर की बजाय बीच में संरेखित करें</system:String>
+    <system:String x:Key="CenterTitleArtistTitle">केंद्र शीर्षक और कलाकार</system:String>
+    <system:String x:Key="CompactLayoutDescription" xml:space="preserve">सरल और कम दखल देने वाला लेआउट
+रिपीट, शफल और प्लेयर की जानकारी छुपाता है</system:String>
+    <system:String x:Key="CompactLayoutTitle">तंग लेआउट</system:String>
+    <system:String x:Key="FlyoutPositionTitle">फ्लाईआउट स्थिति</system:String>
+    <system:String x:Key="FlyoutStayDurationDescription">(डिफ़ॉल्ट: 3000 मिलीसेकंड)</system:String>
+    <system:String x:Key="FlyoutStayDurationTitle">फ्लायआउट रहने की अवधि</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplay">हमेशा प्रदर्शित करें</system:String>
+    <system:String x:Key="MediaFlyoutAlwaysDisplayDescription">फ़्लायआउट तब तक खुला रहता है जब तक आप क्लोज़ बटन पर क्लिक नहीं करते</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeDescription">वॉल्यूम बढ़ाने/घटाने/म्यूट करने के दौरान फ़्लाइआउट न दिखाएं</system:String>
+    <system:String x:Key="MediaFlyoutExcludeVolumeTitle">वॉल्यूम बटन को शामिल न करें</system:String>
+    <system:String x:Key="PauseOtherMediaDescription">जब आप खेलते हैं या नए मीडिया पर ध्यान केंद्रित करते हैं, तो अन्य सक्रिय सत्र स्वचालित रूप से रुक जाते हैं</system:String>
+    <system:String x:Key="PauseOtherMediaTitle">अन्य मीडिया को स्वचालित रूप से रोकें</system:String>
+    <system:String x:Key="PositionTopCenter" xml:space="preserve"> ऊपरी केंद्र</system:String>
+    <system:String x:Key="PositionTopLeft" xml:space="preserve"> ऊपरी बायाँ ओर</system:String>
+    <system:String x:Key="PositionTopRight" xml:space="preserve"> ऊपर दाईं ओर</system:String>
+    <system:String x:Key="RepeatButtonDescription">सभी को दोहराने या केवल एक को दोहराने का विकल्प चुनें, इससे फ्लाईआउट की चौड़ाई बढ़ जाती है</system:String>
+    <system:String x:Key="RepeatButtonTitle">रीपीट(दोहराएँ) बटन*</system:String>
+    <system:String x:Key="ShowMediaPlayerNameTitle">मीडिया प्लेयर का नाम दिखाएँ</system:String>
+    <system:String x:Key="ShowSeekbarDescription">यदि प्लेयर इसे सपोर्ट करता है तो एक इंटरैक्टेबल सीकबार अपने आप प्रदर्शित हो जाएगी</system:String>
+    <system:String x:Key="ShowSeekbarTitle">सीकबार दिखाएँ*</system:String>
+    <system:String x:Key="ShuffleButtonDescription">फ्लाईआउट की चौड़ाई बढ़ाता है</system:String>
+    <system:String x:Key="ShuffleButtonTitle">शफल बटन*</system:String>
+    <system:String x:Key="TextBlockText1">मीडिया फ्लाईआउट सक्षम करें</system:String>
+    <system:String x:Key="TextBlockText2">आधुनिक पृष्ठभूमि धुंधला शैलियों के प्रीसेट में से चुनें</system:String>
+    <system:String x:Key="TextBlockText3">जब आप मीडिया कुंजी दबाते हैं तो फ्लाईआउट प्रदर्शित करें</system:String>
+    <system:String x:Key="UnsupportedControlsWarning">*कुछ ब्राउज़र/प्लेयर रिपीट, शफल और सीकबार कंट्रोल को सपोर्ट नहीं करते हैं।</system:String>
 </ResourceDictionary>
