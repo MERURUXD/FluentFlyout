@@ -8,9 +8,9 @@ namespace FluentFlyoutWPF.Classes;
 internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
 {
     private const int RibbonCount = 3;
+    private const int LobeCount = 3;
     private const int ControlPointCount = 7;
     private const byte BaseAlpha = 80;
-    private const float TwoPi = 2f * MathF.PI;
 
     private static readonly Color[] RibbonColors =
     [
@@ -19,14 +19,12 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         Color.FromRgb(168, 85, 247)
     ];
 
-    private static readonly float[] SpectrumOffsets = [-0.08f, 0f, 0.08f];
-    private static readonly float[] PhaseOffsets = [-0.12f, 0f, 0.12f];
-    private static readonly float[] LocalMotionSpeeds = [0.34f, 0.28f, 0.40f];
-    private static readonly float[] WaveCycles = [1.95f, 2.05f, 2.15f];
-    private static readonly float[] LayerBiases = [-0.035f, 0f, 0.035f];
-    private static readonly float[] DisplacementScales = [0.12f, 0.13f, 0.12f];
-    private static readonly float[] BaseThicknessScales = [0.022f, 0.024f, 0.022f];
-    private static readonly float[] AudioThicknessScales = [0.018f, 0.016f, 0.018f];
+    private static readonly float[] SpectrumOffsets = [-0.06f, 0f, 0.06f];
+    private static readonly float[] LobeCenters = [0.18f, 0.50f, 0.82f];
+    private static readonly float[] LobeWidths = [0.24f, 0.27f, 0.24f];
+    private static readonly float[] LobeHeightScales = [0.105f, 0.13f, 0.105f];
+    private static readonly float[] RibbonHeightScales = [1.00f, 0.92f, 0.84f];
+    private static readonly float[] BaseThicknessScales = [0.024f, 0.022f, 0.020f];
 
     public void Render(
         Span<byte> buffer,
@@ -40,19 +38,20 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
             return;
 
         Span<float> controlPoints = stackalloc float[ControlPointCount];
+        Span<float> lobeHeights = stackalloc float[LobeCount];
 
         for (int ribbon = 0; ribbon < RibbonCount; ribbon++)
         {
             BuildAudioControlPoints(amplitudes, controlPoints, ribbon);
+            BuildLobeHeights(controlPoints, lobeHeights, ribbon);
             DrawRibbon(
                 buffer,
                 stride,
                 imageWidth,
                 imageHeight,
-                controlPoints,
+                lobeHeights,
                 RibbonColors[ribbon],
-                ribbon,
-                options.ElapsedSeconds);
+                ribbon);
         }
     }
 
@@ -73,18 +72,18 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         int stride,
         int imageWidth,
         int imageHeight,
-        ReadOnlySpan<float> controlPoints,
+        ReadOnlySpan<float> lobeHeights,
         Color color,
-        int ribbon,
-        double elapsedSeconds)
+        int ribbon)
     {
+        float centerY = imageHeight * 0.5f;
+
         for (int x = 0; x < imageWidth; x++)
         {
             float normalizedX = imageWidth == 1 ? 0f : x / (imageWidth - 1f);
-            float centerY = SampleCenterline(controlPoints, normalizedX, ribbon, imageHeight, elapsedSeconds);
-            float halfThickness = SampleHalfThickness(controlPoints, normalizedX, ribbon, imageHeight);
-            float top = centerY - halfThickness;
-            float bottom = centerY + halfThickness;
+            float halfHeight = CalculateHalfHeight(lobeHeights, normalizedX, ribbon, imageHeight);
+            float top = centerY - halfHeight;
+            float bottom = centerY + halfHeight;
             int firstY = Math.Max(0, (int)MathF.Floor(top));
             int endY = Math.Min(imageHeight, (int)MathF.Ceiling(bottom));
 
@@ -104,51 +103,63 @@ internal sealed class RibbonVisualizerRenderer : IVisualizerRenderer
         }
     }
 
-    internal static float SampleCenterline(
+    private static void BuildLobeHeights(
         ReadOnlySpan<float> controlPoints,
-        float normalizedX,
-        int ribbon,
-        int imageHeight,
-        double elapsedSeconds)
+        Span<float> lobeHeights,
+        int ribbon)
     {
         int ribbonIndex = NormalizeRibbonIndex(ribbon);
-        normalizedX = ClampUnit(normalizedX);
-        float audioAmplitude = ClampUnit(SampleSmoothCurve(controlPoints, normalizedX));
-        float anchoredPhase = (TwoPi * WaveCycles[ribbonIndex] * normalizedX) + PhaseOffsets[ribbonIndex];
-        float anchoredShape = MathF.Sin(anchoredPhase);
-        float localMotionPhase = (TwoPi * LocalMotionSpeeds[ribbonIndex] * (float)elapsedSeconds)
-            + (TwoPi * 1.15f * normalizedX)
-            + (ribbonIndex * 0.7f);
-        float localMotion = 1f + (0.08f * MathF.Sin(localMotionPhase));
-        float audioInfluence = 0.30f + (0.70f * audioAmplitude);
 
-        return (imageHeight * 0.5f)
-            + (LayerBiases[ribbonIndex] * imageHeight)
-            + (anchoredShape
-                * localMotion
-                * audioInfluence
-                * imageHeight
-                * DisplacementScales[ribbonIndex]
-                * SampleEdgeEnvelope(normalizedX));
+        for (int lobe = 0; lobe < LobeCount; lobe++)
+        {
+            float audioAmplitude = ClampUnit(SampleSmoothCurve(controlPoints, LobeCenters[lobe]));
+            lobeHeights[lobe] = audioAmplitude * LobeHeightScales[lobe] * RibbonHeightScales[ribbonIndex];
+        }
     }
 
-    internal static float SampleHalfThickness(
+    internal static float SampleHalfHeight(
         ReadOnlySpan<float> controlPoints,
         float normalizedX,
         int ribbon,
         int imageHeight)
     {
-        int ribbonIndex = NormalizeRibbonIndex(ribbon);
-        float audioAmplitude = ClampUnit(SampleSmoothCurve(controlPoints, normalizedX));
+        Span<float> lobeHeights = stackalloc float[LobeCount];
+        BuildLobeHeights(controlPoints, lobeHeights, ribbon);
+        return CalculateHalfHeight(lobeHeights, normalizedX, ribbon, imageHeight);
+    }
 
-        return imageHeight * (BaseThicknessScales[ribbonIndex]
-            + (audioAmplitude * AudioThicknessScales[ribbonIndex]));
+    private static float CalculateHalfHeight(
+        ReadOnlySpan<float> lobeHeights,
+        float normalizedX,
+        int ribbon,
+        int imageHeight)
+    {
+        int ribbonIndex = NormalizeRibbonIndex(ribbon);
+        float halfHeight = BaseThicknessScales[ribbonIndex];
+
+        for (int lobe = 0; lobe < LobeCount; lobe++)
+            halfHeight += lobeHeights[lobe] * SampleLobeFalloff(normalizedX, lobe);
+
+        return imageHeight * halfHeight * SampleEdgeEnvelope(normalizedX);
     }
 
     internal static float SampleEdgeEnvelope(float normalizedX)
     {
         normalizedX = ClampUnit(normalizedX);
-        return 0.65f + (0.35f * MathF.Sin(MathF.PI * normalizedX));
+        float centerWeight = 4f * normalizedX * (1f - normalizedX);
+        return 0.72f + (0.28f * centerWeight);
+    }
+
+    internal static float SampleLobeFalloff(float normalizedX, int lobe)
+    {
+        int lobeIndex = Math.Clamp(lobe, 0, LobeCount - 1);
+        normalizedX = ClampUnit(normalizedX);
+        float distance = MathF.Abs(normalizedX - LobeCenters[lobeIndex]) / LobeWidths[lobeIndex];
+        if (distance >= 1f)
+            return 0f;
+
+        float value = 1f - distance;
+        return value * value * (3f - (2f * value));
     }
 
     internal static float SampleSpectrum(ReadOnlySpan<float> amplitudes, float normalizedX)

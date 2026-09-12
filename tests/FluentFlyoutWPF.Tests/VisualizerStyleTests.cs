@@ -93,69 +93,35 @@ public sealed class VisualizerStyleTests
     }
 
     [Fact]
-    public void RibbonGeometryUsesSignedCenterlineAndThinThickness()
-    {
-        const int width = 152;
-        const int height = 64;
-        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
-        float centerY = height * 0.5f;
-        float[] centerline = Enumerable.Range(0, width)
-            .Select(x => RibbonVisualizerRenderer.SampleCenterline(amplitudes, x / (width - 1f), 0, height, 0.37))
-            .ToArray();
-
-        Assert.Contains(centerline, value => value < centerY - 1f);
-        Assert.Contains(centerline, value => value > centerY + 1f);
-
-        float halfThickness = RibbonVisualizerRenderer.SampleHalfThickness(amplitudes, 0.5f, 0, height);
-        Assert.InRange(halfThickness, 1.5f, 3f);
-    }
-
-    [Fact]
-    public void RibbonCenterlineContainsAtLeastTwoWaveCycles()
-    {
-        const int width = 152;
-        const int height = 64;
-        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
-        float[] centerline = Enumerable.Range(0, width)
-            .Select(x => RibbonVisualizerRenderer.SampleCenterline(amplitudes, x / (width - 1f), 0, height, 0.37))
-            .ToArray();
-        int directionChanges = 0;
-        int previousDirection = 0;
-
-        for (int i = 1; i < centerline.Length; i++)
-        {
-            float delta = centerline[i] - centerline[i - 1];
-            if (MathF.Abs(delta) < 0.02f)
-                continue;
-
-            int direction = delta > 0f ? 1 : -1;
-            if (previousDirection != 0 && direction != previousDirection)
-                directionChanges++;
-
-            previousDirection = direction;
-        }
-
-        Assert.True(directionChanges >= 3);
-    }
-
-    [Fact]
-    public void RibbonLayersRemainRelatedAndMotionIsLocal()
+    public void RibbonGeometryUsesFixedCenterlineAndFilledThickness()
     {
         const int height = 64;
         float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
-        float[] firstTime = Enumerable.Range(0, 3)
-            .Select(ribbon => RibbonVisualizerRenderer.SampleCenterline(amplitudes, 0.37f, ribbon, height, 0.25))
-            .ToArray();
-        float[] secondTime = Enumerable.Range(0, 3)
-            .Select(ribbon => RibbonVisualizerRenderer.SampleCenterline(amplitudes, 0.37f, ribbon, height, 1.5))
-            .ToArray();
+        float halfHeight = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.5f, 1, height);
+        float repeatedHalfHeight = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.5f, 1, height);
 
-        Assert.True(firstTime.Max() - firstTime.Min() > 0.25f);
-        Assert.All(firstTime.Zip(secondTime), pair => Assert.InRange(MathF.Abs(pair.First - pair.Second), 0f, 1.5f));
+        Assert.Equal(halfHeight, repeatedHalfHeight);
+        Assert.InRange(halfHeight, 7f, 12f);
     }
 
     [Fact]
-    public void RibbonRendersAThickFilledFootprintAroundTheAnchoredCenterline()
+    public void RibbonHalfHeightContainsThreeFixedLobes()
+    {
+        const int height = 64;
+        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
+        float leftLobe = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.18f, 1, height);
+        float centerLobe = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.50f, 1, height);
+        float rightLobe = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.82f, 1, height);
+        float leftValley = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.34f, 1, height);
+        float rightValley = RibbonVisualizerRenderer.SampleHalfHeight(amplitudes, 0.66f, 1, height);
+
+        Assert.True(leftLobe > leftValley + 1f);
+        Assert.True(centerLobe > leftValley + 1f);
+        Assert.True(rightLobe > rightValley + 1f);
+    }
+
+    [Fact]
+    public void RibbonRendersAThickFilledFootprintAroundTheFixedCenterline()
     {
         const int width = 152;
         const int height = 64;
@@ -193,6 +159,24 @@ public sealed class VisualizerStyleTests
     }
 
     [Fact]
+    public void RibbonFrameDoesNotChangeWithElapsedTime()
+    {
+        const int width = 152;
+        const int height = 64;
+        byte[] firstFrame = new byte[width * height * 4];
+        byte[] secondFrame = new byte[width * height * 4];
+        float[] amplitudes = [1f, 1f, 1f, 1f, 1f, 1f, 1f];
+        var firstOptions = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 0);
+        var secondOptions = new VisualizerRenderOptions(Color.FromRgb(10, 20, 30), false, false, 10, 4, 4, 12.5);
+
+        var renderer = new RibbonVisualizerRenderer();
+        renderer.Render(firstFrame, width * 4, width, height, amplitudes, in firstOptions);
+        renderer.Render(secondFrame, width * 4, width, height, amplitudes, in secondOptions);
+
+        Assert.Equal(firstFrame, secondFrame);
+    }
+
+    [Fact]
     public void RibbonFftAmplitudeModulatesNearbyGeometry()
     {
         const int height = 64;
@@ -200,11 +184,11 @@ public sealed class VisualizerStyleTests
         float[] localPeakSpectrum = [0.1f, 0.1f, 0.1f, 1f, 0.1f, 0.1f, 0.1f];
 
         float localDelta = MathF.Abs(
-            RibbonVisualizerRenderer.SampleHalfThickness(localPeakSpectrum, 0.5f, 1, height)
-            - RibbonVisualizerRenderer.SampleHalfThickness(quietSpectrum, 0.5f, 1, height));
+            RibbonVisualizerRenderer.SampleHalfHeight(localPeakSpectrum, 0.5f, 1, height)
+            - RibbonVisualizerRenderer.SampleHalfHeight(quietSpectrum, 0.5f, 1, height));
         float distantDelta = MathF.Abs(
-            RibbonVisualizerRenderer.SampleHalfThickness(localPeakSpectrum, 0.02f, 1, height)
-            - RibbonVisualizerRenderer.SampleHalfThickness(quietSpectrum, 0.02f, 1, height));
+            RibbonVisualizerRenderer.SampleHalfHeight(localPeakSpectrum, 0.02f, 1, height)
+            - RibbonVisualizerRenderer.SampleHalfHeight(quietSpectrum, 0.02f, 1, height));
 
         Assert.True(localDelta > 0.3f);
         Assert.True(localDelta > distantDelta + 0.1f);
@@ -213,8 +197,8 @@ public sealed class VisualizerStyleTests
     [Fact]
     public void RibbonEdgeEnvelopeRemainsGentle()
     {
-        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(0f), 0.64f, 0.66f);
-        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(1f), 0.64f, 0.66f);
+        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(0f), 0.71f, 0.73f);
+        Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(1f), 0.71f, 0.73f);
         Assert.InRange(RibbonVisualizerRenderer.SampleEdgeEnvelope(0.5f), 0.99f, 1f);
     }
 }
