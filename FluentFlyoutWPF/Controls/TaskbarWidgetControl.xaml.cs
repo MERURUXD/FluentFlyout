@@ -510,7 +510,7 @@ public partial class TaskbarWidgetControl : UserControl
                 SongImagePlaceholder.Symbol = SymbolRegular.MusicNote220;
                 SongImagePlaceholder.Visibility = Visibility.Visible;
                 SongImage.ImageSource = null;
-                BackgroundImage.Source = null;
+                BackgroundGlow.Background = null;
                 SongImageBorder.Margin = new Thickness(0, 0, 0, -3); // align music note better when no cover
 
                 MainBorder.Background = new SolidColorBrush(Colors.Transparent);
@@ -604,7 +604,7 @@ public partial class TaskbarWidgetControl : UserControl
                     SongImage.Opacity = 1;
                 }
                 SongImage.ImageSource = icon;
-                BackgroundImage.Source = icon;
+                BackgroundGlow.Background = brush;
                 SongImageBorder.Margin = new Thickness(0, 0, 0, -2); // align image better when cover is present
             }
             else
@@ -612,7 +612,7 @@ public partial class TaskbarWidgetControl : UserControl
                 SongImagePlaceholder.Symbol = SymbolRegular.MusicNote220;
                 SongImagePlaceholder.Visibility = Visibility.Visible;
                 SongImage.ImageSource = null;
-                BackgroundImage.Source = null;
+                BackgroundGlow.Background = null;
             }
 
             SongTitle.Visibility = Visibility.Visible;
@@ -620,7 +620,7 @@ public partial class TaskbarWidgetControl : UserControl
                 ? Visibility.Visible
                 : Visibility.Collapsed;
             SongInfoStackPanel.Visibility = _isVertical ? Visibility.Collapsed : Visibility.Visible;
-            BackgroundImage.Visibility = SettingsManager.Current.TaskbarWidgetBackgroundBlur ? Visibility.Visible : Visibility.Collapsed;
+            BackgroundGlow.Visibility = SettingsManager.Current.TaskbarWidgetBackgroundBlur ? Visibility.Visible : Visibility.Collapsed;
 
             // on top of XAML visibility binding (XAML binding only hides when disabled in settings)
             ControlsStackPanel.Visibility = SettingsManager.Current.TaskbarWidgetControlsEnabled
