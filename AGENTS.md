@@ -8,7 +8,7 @@ This is a personal downstream fork of [FluentFlyout](https://github.com/unchihug
 - Keep the existing solution and project directory names. Do not perform broad namespace renames, mass formatting, repository-wide reorganization, or unrelated feature deletion.
 - Do not rewrite the media state machine without evidence that a smaller change cannot solve the problem. Prefer small downstream policy files and narrow adapters over changes scattered across upstream code.
 - Treat `FluentFlyoutWPF/MainWindow.xaml.cs`, media/session code, settings, packaging, and existing workflows as upstream-heavy conflict hotspots. Identify that risk before editing them.
-- Keep fixes, pure formatting, and unrelated cleanup separate. For multi-issue work, agree on a staged scope and finish its validation before moving to the next stage; do not implement an entire roadmap just because it is documented.
+- Keep fixes, pure formatting, and unrelated cleanup separate. For multi-issue work, organize stages within the authorized scope and validate affected behavior as you proceed. Ask only when the scope expands or a material product tradeoff needs the user's decision; a documented roadmap alone does not authorize its implementation.
 
 ## Downstream invariants
 
@@ -25,7 +25,7 @@ These are requirements for changes, not a claim that all existing paths already 
 ## Before editing and reading development notes
 
 1. Inspect the working tree, branch, remotes, and current base SHA. Preserve unrelated user changes.
-2. Read the relevant implementation and notes below. Record the intended scope, acceptance checks, and upstream conflict risk before changing code.
+2. Read the affected implementation and consult the notes below only for the topic being changed. For cross-module or high-risk changes, state scope, acceptance checks, and upstream conflict risk; simple changes do not need a separate planning record.
 3. Treat historical descriptions as context, not instructions to restore old behavior. If a note and implementation disagree, identify the mismatch rather than assuming either is proof of successful validation.
 
 Development notes:
@@ -40,7 +40,9 @@ Development notes:
 
 Follow the applicable EditorConfig rather than imposing a new style. `FluentFlyoutWPF/.editorconfig` requires four-space C# indentation, CRLF line endings, no final newline, and the existing copyright/SPDX header. Preserve the formatter's import ordering. That configuration does not apply to every directory or to Markdown.
 
-For executable WPF changes, use Windows with a .NET 10 SDK and the explicit configuration/platform from the repository root:
+Choose local validation for the affected behavior; the commands below are entry points, not a mandatory local checklist for every edit. Matching CI evidence may cover a check when its commit, configuration, and scope match. Rerun after relevant changes or for a concrete remaining risk; retain all required CI gates.
+
+For executable WPF checks, use Windows with a .NET 10 SDK and the explicit configuration/platform from the repository root:
 
 ```powershell
 dotnet restore FluentFlyoutWPF\FluentFlyout.csproj -p:Platform=x64
@@ -57,6 +59,10 @@ git diff --check
 
 ## Change handoff and authorization
 
-Every change handoff should include the summary, files changed, architecture decisions, validation commands/results, upstream compatibility/conflict risk, known risks, remaining work, and relevant commit hashes when commits exist. Label static inspection, automated tests, and desktop measurements separately.
+- Within the authorized scope, continue through implementation, focused validation, and fixes for failures introduced by the change. Deliver when acceptance conditions and relevant checks are satisfied; broaden validation only for a concrete remaining risk or required gate. Report environment blockers and continue work that is not blocked.
 
-Do not create commits, push, or open a pull request unless the user authorizes it for the requested work. When authorized, use a scoped branch/PR and do not rewrite published `master` history. Permission to modify code or open a PR is not permission to merge, move release tags, publish releases, sign packages, or deploy. Check workflow triggers before an authorized push and ask if it would cause publishing beyond that authorization.
+Handoffs should state what changed, validation evidence, and unresolved blockers. Add architecture decisions, upstream conflict risks, remaining work, or commit identifiers only when useful to assess the change. Distinguish static inspection, automated tests, and desktop observations when reporting them.
+
+A request to open a PR authorizes the necessary scoped branch, commits, push, and same-scope revisions without repeated confirmation. A request for advice or review alone does not authorize implementation. Do not rewrite published `master` history.
+
+Merging requires user authorization; "review and merge if clean" is conditional merge authorization, so do not ask again once its conditions and required checks are satisfied. Permission to modify code or open a PR alone is not merge permission. An authorized merge includes the existing automatic dev-release workflow it normally triggers. Manual release/tag operations, signing, deployment, or changes to publishing policy require authorization for those actions. Check workflow triggers before pushing and ask only about side effects outside the existing authorization.

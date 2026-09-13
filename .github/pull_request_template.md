@@ -1,58 +1,11 @@
 ## Summary
 
-<!-- State the bounded stage or issue and the downstream product/channel it covers. -->
+<!-- Explain the problem or goal and the important changes. Keep one logical scope. -->
 
-## Motivation and scope
+## Validation
 
-<!-- Explain why this is needed. Link an issue if applicable. List intentional non-goals. -->
+<!-- List commands/results or matching CI evidence actually checked. Distinguish static inspection, automated tests, and Windows desktop observations. State relevant checks not run and why; omit inapplicable categories. -->
 
-## Type of change
+## Risks or blockers
 
-- [ ] Documentation or policy
-- [ ] Bug fix
-- [ ] Test coverage
-- [ ] Refactor (no functional changes)
-- [ ] Other
-
-## What changed
-
-<!-- Keep this list tied to the stated scope. -->
-
--
--
-
-## Validation evidence
-
-### Static and documentation checks
-
-- [ ] Relative links, paths, commands, and cross-references checked
-- [ ] `git diff --check`
-
-### Automated checks
-
-<!-- List exact commands and results, or explain why they were not run. -->
-
-- Restore/build:
-- Format:
-- Focused tests:
-
-### Windows desktop evidence
-
-<!-- Separate real GUI/audio/media/network observations from CI/build results. -->
-
-- [ ] Not applicable to this change
-- [ ] Completed; describe profile, version, and evidence:
-- [ ] Not run; explain the environment or dependency blocker:
-
-## Compatibility and risk
-
-- Upstream conflict hotspot(s):
-- Existing behavior intentionally preserved:
-- Migration, rollback, or release-channel considerations:
-
-## Checklist
-
-- [ ] I reviewed the final diff, including untracked-file scope.
-- [ ] I did not include credentials, personal data, raw logs, or user media.
-- [ ] I did not create a release, move a tag, publish a package, or change Store signing.
-- [ ] If AI tools were used, I reviewed and understand the resulting changes.
+<!-- Include only material unresolved issues, upstream conflicts, architecture decisions, migration/release implications, or follow-up work. Remove this section if none apply. -->
