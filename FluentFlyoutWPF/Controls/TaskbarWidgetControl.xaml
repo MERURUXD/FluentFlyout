@@ -18,11 +18,29 @@
             MouseLeftButtonUp="Grid_MouseLeftButtonUp"
             ClipToBounds="True">
         <Grid>
-            <Image x:Name="BackgroundImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" Opacity="0.4">
-                <Image.Effect>
-                    <BlurEffect Radius="80" />
-                </Image.Effect>
-            </Image>
+            <Grid IsHitTestVisible="False">
+                <Grid.OpacityMask>
+                    <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                        <GradientStop Color="#00000000" Offset="0" />
+                        <GradientStop Color="#FF000000" Offset="0.12" />
+                        <GradientStop Color="#A0000000" Offset="0.5" />
+                        <GradientStop Color="#00000000" Offset="1" />
+                    </LinearGradientBrush>
+                </Grid.OpacityMask>
+                <Image x:Name="BackgroundImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Width="{Binding ActualWidth, ElementName=MainBorder}" Height="{Binding ActualHeight, ElementName=MainBorder}" Opacity="0.8">
+                    <Image.Effect>
+                        <BlurEffect Radius="24" />
+                    </Image.Effect>
+                    <Image.OpacityMask>
+                        <RadialGradientBrush GradientOrigin="0.18,0.5" Center="0.18,0.5" RadiusX="1" RadiusY="0.5">
+                            <GradientStop Color="#FF000000" Offset="0" />
+                            <GradientStop Color="#90000000" Offset="0.45" />
+                            <GradientStop Color="#00000000" Offset="1" />
+                        </RadialGradientBrush>
+                    </Image.OpacityMask>
+                </Image>
+            </Grid>
             <Border Name="TopBorder" BorderThickness="0,1.25,0,0" CornerRadius="5" Margin="0,0,0,1.25">
                 <Grid Name="MainGrid" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0,0.5">
                     <Grid.RenderTransform>
