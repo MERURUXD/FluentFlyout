@@ -262,7 +262,7 @@ internal static class BitmapHelper
             var rng = new Random();
             var samples = new List<int[]>();
 
-            for (int i = 0; i < pixels.Length; i += 4)
+            for (int i = 0; colorCount != 1 && i < pixels.Length; i += 4)
             {
                 byte b = pixels[i];
                 byte g = pixels[i + 1];
@@ -270,7 +270,7 @@ internal static class BitmapHelper
                 byte a = pixels[i + 3];
 
                 if (a < 128) continue;
-                if (rng.Next(10) != 0) continue; // sample ~10%
+                if (rng.Next(10) != 0) continue; // sample ~10% for multi-color extraction
 
                 samples.Add([r, g, b]);
             }
@@ -279,49 +279,7 @@ internal static class BitmapHelper
 
             if (colorCount == 1)
             {
-                // histogram peak for single dominant color for single color extraction (~2x faster than k-means)
-                const int quantBits = 4;
-                const int bins = 1 << quantBits;
-                var histogram = new int[bins * bins * bins];
-
-                foreach (var pixel in samples)
-                {
-                    float r = pixel[0] / 255f;
-                    float g = pixel[1] / 255f;
-                    float b = pixel[2] / 255f;
-
-                    float max = MathF.Max(r, MathF.Max(g, b));
-                    float min = MathF.Min(r, MathF.Min(g, b));
-                    float chroma = max - min;
-                    float lightness = (max + min) / 2f;
-
-                    // skip blacks, whites, and neutrals
-                    if (chroma < 0.15f) continue;
-                    if (lightness < 0.15f || lightness > 0.85f) continue;
-
-                    // weight by chroma so vivid colors dominate
-                    float weight = chroma * chroma;
-
-                    int ri = pixel[0] >> (8 - quantBits);
-                    int gi = pixel[1] >> (8 - quantBits);
-                    int bi = pixel[2] >> (8 - quantBits);
-                    histogram[ri * bins * bins + gi * bins + bi] += (int)(weight * 100);
-                }
-
-                int peakIdx = 0;
-                for (int i = 1; i < histogram.Length; i++)
-                    if (histogram[i] > histogram[peakIdx]) peakIdx = i;
-
-                int pr = peakIdx / (bins * bins);
-                int pg = (peakIdx / bins) % bins;
-                int pb = peakIdx % bins;
-
-                // map each bin index back to the center of its value range
-                byte peakR = (byte)((pr << (8 - quantBits)) + (1 << (8 - quantBits - 1)));
-                byte peakG = (byte)((pg << (8 - quantBits)) + (1 << (8 - quantBits - 1)));
-                byte peakB = (byte)((pb << (8 - quantBits)) + (1 << (8 - quantBits - 1)));
-
-                result = [Color.FromArgb(255, peakR, peakG, peakB)];
+                result = [AlbumArtAccentColor.Extract(pixels)];
             }
             else
             {
