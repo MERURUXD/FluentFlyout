@@ -54,6 +54,19 @@
                 <ui:ToggleSwitch IsChecked="{Binding TaskbarVisualizerEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
             </ui:CardControl>
 
+            <ui:CardControl x:Name="TaskbarVisualizerStyleTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon SoundWaveCircle24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{DynamicResource TaskbarVisualizerStyleTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource TaskbarVisualizerStyleDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox SelectedIndex="{Binding TaskbarVisualizerStyle, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" Style="{StaticResource DefaultComboBoxStyle}">
+                    <ComboBoxItem Content="{DynamicResource TaskbarVisualizerStyleClassicBars}" />
+                    <ComboBoxItem Content="{DynamicResource TaskbarVisualizerStyleFluentRibbon}" />
+                </ComboBox>
+            </ui:CardControl>
+
             <ui:CardControl x:Name="TaskbarVisualizerPositionTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon ArrowMove24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">

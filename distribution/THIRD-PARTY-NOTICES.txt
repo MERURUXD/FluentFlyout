@@ -70,3 +70,17 @@ exact files copied for each package.
 The self-contained publish includes the .NET runtime and Windows Desktop
 framework. Their license and third-party notice files are preserved under
 licenses/dotnet/LICENSE.txt and licenses/dotnet/ThirdPartyNotices.txt.
+
+Algorithm references used by the Fluent Ribbon renderer
+
+The iOS 9 Siri waveform state and curve math adapted by
+FluentFlyoutWPF/Classes/RibbonVisualizerRenderer.cs is based on the following
+projects. Their original copyright and license terms remain applicable to the
+adapted portions:
+
+- halildurmus/siri_wave — BSD-3-Clause
+  https://github.com/halildurmus/siri_wave
+- kopiro/siriwave — MIT
+  https://github.com/kopiro/siriwave
+- mapo80/SiriWave — MIT
+  https://github.com/mapo80/SiriWave
