@@ -1,0 +1,14 @@
+Lyricify Lyrics Helper 0.2.0
+Author: XY Wang / WXRIW
+https://github.com/WXRIW/Lyricify-Lyrics-Helper
+Apache License 2.0; see Lyricify-Lyrics-Helper-LICENSE.txt.
+NuGet source revision: a139e385b032b9abfca4c060627776cf9c3147ad.
+
+FluentFlyout uses the library's QRC decoder, XML compatibility helper,
+QRC/LRC parsers and Chinese conversion. Its QQ/NetEase HTTP adapters follow
+the documented library protocols, with separate cancellation-aware transport.
+The upstream library is unmodified. The FluentFlyout application remains
+GPL-3.0-or-later, with its original copyright and attribution retained.
+
+Transitive packages: CHTCHSConv 1.0.0, Newtonsoft.Json 13.0.3,
+SharpZipLib 1.4.2. See their NuGet metadata for attribution and licenses.
