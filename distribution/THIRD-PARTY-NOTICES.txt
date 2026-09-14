@@ -70,3 +70,10 @@ exact files copied for each package.
 The self-contained publish includes the .NET runtime and Windows Desktop
 framework. Their license and third-party notice files are preserved under
 licenses/dotnet/LICENSE.txt and licenses/dotnet/ThirdPartyNotices.txt.
+
+Lyrics source subset:
+- Lyricify QRC decoder/XML helpers — Apache-2.0 — XY Wang / WXRIW
+  Source a139e385b032b9abfca4c060627776cf9c3147ad; see ThirdPartyNotices/Lyrics.txt
+  and ThirdPartyNotices/Lyricify-Lyrics-Helper-LICENSE.txt in the archive.
+- SharpZipLib 1.4.2 — MIT — ICSharpCode / SharpZipLib contributors
+  https://github.com/icsharpcode/SharpZipLib

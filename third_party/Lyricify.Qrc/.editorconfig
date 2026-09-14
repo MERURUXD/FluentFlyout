@@ -1,0 +1,5 @@
+root = true
+
+[*.cs]
+# Preserve the unmodified, Apache-2.0 upstream source and its formatting.
+generated_code = true

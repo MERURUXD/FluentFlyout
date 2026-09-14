@@ -1,14 +1,14 @@
-Lyricify Lyrics Helper 0.2.0
+Lyricify QRC source subset
 Author: XY Wang / WXRIW
 https://github.com/WXRIW/Lyricify-Lyrics-Helper
+Source revision: a139e385b032b9abfca4c060627776cf9c3147ad
 Apache License 2.0; see Lyricify-Lyrics-Helper-LICENSE.txt.
-NuGet source revision: a139e385b032b9abfca4c060627776cf9c3147ad.
 
-FluentFlyout uses the library's QRC decoder, XML compatibility helper,
-QRC/LRC parsers and Chinese conversion. Its QQ/NetEase HTTP adapters follow
-the documented library protocols, with separate cancellation-aware transport.
-The upstream library is unmodified. The FluentFlyout application remains
-GPL-3.0-or-later, with its original copyright and attribution retained.
+Includes DESHelper.cs, Decrypter.cs and XmlUtils.cs, linked from third_party.
+Changes to upstream code: explicit System.IO import and nullable annotations in Decrypter.cs for
+compilation in the WPF host. Parsing and Windows NLS normalization are owned
+by FluentFlyout. The application remains GPL-3.0-or-later.
 
-Transitive packages: CHTCHSConv 1.0.0, Newtonsoft.Json 13.0.3,
-SharpZipLib 1.4.2. See their NuGet metadata for attribution and licenses.
+SharpZipLib 1.4.2: MIT, ICSharpCode / SharpZipLib contributors.
+https://github.com/icsharpcode/SharpZipLib
+The full Lyricify NuGet package and CHTCHSConv are not distributed.

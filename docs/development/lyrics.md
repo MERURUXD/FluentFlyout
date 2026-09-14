@@ -237,3 +237,25 @@ Build and full 112-test suite passed using --artifacts-path
 Solution formatter verification and diff checks passed. Existing WPF warnings
 remain. No commit, publish or user-setting change was made. Shimmer/glow for
 active words was discussed only, not added or benchmarked in this change.
+
+## CI package-license correction (2026-09-15)
+
+PR #20 compiled and passed tests, but Build-DownstreamZip rejected the transitive
+CHTCHSConv 1.0.0 package because its nuspec declares no license. The packaging
+policy is unchanged. The full Lyricify.Lyrics.Helper NuGet dependency has been
+removed. Three attributed Apache-2.0 QRC decoding/XML source files are linked
+from third_party/Lyricify.Qrc at the package's exact upstream source revision.
+SharpZipLib 1.4.2 is the only new direct package and declares MIT.
+
+FluentFlyout now parses the supported QRC/LRC timelines directly and uses the
+Windows NLS LCMapStringEx API for simplified-Chinese matching. Tests cover QRC
+word timings, offsets, repeated LRC timestamps, untimed input and traditional
+artist names. Full suite: 118 passed. Direct QQ lyric downloads still parsed
+58/22/53 lines for the three sample IDs. QQ search returned empty results in
+this probe; the service used NetEase fallback. Search transport was not changed.
+
+The complete development ZIP build passed locally; archive inspection confirmed
+no ChineseConverter.dll, CHTCHSConv or Lyricify.Lyrics.Helper.dll. Existing license
+checks were not relaxed. Changes are isolated to lyrics dependencies/parsing,
+vendored attribution and tests; no media state or UI behavior is intentionally
+changed. Live synchronization was not re-measured in this packaging fix.

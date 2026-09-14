@@ -1,7 +1,8 @@
 // Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-using Lyricify.Lyrics.Helpers.General;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -17,8 +18,25 @@ public static class LyricsMatchPolicy
         || string.Equals(applicationId, "SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify", StringComparison.OrdinalIgnoreCase);
 
     public static string Normalize(string value) =>
-        string.Concat(ChineseHelper.T2S(value.Normalize(NormalizationForm.FormKC))
+        string.Concat(ToSimplified(value.Normalize(NormalizationForm.FormKC))
             .Where(char.IsLetterOrDigit)).ToLowerInvariant();
+
+    private static string ToSimplified(string value)
+    {
+        if (value.Length == 0) return value;
+        const uint simplifiedChinese = 0x02000000;
+        int length = LCMapStringEx("zh-CN", simplifiedChinese, value, value.Length, null, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+        if (length == 0) throw new Win32Exception(Marshal.GetLastWin32Error());
+        var output = new char[length];
+        int written = LCMapStringEx("zh-CN", simplifiedChinese, value, value.Length, output, length, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+        if (written == 0)
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+        return new string(output, 0, written);
+    }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern int LCMapStringEx(string localeName, uint flags, string source, int sourceLength,
+        [Out] char[]? destination, int destinationLength, IntPtr version, IntPtr reserved, IntPtr sortHandle);
 
     public static string SearchTitle(string title) => Regex.Replace(title,
         @"[（(][^()（）]*(?:插曲|主题曲|主題曲|片尾曲|片头曲|片頭曲)[^()（）]*[）)]", "",
