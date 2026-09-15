@@ -192,4 +192,14 @@
     <system:String x:Key="TextBlockText2">選擇背景模糊樣式</system:String>
     <system:String x:Key="TextBlockText3">當按下媒體鍵時顯示彈出視窗</system:String>
     <system:String x:Key="UnsupportedControlsWarning">*某些瀏覽器/播放器不支援重複、隨機播放和進度條控制。</system:String>
+    <system:String x:Key="LyricsTitle">Spotify 歌詞</system:String>
+    <system:String x:Key="LyricsDescription">僅 Spotify 桌面版；QQ 音樂優先，網易雲備用。無翻譯時顯示下一句。</system:String>
+    <system:String x:Key="LyricsEnabled">啟用工作列歌詞</system:String>
+    <system:String x:Key="LyricsTranslation">顯示翻譯</system:String>
+    <system:String x:Key="LyricsFixedWidth">固定寬度（關閉時按歌曲調整）</system:String>
+    <system:String x:Key="LyricsWidth">歌詞寬度</system:String>
+    <system:String x:Key="LyricsOffset">時間偏移（正數提前）</system:String>
+    <system:String x:Key="LyricsSpectrum">頻譜位置</system:String>
+    <system:String x:Key="LyricsSpectrumAfter">封面 → 歌詞 → 頻譜</system:String>
+    <system:String x:Key="LyricsSpectrumBefore">封面 → 頻譜 → 歌詞</system:String>
 </ResourceDictionary>

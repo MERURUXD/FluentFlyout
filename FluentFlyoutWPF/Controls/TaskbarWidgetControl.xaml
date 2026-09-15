@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
+             xmlns:local="clr-namespace:FluentFlyout.Controls"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewModels:UserSettings}"
              Height="40" Width="100"
@@ -75,7 +76,7 @@
                                 </TextBlock>
                             </Canvas>
                         </StackPanel>
-
+                        <local:TaskbarLyricsView x:Name="LyricsView" Width="220" Visibility="Collapsed" Margin="8,0,0,0" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                         <StackPanel Name="ControlsStackPanel" Orientation="Horizontal" VerticalAlignment="Center" Width="Auto">
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">

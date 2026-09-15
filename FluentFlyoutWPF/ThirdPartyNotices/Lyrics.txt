@@ -1,0 +1,14 @@
+Lyricify QRC source subset
+Author: XY Wang / WXRIW
+https://github.com/WXRIW/Lyricify-Lyrics-Helper
+Source revision: a139e385b032b9abfca4c060627776cf9c3147ad
+Apache License 2.0; see Lyricify-Lyrics-Helper-LICENSE.txt.
+
+Includes DESHelper.cs, Decrypter.cs and XmlUtils.cs, linked from third_party.
+Changes to upstream code: explicit System.IO import and nullable annotations in Decrypter.cs for
+compilation in the WPF host. Parsing and Windows NLS normalization are owned
+by FluentFlyout. The application remains GPL-3.0-or-later.
+
+SharpZipLib 1.4.2: MIT, ICSharpCode / SharpZipLib contributors.
+https://github.com/icsharpcode/SharpZipLib
+The full Lyricify NuGet package and CHTCHSConv are not distributed.

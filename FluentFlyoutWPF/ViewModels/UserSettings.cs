@@ -384,6 +384,37 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool TaskbarWidgetAnimated { get; set; }
 
+    [ObservableProperty]
+    public partial bool TaskbarLyricsEnabled { get; set; }
+
+    [ObservableProperty]
+    public partial bool TaskbarLyricsTranslation { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool TaskbarLyricsFixedWidth { get; set; }
+
+    [ObservableProperty]
+    public partial double TaskbarLyricsWidth { get; set; } = 260;
+
+    [ObservableProperty]
+    public partial int TaskbarLyricsOffset { get; set; }
+
+    partial void OnTaskbarLyricsEnabledChanged(bool value) => RefreshLyricsSettings();
+    partial void OnTaskbarLyricsTranslationChanged(bool value) => RefreshLyricsSettings();
+    partial void OnTaskbarLyricsFixedWidthChanged(bool value) => RefreshLyricsSettings();
+    partial void OnTaskbarLyricsWidthChanged(double value) => RefreshLyricsSettings();
+    partial void OnTaskbarLyricsOffsetChanged(int value) => RefreshLyricsSettings();
+    partial void OnTaskbarLyricsSpectrumPositionChanged(int value) => RefreshLyricsSettings();
+
+    private void RefreshLyricsSettings()
+    {
+        if (!_initializing && Application.Current?.MainWindow is MainWindow main)
+            main.RefreshTaskbarLyricsSettings();
+    }
+    // 0: after lyrics; 1: between cover and lyrics.
+    [ObservableProperty]
+    public partial int TaskbarLyricsSpectrumPosition { get; set; }
+
     /// <summary>
     /// Gets or sets a value indicating whether the taskbar widget scrolling text (marquee) is enabled for long titles.
     /// </summary>

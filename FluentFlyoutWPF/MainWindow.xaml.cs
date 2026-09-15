@@ -372,7 +372,10 @@ public partial class MainWindow : MicaWindow
     private void UpdateMediaSessionDisplayOwnership(MediaSession? activeSession)
     {
         if (_mediaSessionDisplayOwnership.SetOwner(activeSession))
+        {
             currentTitle = string.Empty;
+            taskbarWindow?.RefreshLyricsOwner();
+        }
     }
 
     public void RefreshFilteredMedia()
@@ -711,6 +714,12 @@ public partial class MainWindow : MicaWindow
         storyboard.Begin(window);
     }
 
+    public void RefreshTaskbarLyricsSettings()
+    {
+        if (!Dispatcher.CheckAccess()) { Dispatcher.BeginInvoke(RefreshTaskbarLyricsSettings); return; }
+        taskbarWindow?.RefreshLyricsSettings();
+    }
+
     public void UpdateTaskbar()
     {
         if (!Dispatcher.CheckAccess())
@@ -891,6 +900,8 @@ public partial class MainWindow : MicaWindow
 
     private void CurrentSession_OnPlaybackStateChanged(MediaSession mediaSession, GlobalSystemMediaTransportControlsSessionPlaybackInfo? playbackInfo = null)
     {
+        // Deliver playback state before metadata/thumbnail work in the upstream handler.
+        taskbarWindow?.NotifyLyricsPlayback(mediaSession.ControlSession, playbackInfo);
 #if DEBUG
         Logger.Debug("Playback state changed: " + mediaSession.Id + " " + mediaSession.ControlSession.GetPlaybackInfo().PlaybackStatus);
 #endif     

@@ -83,3 +83,9 @@ with a minimal reproduction and evidence path. See the
 [current validation report](windows-validation.md) for the acceptance matrix
 and current evidence. Do not claim a percentage until the raw measurements
 exist.
+
+Taskbar geometry reads now use a nonblocking snapshot cache rather than waiting
+on UI Automation from the Dispatcher. Lyrics width is set once per result,
+with opacity transition, so line/frame updates do not trigger repeated shell
+placement. This addresses code paths identified after desktop lag reports;
+actual latency and CPU changes remain unmeasured.

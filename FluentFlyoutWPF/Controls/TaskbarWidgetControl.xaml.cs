@@ -65,6 +65,7 @@ public partial class TaskbarWidgetControl : UserControl
     public TaskbarWidgetControl()
     {
         InitializeComponent();
+        InitializeLyrics();
 
         // Apply Windows theme colors (independent of the app theme setting)
         ApplyWindowsTheme();
@@ -113,8 +114,10 @@ public partial class TaskbarWidgetControl : UserControl
 
     public void SetVerticalMode(bool isVertical)
     {
+        bool changed = _isVertical != isVertical;
         _isVertical = isVertical;
-        SongInfoStackPanel.Visibility = isVertical ? Visibility.Collapsed : Visibility.Visible;
+        SongInfoStackPanel.Visibility = isVertical || HasLyricsLayout ? Visibility.Collapsed : Visibility.Visible;
+        if (changed) RefreshLyrics();
         SongArtistContainer.Visibility = !_isSmallTaskbar && !isVertical && !string.IsNullOrEmpty(_actualArtist)
             ? Visibility.Visible
             : Visibility.Collapsed;
@@ -134,6 +137,7 @@ public partial class TaskbarWidgetControl : UserControl
     public void SetSmallTaskbarMode(bool isSmallTaskbar)
     {
         _isSmallTaskbar = isSmallTaskbar;
+        LyricsView.Height = isSmallTaskbar ? 26 : 38;
         SongArtistContainer.Visibility = !isSmallTaskbar && !_isVertical && !string.IsNullOrEmpty(_actualArtist)
             ? Visibility.Visible
             : Visibility.Collapsed;
@@ -294,6 +298,11 @@ public partial class TaskbarWidgetControl : UserControl
             logicalWidth = Math.Min(logicalWidth, maxLogicalWidth);
         }
 
+        if (HasLyricsLayout)
+        {
+            logicalWidth = coverImageMargin + LyricsView.Width + 8;
+        }
+
         double newTitleContainerWidth = Math.Max(logicalWidth - coverImageMargin, 0);
         double newArtistContainerWidth = Math.Max(logicalWidth - coverImageMargin, 0);
         bool widthChanged = false;
@@ -335,6 +344,16 @@ public partial class TaskbarWidgetControl : UserControl
 
     public void UpdateMarquees()
     {
+        if (HasLyricsLayout)
+        {
+            SongInfoStackPanel.BeginAnimation(OpacityProperty, null);
+            if (SongInfoStackPanel.RenderTransform is TranslateTransform infoTransform)
+                infoTransform.BeginAnimation(TranslateTransform.XProperty, null);
+            SongTitle.BeginAnimation(UIElement.OpacityProperty, null);
+            ((TranslateTransform)SongTitle.RenderTransform).BeginAnimation(TranslateTransform.XProperty, null);
+            ((TranslateTransform)SongArtist.RenderTransform).BeginAnimation(TranslateTransform.XProperty, null);
+            return;
+        }
         double titleAvailableWidth = double.IsNaN(SongTitleContainer.Width) ? 0 : SongTitleContainer.Width;
         double artistAvailableWidth = double.IsNaN(SongArtistContainer.Width) ? 0 : SongArtistContainer.Width;
 
@@ -487,6 +506,7 @@ public partial class TaskbarWidgetControl : UserControl
 
     public void UpdateUi(string title, string artist, BitmapImage? icon, GlobalSystemMediaTransportControlsSessionPlaybackStatus? playbackStatus, GlobalSystemMediaTransportControlsSessionPlaybackControls? playbackControls = null)
     {
+        Dispatcher.BeginInvoke(RefreshLyrics);
         if (title == "-" && artist == "-")
         {
             // No media playing, hide UI
@@ -561,7 +581,7 @@ public partial class TaskbarWidgetControl : UserControl
             if (_actualTitle != newTitle || _actualArtist != newArtist)
             {
                 // changed info
-                if (SettingsManager.Current.TaskbarWidgetAnimated)
+                if (SettingsManager.Current.TaskbarWidgetAnimated && !HasLyricsLayout)
                 {
                     AnimateEntrance();
                 }
@@ -571,6 +591,8 @@ public partial class TaskbarWidgetControl : UserControl
 
                 SongTitle.Text = _actualTitle;
                 SongArtist.Text = _actualArtist;
+                // Restore the new track's metadata synchronously, before the queued lyrics lookup.
+                if (_lyricsOwner != null) InvalidateLyrics();
             }
 
             // Update tooltip with song info
@@ -619,7 +641,7 @@ public partial class TaskbarWidgetControl : UserControl
             SongArtistContainer.Visibility = !_isSmallTaskbar && !_isVertical && !string.IsNullOrEmpty(artist)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            SongInfoStackPanel.Visibility = _isVertical ? Visibility.Collapsed : Visibility.Visible;
+            SongInfoStackPanel.Visibility = _isVertical || HasLyricsLayout ? Visibility.Collapsed : Visibility.Visible;
             BackgroundGlow.Visibility = SettingsManager.Current.TaskbarWidgetBackgroundBlur ? Visibility.Visible : Visibility.Collapsed;
 
             // on top of XAML visibility binding (XAML binding only hides when disabled in settings)

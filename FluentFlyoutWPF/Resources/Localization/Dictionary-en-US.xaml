@@ -219,4 +219,14 @@ hides repeat, shuffle and player info</System:String>
     <System:String x:Key="TextBlockText2">Choose from a preset of modern background blur styles</System:String>
     <System:String x:Key="TextBlockText3">Display a flyout when you press a media key</System:String>
     <System:String x:Key="UnsupportedControlsWarning">*Some browsers/players do not support repeat, shuffle and seekbar control.</System:String>
+    <System:String x:Key="LyricsTitle">Spotify lyrics</System:String>
+    <System:String x:Key="LyricsDescription">Spotify desktop only. QQ Music first, NetEase fallback. Without translation, preview the next line.</System:String>
+    <System:String x:Key="LyricsEnabled">Enable taskbar lyrics</System:String>
+    <System:String x:Key="LyricsTranslation">Show translation</System:String>
+    <System:String x:Key="LyricsFixedWidth">Fixed width (off: adapt once per song)</System:String>
+    <System:String x:Key="LyricsWidth">Lyrics width</System:String>
+    <System:String x:Key="LyricsOffset">Timing offset (positive: advance)</System:String>
+    <System:String x:Key="LyricsSpectrum">Spectrum position</System:String>
+    <System:String x:Key="LyricsSpectrumAfter">Cover → Lyrics → Spectrum</System:String>
+    <System:String x:Key="LyricsSpectrumBefore">Cover → Spectrum → Lyrics</System:String>
 </ResourceDictionary>

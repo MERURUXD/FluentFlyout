@@ -4,6 +4,7 @@
 using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF;
 using FluentFlyoutWPF.Classes;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Classes.Utils;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -41,12 +42,30 @@ public partial class TaskbarWindow : Window
     private IntPtr _lastTaskbarHandle;
     private bool _positionUpdateInProgress;
     private bool _isClosing;
-    private readonly Dictionary<string, Task> _pendingAutomationTasks = [];
+    private readonly Dictionary<string, NonBlockingSnapshot<ShellGeometry>> _shellGeometry = [];
+    private sealed record ShellGeometry(AutomationElement Element, Rect Bounds);
+    private bool _lyricsPositionQueued;
 
     private GlobalSystemMediaTransportControlsSessionPlaybackStatus? _lastPlaybackStatus;
     private DispatcherTimer? _autoHideTimer;
 
     internal bool IsClosing => _isClosing;
+    internal void RefreshLyricsOwner() => Widget.RefreshLyrics();
+    internal void NotifyLyricsPlayback(GlobalSystemMediaTransportControlsSession session,
+        GlobalSystemMediaTransportControlsSessionPlaybackInfo? info) => Widget.NotifyLyricsPlayback(session, info);
+    internal void RefreshLyricsSettings() => Widget.RefreshLyricsSettings();
+    private int EffectiveVisualizerPosition => Widget.HasLyricsLayout ? 1 : SettingsManager.Current.TaskbarVisualizerPosition;
+
+    internal void RefreshLyricsPosition()
+    {
+        if (_isClosing || _lyricsPositionQueued) return;
+        _lyricsPositionQueued = true;
+        Dispatcher.BeginInvoke(() =>
+        {
+            _lyricsPositionQueued = false;
+            if (!_isClosing) UpdatePosition();
+        }, DispatcherPriority.Background);
+    }
 
     public TaskbarWindow()
     {
@@ -365,7 +384,7 @@ on_error:
         _widgetElement = null;
         _trayElement = null;
         _taskbarFrameElement = null;
-        _pendingAutomationTasks.Clear();
+        _shellGeometry.Clear();
     }
 
     private void CalculateAndSetPosition(IntPtr taskbarHandle, IntPtr taskbarWindowHandle, bool isMainTaskbarSelected)
@@ -457,6 +476,7 @@ on_error:
             return Rect.Empty;
 
         Widget.SetVerticalMode(isVertical);
+        Widget.SetLyricsAvailableWidth((taskbarRect.Right - taskbarRect.Left) / dpiScale / 3 - 140);
 
         // Calculate widget size
         var (logicalWidth, logicalHeight) = Widget.CalculateSize(dpiScale);
@@ -490,7 +510,7 @@ on_error:
             case 0: // near start (left for horizontal, top for vertical)
                 primaryPos = 20;
 
-                if (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 0)
+                if (SettingsManager.Current.TaskbarVisualizerEnabled && EffectiveVisualizerPosition == 0)
                     primaryPos += (int)(TaskbarVisualizer.Width * dpiScale) + 4;
 
                 if (!SettingsManager.Current.TaskbarWidgetPadding)
@@ -527,7 +547,7 @@ on_error:
                 primaryPos = (primarySize - physicalWidth) / 2;
 
                 if (SettingsManager.Current.TaskbarVisualizerEnabled)
-                    if (SettingsManager.Current.TaskbarVisualizerPosition == 0)
+                    if (EffectiveVisualizerPosition == 0)
                         primaryPos += (int)(TaskbarVisualizer.Width * dpiScale) / 2 + 4;
                     else
                         primaryPos -= (int)(TaskbarVisualizer.Width * dpiScale) / 2 - 4;
@@ -536,7 +556,7 @@ on_error:
             case 2: // near end (right for horizontal, bottom for vertical)
                 try
                 {
-                    if (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 1)
+                    if (SettingsManager.Current.TaskbarVisualizerEnabled && EffectiveVisualizerPosition == 1)
                         primaryPos -= (int)(TaskbarVisualizer.Width * dpiScale) - 4;
 
                     // Horizontal only: try to position next to native Widgets button on the end side
@@ -670,7 +690,7 @@ on_error:
         double widgetPrimaryStart = isVertical ? Canvas.GetTop(Widget) : Canvas.GetLeft(Widget);
         int primaryPos;
 
-        switch (SettingsManager.Current.TaskbarVisualizerPosition)
+        switch (EffectiveVisualizerPosition)
         {
             case 0: // before widget (left for horizontal, above for vertical)
                 primaryPos = (int)(widgetPrimaryStart * dpiScale) - (int)(TaskbarVisualizer.Width * dpiScale);
@@ -778,101 +798,20 @@ on_error:
 
     private (bool, Rect) GetTaskbarXamlElementRect(IntPtr taskbarHandle, ref AutomationElement? elementCache, string elementName)
     {
-        if (taskbarHandle == IntPtr.Zero)
-            return (false, Rect.Empty);
-
-        try
+        if (taskbarHandle == IntPtr.Zero) return (false, Rect.Empty);
+        if (!_shellGeometry.TryGetValue(elementName, out var cache))
+            _shellGeometry[elementName] = cache = new();
+        var context = (taskbarHandle, SettingsManager.Current.TaskbarWidgetSelectedMonitor);
+        var snapshot = cache.Read(context, () =>
         {
-            // reset if monitor changed
-            if (_lastSelectedMonitor != SettingsManager.Current.TaskbarWidgetSelectedMonitor)
-                elementCache = null;
-
-            // find widget in XAML
-            if (elementCache == null)
-            {
-                if (_pendingAutomationTasks.TryGetValue(elementName, out var pendingTask) && !pendingTask.IsCompleted)
-                    return (false, Rect.Empty);
-
-                AutomationElement? found = null;
-                var findTask = Task.Run(() =>
-                {
-                    var root = AutomationElement.FromHandle(taskbarHandle);
-                    found = root.FindFirst(TreeScope.Descendants,
-                        new PropertyCondition(AutomationElement.AutomationIdProperty, elementName));
-                });
-                _pendingAutomationTasks[elementName] = findTask;
-
-                if (!findTask.Wait(1000))
-                {
-                    Logger.Warn("Timeout querying taskbar XAML element: " + elementName);
-                    return (false, Rect.Empty);
-                }
-
-                // Propagate any exception from the background thread
-                findTask.GetAwaiter().GetResult();
-                elementCache = found;
-            }
-
-            if (elementCache == null) // widget most likely disabled
-                return (false, Rect.Empty);
-
-            try
-            {
-                if (_pendingAutomationTasks.TryGetValue(elementName, out var pendingTask) && !pendingTask.IsCompleted)
-                {
-                    elementCache = null;
-                    return (false, Rect.Empty);
-                }
-
-                var cachedElement = elementCache;
-                var boundsTask = Task.Run(() => cachedElement.Current.BoundingRectangle);
-                _pendingAutomationTasks[elementName] = boundsTask;
-
-                if (!boundsTask.Wait(500))
-                {
-                    Logger.Warn("Timeout getting bounds for taskbar XAML element: " + elementName);
-                    elementCache = null;
-                    return (false, Rect.Empty);
-                }
-
-                Rect elementRect = boundsTask.GetAwaiter().GetResult();
-
-                if (elementRect == Rect.Empty) // widget shown before but most likely disabled now
-                {
-                    elementCache = null; // reset cache
-                    return (false, Rect.Empty);
-                }
-
-                return (true, elementRect);
-            }
-            catch (ElementNotAvailableException)
-            {
-                // element became stale, reset cache
-                Logger.Warn("Taskbar XAML element became stale, resetting cache: " + elementName);
-                elementCache = null;
-                return (false, Rect.Empty);
-            }
-        }
-        catch (COMException ex)
-        {
-            Logger.Warn(ex, "COM error retrieving taskbar XAML element Rect: " + elementName);
-            elementCache = null; // reset cache on error
-            return (false, Rect.Empty);
-        }
-        catch (ElementNotAvailableException)
-        {
-            Logger.Warn("Taskbar XAML element not available, resetting cache: " + elementName);
-            elementCache = null;
-            return (false, Rect.Empty);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Error retrieving taskbar XAML element Rect: " + elementName);
-            elementCache = null; // reset cache on error
-            return (false, Rect.Empty);
-        }
+            var root = AutomationElement.FromHandle(taskbarHandle);
+            var element = root.FindFirst(TreeScope.Descendants,
+                new PropertyCondition(AutomationElement.AutomationIdProperty, elementName));
+            return element == null ? null : new ShellGeometry(element, element.Current.BoundingRectangle);
+        });
+        elementCache = snapshot?.Element;
+        return snapshot is { Bounds.IsEmpty: false } ? (true, snapshot.Bounds) : (false, Rect.Empty);
     }
-
     /// <summary>
     /// Attempts to locate the Windows taskbar widgets button and retrieves its bounding rectangle.
     /// </summary>
@@ -897,13 +836,14 @@ on_error:
     protected override void OnClosed(EventArgs e)
     {
         _isClosing = true;
+        Widget.ReleaseLyrics(true);
         _timer.Stop();
         _autoHideTimer?.Stop();
         _autoHideTimer = null;
         _widgetElement = null;
         _trayElement = null;
         _taskbarFrameElement = null;
-        _pendingAutomationTasks.Clear();
+        _shellGeometry.Clear();
         base.OnClosed(e);
     }
 }

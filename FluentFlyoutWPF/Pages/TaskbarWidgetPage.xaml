@@ -15,6 +15,7 @@
 
     <StackPanel MaxWidth="1000" Margin="16">
         <TextBlock Text="{DynamicResource TaskbarWidgetCustomizationTitle}" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,20" />
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -197,6 +198,44 @@
                 </ComboBox>
             </ui:CardControl>
 
+            <ui:CardExpander x:Name="TaskbarLyricsCard" Tag="Indexable" Icon="{ui:SymbolIcon MusicNote224}" ContentPadding="0" IsExpanded="False" Margin="0,0,0,12">
+                <ui:CardExpander.Header>
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{DynamicResource LyricsTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                                <ui:InfoBadge Value=" NEW " FontWeight="Medium" FontSize="10" Margin="6,-2,0,-2" Severity="Success" />
+                            </StackPanel>
+                            <TextBlock Text="{DynamicResource LyricsDescription}" FontSize="12" Opacity="0.5" TextWrapping="Wrap" MaxWidth="540" HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <ui:ToggleSwitch Grid.Column="1" IsChecked="{Binding TaskbarLyricsEnabled, Mode=TwoWay}" IsEnabled="{Binding TaskbarWidgetEnabled}" Margin="16,0,16,0" />
+                    </Grid>
+                </ui:CardExpander.Header>
+                <StackPanel IsEnabled="{Binding TaskbarLyricsEnabled}" Opacity="{Binding TaskbarLyricsEnabled, Converter={StaticResource BoolToFullHalfOpacityConverter}}">
+                    <ui:CardControl Background="Transparent" BorderBrush="{ui:ThemeResource CardStrokeColorDefaultSolidBrush}" BorderThickness="0,0,0,1" CornerRadius="0" Padding="52,16,16,16">
+                        <ui:CardControl.Header><TextBlock Text="{DynamicResource LyricsTranslation}" FontSize="14" /></ui:CardControl.Header>
+                        <ui:ToggleSwitch IsChecked="{Binding TaskbarLyricsTranslation, Mode=TwoWay}" />
+                    </ui:CardControl>
+                    <ui:CardControl Background="Transparent" BorderBrush="{ui:ThemeResource CardStrokeColorDefaultSolidBrush}" BorderThickness="0,0,0,1" CornerRadius="0" Padding="52,16,16,16">
+                        <ui:CardControl.Header><TextBlock Text="{DynamicResource LyricsFixedWidth}" FontSize="14" /></ui:CardControl.Header>
+                        <ui:ToggleSwitch IsChecked="{Binding TaskbarLyricsFixedWidth, Mode=TwoWay}" />
+                    </ui:CardControl>
+                    <ui:CardControl Background="Transparent" BorderBrush="{ui:ThemeResource CardStrokeColorDefaultSolidBrush}" BorderThickness="0,0,0,1" CornerRadius="0" Padding="52,16,16,16" IsEnabled="{Binding TaskbarLyricsFixedWidth}">
+                        <ui:CardControl.Header><TextBlock Text="{DynamicResource LyricsWidth}" FontSize="14" /></ui:CardControl.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Slider Width="180" Minimum="100" Maximum="420" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding TaskbarLyricsWidth}" VerticalAlignment="Center" />
+                            <TextBlock Width="64" Text="{Binding TaskbarLyricsWidth, StringFormat={}{0:0} DIP}" TextAlignment="Right" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ui:CardControl>
+                    <ui:CardControl Background="Transparent" BorderThickness="0" CornerRadius="0" Padding="52,16,16,16">
+                        <ui:CardControl.Header><TextBlock Text="{DynamicResource LyricsOffset}" FontSize="14" /></ui:CardControl.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Slider Width="180" Minimum="-5000" Maximum="5000" TickFrequency="100" IsSnapToTickEnabled="True" Value="{Binding TaskbarLyricsOffset}" VerticalAlignment="Center" />
+                            <TextBlock Width="64" Text="{Binding TaskbarLyricsOffset, StringFormat={}{0} ms}" TextAlignment="Right" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ui:CardControl>
+                </StackPanel>
+            </ui:CardExpander>
             <ui:CardExpander x:Name="TaskbarWidgetScrollingTextCard" Tag="Indexable" Grid.Row="14" Icon="{ui:SymbolIcon TextDirectionHorizontalRight24}" ContentPadding="0" Margin="0,0,0,12">
                 <ui:CardExpander.Header>
                     <Grid ColumnDefinitions="*, Auto">

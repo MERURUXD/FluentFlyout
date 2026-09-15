@@ -181,3 +181,12 @@ require the controlled Windows validation summarized in the
 
 Before editing a hotspot, verify the current source and record the intended
 scope. Do not use this document as permission for a media-state-machine rewrite.
+
+## Optional Spotify taskbar lyrics
+
+The opt-in taskbar lyrics integration is documented in [lyrics.md](lyrics.md).
+It uses the existing filtered/selected session owner and only permits native
+Spotify application IDs. The taskbar widget owns subscriptions and cancellation;
+its two-line renderer uses a local clock and stops frame refresh while inactive.
+Default settings keep it disabled. Desktop synchronization, placement and
+performance remain separate acceptance work.

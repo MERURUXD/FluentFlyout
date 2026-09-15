@@ -215,4 +215,14 @@
     <system:String x:Key="TextBlockText2">从预设的现代背景模糊样式中选择一个</system:String>
     <system:String x:Key="TextBlockText3">当按下媒体控制按键时显示浮窗</system:String>
     <system:String x:Key="UnsupportedControlsWarning">* 一些浏览器 / 播放器不支持重复、随机播放按钮和进度条控制。</system:String>
+    <system:String x:Key="LyricsTitle">Spotify 歌词</system:String>
+    <system:String x:Key="LyricsDescription">仅 Spotify 桌面版；QQ 音乐优先，网易云备用。无翻译时显示下一句。</system:String>
+    <system:String x:Key="LyricsEnabled">启用任务栏歌词</system:String>
+    <system:String x:Key="LyricsTranslation">显示翻译</system:String>
+    <system:String x:Key="LyricsFixedWidth">固定宽度（关闭时按歌曲调整）</system:String>
+    <system:String x:Key="LyricsWidth">歌词宽度</system:String>
+    <system:String x:Key="LyricsOffset">时间偏移（正数提前）</system:String>
+    <system:String x:Key="LyricsSpectrum">频谱位置</system:String>
+    <system:String x:Key="LyricsSpectrumAfter">封面 → 歌词 → 频谱</system:String>
+    <system:String x:Key="LyricsSpectrumBefore">封面 → 频谱 → 歌词</system:String>
 </ResourceDictionary>
