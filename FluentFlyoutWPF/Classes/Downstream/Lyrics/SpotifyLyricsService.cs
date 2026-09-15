@@ -74,6 +74,7 @@ public sealed class SpotifyLyricsService : IDisposable
     private async Task LoadAsync(LyricsTrack track, long generation, CancellationTokenSource cancellation)
     {
         LyricsDocument? document = null;
+        bool instrumental = false;
         try
         {
             var token = cancellation.Token;
@@ -93,6 +94,15 @@ public sealed class SpotifyLyricsService : IDisposable
                         if (match == null || !attempted.Add(match.Id))
                             continue;
                         document = await provider.FetchAsync(match.Id, token).ConfigureAwait(false);
+                        // An explicit instrumental placeholder is a successful no-lyrics result.
+                        // Stop all queries, but never classify mixed normal lyrics as instrumental.
+                        if (document is { Lines.Count: > 0 }
+                            && document.Lines.All(line => LyricsMatchPolicy.Normalize(line.Text) == "纯音乐请欣赏"))
+                        {
+                            instrumental = true;
+                            document = null;
+                            return;
+                        }
                         if (document is { Lines.Count: > 0 })
                             break;
                         document = null;
@@ -125,7 +135,8 @@ public sealed class SpotifyLyricsService : IDisposable
                     if (_cache.Count >= 64)
                         _cache.Remove(_cache.MinBy(pair => pair.Value.Expires).Key);
                     _cache[track] = new(_current, _clock.GetUtcNow().Add(
-                        _current == null ? TimeSpan.FromMinutes(2) : TimeSpan.FromHours(12)));
+                        _current == null && (!instrumental || cancellation.IsCancellationRequested)
+                            ? TimeSpan.FromMinutes(2) : TimeSpan.FromHours(12)));
                     _request = null;
                 }
                 cancellation.Dispose();

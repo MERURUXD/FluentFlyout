@@ -55,6 +55,47 @@ public sealed class SpotifyLyricsTests
         Assert.Equal(0, netease.Searches);
     }
 
+    [Theory]
+    [InlineData("纯音乐，请欣赏")]
+    [InlineData(" 纯音乐 , 请欣赏。 ")]
+    [InlineData("純音樂，請欣賞")]
+    public async Task InstrumentalPlaceholderStopsQueriesAndCachesNoLyrics(string text)
+    {
+        var clock = new Clock();
+        var qq = new FakeProvider
+        {
+            Fetch = _ => Task.FromResult<LyricsDocument?>(Document with
+            {
+                Lines = [new(text, 0, null, []), new(text, 1000, null, [])]
+            })
+        };
+        var netease = new FakeProvider();
+        using var service = new SpotifyLyricsService(qq, netease, clock);
+        await service.SelectAsync(true, new object(), "Spotify.exe", Track);
+        Assert.Null(service.Current);
+        clock.Now += TimeSpan.FromHours(11);
+        await service.SelectAsync(true, new object(), "Spotify.exe", Track);
+        Assert.Null(service.Current);
+        Assert.Equal(1, qq.Searches);
+        Assert.Equal(1, qq.Fetches);
+        Assert.Equal(0, netease.Searches);
+        clock.Now += TimeSpan.FromHours(2);
+        await service.SelectAsync(true, new object(), "Spotify.exe", Track);
+        Assert.Equal(2, qq.Fetches);
+        Assert.Null(service.Current);
+        Assert.Equal(0, netease.Searches);
+    }
+
+    [Fact]
+    public async Task PlaceholderMixedWithNormalLyricsIsNotInstrumental()
+    {
+        var mixed = Document with { Lines = [new("纯音乐，请欣赏", 0, null, []), new("正常歌词", 1000, null, [])] };
+        var qq = new FakeProvider { Fetch = _ => Task.FromResult<LyricsDocument?>(mixed) };
+        using var service = new SpotifyLyricsService(qq, new FakeProvider());
+        await service.SelectAsync(true, new object(), "Spotify.exe", Track);
+        Assert.Same(mixed, service.Current);
+    }
+
     [Fact]
     public async Task EmptyCombinedQueryRetriesTitleBeforeNetease()
     {
