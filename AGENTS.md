@@ -15,9 +15,9 @@ This is a personal downstream fork of [FluentFlyout](https://github.com/unchihug
 These are requirements for changes, not a claim that all existing paths already satisfy them. Verify the current implementation and distinguish new regressions from inherited defects.
 
 - Keep the code-owned isolation in `FluentFlyoutWPF/Classes/Downstream/DownstreamPolicy.cs`: imported settings must not re-enable upstream telemetry, experiments, or update infrastructure. Downstream purchase UI and onboarding runtime are intentionally retired; keep Store entitlement compatibility and GitHub Release unlock policy explicit.
-- Keep updates on the fixed downstream GitHub stable-release channel. The rolling `dev` prerelease is not a stable update. Do not add binary download, execution, or installation to a metadata-only updater.
+- Keep updates on the fixed downstream GitHub stable-release channel, anchored by `LatestReleaseUrl`/`LatestReleaseApiUrl` in `FluentFlyoutWPF/Classes/Downstream/ProductIdentity.cs`. The rolling `dev` prerelease is not a stable update: the `/releases/latest` API endpoint returns only the newest non-prerelease tag, so redirecting the checker to the release list or a prerelease tag would change this policy. Do not add binary download, execution, or installation to a metadata-only updater.
 - Preserve the separate downstream identity for settings, logs, startup registration, mutex/events, and notifications. Legacy settings are migration input, not a write destination; preserve explicit feature choices and the migration's identity reset.
-- Apply app filtering before media preference. Preserve Automatic mode and unknown-mode fallback. Selected-session UI and controls must agree; deduplication must not outlive its session ownership. Do not add a polling loop to conceal missed session events.
+- Apply app filtering before media preference. Preserve Automatic mode and unknown-mode fallback. Selected-session UI and controls must agree; deduplication must not outlive its session ownership. Do not add a polling loop to conceal missed session events; the authoritative signals are the `mediaManager` (`WindowsMediaController.MediaManager`) callbacks wired in `MainWindow.xaml.cs` (`OnAnySessionOpened`, `OnAnySessionClosed`, `OnFocusedSessionChanged`, and the per-session property/playback/timeline events). Fix missed events at that subscription layer instead.
 - Disabled optional features must not acquire new timers, subscriptions, capture, or network work. Check both never-enabled and enabled-then-disabled states, including shared consumers and in-flight callbacks. Hidden, unloaded, closed, and disposed are different states.
 - Pair resource creation with stop/unsubscribe/dispose paths. Coordinate restart, disable, and disposal across threads; a disposed flag alone does not serialize resource publication. Apply WPF UI changes on the Dispatcher and recheck ownership there.
 - Keep ZIP distribution separate from MSIX/Store support. The supported downstream release configuration is `GitHub Release`; hiding purchase UI does not prove that other build configurations avoid Store APIs. Do not request signing secrets or change Store behavior incidentally.
@@ -28,12 +28,15 @@ These are requirements for changes, not a claim that all existing paths already 
 2. Read the affected implementation and consult the notes below only for the topic being changed. For cross-module or high-risk changes, state scope, acceptance checks, and upstream conflict risk; simple changes do not need a separate planning record.
 3. Treat historical descriptions as context, not instructions to restore old behavior. If a note and implementation disagree, identify the mismatch rather than assuming either is proof of successful validation.
 
-Development notes:
+Development notes (the list below is the complete index of `docs/development/`; every topic-relevant note should be reachable from here, so add a bullet when a new note is introduced):
 
 - [Downstream policy and identity](docs/development/downstream-policy.md): isolation, migration, identity, and defaults.
 - [Runtime architecture](docs/development/architecture.md): ownership and media flow; verify snapshot descriptions against current code, especially startup, defaults, and online services.
+- [Lyrics pipeline](docs/development/lyrics.md): Spotify lyrics lookup, taskbar display, and timing constraints, including the no-media-polling guarantee.
 - [Performance audit](docs/development/performance.md): structural changes and intended lifecycle guarantees, not measured CPU or memory results.
 - [Release process](docs/development/release.md): ZIP/version/release procedures; reading a procedure is not permission to publish.
+- [Upstream sync](docs/development/upstream-sync.md): review and preparation checklist for upstream merges; reading it does not authorize a merge, rebase, or tag operation.
+- [Windows validation](docs/development/windows-validation.md): a dated desktop validation report showing which scenarios were and were not verified on real Windows profiles; a snapshot, not a general procedure.
 - [Historical baseline](docs/development/baseline.md): the original takeover snapshot, not the current runtime contract.
 
 ## Formatting and validation
