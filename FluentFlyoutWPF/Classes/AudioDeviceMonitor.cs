@@ -16,6 +16,7 @@ public class AudioDeviceMonitor : IDisposable
     private AudioDeviceNotificationClient? _notificationClient;
 
     public event EventHandler<DefaultDeviceChangedEventArgs>? DefaultDeviceChanged;
+    public event EventHandler<DefaultDeviceChangedEventArgs>? DefaultCaptureDeviceChanged;
 
     public static AudioDeviceMonitor Instance
     {
@@ -56,6 +57,12 @@ public class AudioDeviceMonitor : IDisposable
 
     private void OnDefaultDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e)
     {
+        if (e.DataFlow == DataFlow.Capture && e.Role == Role.Multimedia)
+        {
+            DefaultCaptureDeviceChanged?.Invoke(this, e);
+            return;
+        }
+
         // Render devices are output devices, no e.Role check because roles are quite often randomly assigned
         if (e.DataFlow != DataFlow.Render)
             return;
@@ -91,6 +98,19 @@ public class AudioDeviceMonitor : IDisposable
         {
             Logger.Error(ex, "Failed to get device by id {0}", deviceId);
             // TODO: we could investigate if returning GetDefaultRenderDevice() works as a fallback for returning null
+            return null;
+        }
+    }
+
+    public MMDevice? GetDefaultCaptureDevice()
+    {
+        try
+        {
+            return _deviceEnumerator?.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
+        }
+        catch (Exception ex)
+        {
+            Logger.Warn(ex, "Failed to get default capture device");
             return null;
         }
     }

@@ -7,6 +7,7 @@ using FluentFlyout.Classes.Settings;
 using FluentFlyout.Classes.Utils;
 using FluentFlyout.Controls;
 using FluentFlyoutWPF.Classes;
+using FluentFlyoutWPF.Classes.Downstream;
 using FluentFlyoutWPF.Models;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -465,6 +466,23 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool TaskbarVisualizerEnabled { get; set; }
 
+    private int _taskbarVisualizerAudioSource;
+
+    /// <summary>0 = desktop, 1 = default microphone, 2 = both.</summary>
+    public int TaskbarVisualizerAudioSource
+    {
+        get => _taskbarVisualizerAudioSource;
+        set
+        {
+            if (SetProperty(ref _taskbarVisualizerAudioSource, VisualizerSourcePolicy.Normalize(value)) && !_initializing)
+                Visualizer.ChangeAudioSource();
+        }
+    }
+
+    [XmlIgnore]
+    [ObservableProperty]
+    public partial string TaskbarVisualizerSourceStatus { get; set; } = string.Empty;
+
     /// <summary>
     /// Returns whether app filtering is enabled or disabled.
     /// </summary>
@@ -887,6 +905,18 @@ public partial class UserSettings : ObservableObject
     {
         if (oldValue == newValue || _initializing) return;
         Visualizer.ResizeBarList(newValue);
+    }
+
+    partial void OnTaskbarVisualizerAudioSensitivityChanged(int oldValue, int newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+        Visualizer.RefreshSpectrumSettings();
+    }
+
+    partial void OnTaskbarVisualizerAudioPeakLevelChanged(int oldValue, int newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+        Visualizer.RefreshSpectrumSettings();
     }
 
     partial void OnTaskbarVisualizerBaselineChanged(bool oldValue, bool newValue)

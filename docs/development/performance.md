@@ -12,9 +12,11 @@ The current checkout makes optional work conditional at its ownership boundary:
 - Taskbar widget construction and its 1.5-second positioning timer require the
   enabled widget and premium access. Disable/close stops the timer and closes
   the window.
-- Taskbar visualizer allocation, loopback capture, watchdog, buffers, and system
-  subscriptions are lazy. Disable/dispose drains callbacks and rejects stale
-  in-flight restarts.
+- Taskbar visualizer allocation, selected desktop/microphone captures, one-shot
+  inactivity timers, buffers, and system subscriptions are lazy. Disable/dispose
+  drains callbacks and rejects stale in-flight restarts. Both-source mode runs
+  two independent FFT inputs; no overhead equivalence with desktop-only mode
+  has been measured. See [audio-source validation](visualizer-audio.md).
 - The seekbar timer runs only while the selected session is playing and the
   visible seekbar is active. Display-environment refresh is a debounced one-shot
   timer.

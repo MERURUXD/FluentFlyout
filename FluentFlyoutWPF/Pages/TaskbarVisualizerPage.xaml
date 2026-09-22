@@ -54,6 +54,21 @@
                 <ui:ToggleSwitch IsChecked="{Binding TaskbarVisualizerEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
             </ui:CardControl>
 
+            <ui:CardControl x:Name="VisualizerAudioSourceCard" Tag="Indexable" Icon="{ui:SymbolIcon SoundWaveCircle24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource VisualizerAudioSourceTitle}" FontSize="14" />
+                        <TextBlock Text="{DynamicResource VisualizerAudioSourceDescription}" FontSize="12" Opacity="0.5" TextWrapping="Wrap" MaxWidth="400" />
+                        <TextBlock Text="{Binding TaskbarVisualizerSourceStatus}" FontSize="12" Opacity="0.75" TextWrapping="Wrap" MaxWidth="400" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox SelectedIndex="{Binding TaskbarVisualizerAudioSource, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" Style="{StaticResource DefaultComboBoxStyle}">
+                    <ComboBoxItem Content="{DynamicResource VisualizerSourceDesktop}" />
+                    <ComboBoxItem Content="{DynamicResource VisualizerSourceMicrophone}" />
+                    <ComboBoxItem Content="{DynamicResource VisualizerSourceBoth}" />
+                </ComboBox>
+            </ui:CardControl>
+
             <ui:CardControl x:Name="TaskbarVisualizerPositionTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon ArrowMove24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
@@ -151,7 +166,7 @@
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <TextBlock FontSize="14" FontWeight="Regular" VerticalAlignment="Center">
-                            <Hyperlink x:Name="StartupHyperlink" Tag="Indexable" NavigateUri="ms-settings:apps-volume" BaselineAlignment="Center"
+                            <Hyperlink x:Name="StartupHyperlink" Tag="Indexable" NavigateUri="ms-settings:sound" BaselineAlignment="Center"
                                    RequestNavigate="StartupHyperlink_RequestNavigate" TextDecorations="None" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" >
                                 <Run Text="{DynamicResource TaskbarVisualizerOutputDeviceTitle}" />
                                 <ui:SymbolIcon VerticalAlignment="Center" FontSize="14" Symbol="ArrowUpRight24" />

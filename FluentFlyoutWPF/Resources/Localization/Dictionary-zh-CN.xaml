@@ -103,7 +103,7 @@
     <system:String x:Key="UpdateAvailableNotificationTitle">更新可用！</system:String>
     <system:String x:Key="UpdateAvailableNotificationButton">下载更新</system:String>
     <system:String x:Key="TaskbarVisualizerTitle">任务栏频谱可视化</system:String>
-    <system:String x:Key="TaskbarVisualizerDescription">在任务栏上显示当前实时播放音频的频谱可视化。专为现代系统设计，性能影响极低。</system:String>
+    <system:String x:Key="TaskbarVisualizerDescription">在任务栏上显示桌面声音、麦克风或两者的实时频谱。</system:String>
     <system:String x:Key="TaskbarVisualizerEnabledTitle">启用任务栏频谱可视化（实验性）</system:String>
     <system:String x:Key="TaskbarVisualizerEnabledDescription">实验性功能：仅当任务栏小组件启用时，此功能才会生效</system:String>
     <system:String x:Key="TaskbarVisualizerPositionTitle">频谱可视化相对于任务栏小组件的位置</system:String>
@@ -120,8 +120,8 @@
     <system:String x:Key="AppearanceBehaviorSectionTitle">外观与行为</system:String>
     <system:String x:Key="UpdatesSectionTitle">软件更新</system:String>
     <system:String x:Key="ShowUpdateNotificationsTitle">有更新时显示通知</system:String>
-    <system:String x:Key="TaskbarVisualizerOutputDeviceTitle">输出设备</system:String>
-    <system:String x:Key="TaskbarVisualizerOutputDeviceDescription">切换 FluentFlyout 的输出设备来更改可视化监听的输出设备。</system:String>
+    <system:String x:Key="TaskbarVisualizerOutputDeviceTitle">Windows 声音设置</system:String>
+    <system:String x:Key="TaskbarVisualizerOutputDeviceDescription">在 Windows 声音设置中选择默认输出和输入设备。</system:String>
     <system:String x:Key="TaskbarVisualizerAudioPeakLevelTitle">音频峰值阈值</system:String>
     <system:String x:Key="TaskbarVisualizerAudioPeakLevelDescription">频谱柱达到最大高度时，对应的音频音量大小</system:String>
     <system:String x:Key="PositionLeft">左侧</system:String>
@@ -225,4 +225,12 @@
     <system:String x:Key="LyricsSpectrum">频谱位置</system:String>
     <system:String x:Key="LyricsSpectrumAfter">封面 → 歌词 → 频谱</system:String>
     <system:String x:Key="LyricsSpectrumBefore">封面 → 频谱 → 歌词</system:String>
+    <system:String x:Key="VisualizerAudioSourceTitle">声音来源</system:String>
+    <system:String x:Key="VisualizerAudioSourceDescription">麦克风跟随 Windows 默认输入设备。声音仅用于频谱分析，不回放或保存。</system:String>
+    <system:String x:Key="VisualizerSourceDesktop">桌面声音</system:String>
+    <system:String x:Key="VisualizerSourceMicrophone">麦克风</system:String>
+    <system:String x:Key="VisualizerSourceBoth">桌面声音 + 麦克风</system:String>
+    <system:String x:Key="VisualizerSourceActive">正在采集</system:String>
+    <system:String x:Key="VisualizerSourceStarting">正在连接…</system:String>
+    <system:String x:Key="VisualizerSourceUnavailable">不可用，请检查 Windows 中的设备和麦克风访问权限。</system:String>
 </ResourceDictionary>
