@@ -9,9 +9,13 @@ the setting while the visualizer is disabled does not create capture resources.
 The settings page uses the existing entitlement policy and links to Windows
 sound settings for default-device selection.
 
-Desktop uses WASAPI loopback on the default multimedia render endpoint;
-microphone uses WASAPI capture on the default multimedia input endpoint. The
-existing output-device event retains its contract. A separate input-device event
+Desktop initially uses WASAPI loopback on the default multimedia render endpoint.
+After a render notification, it prefers the event's device ID regardless of Role
+(Console, Multimedia, or Communications), preserving the previous output-event
+contract even if the multimedia default still points to the old endpoint. Missing
+or unresolvable IDs fall back to the multimedia default; an empty notification
+clears the remembered ID. Microphone uses WASAPI capture on the default multimedia
+input endpoint. A separate input-device event
 restarts only the microphone, querying the current default endpoint again.
 There is no microphone playback, recording to disk, or upload.
 
@@ -70,6 +74,18 @@ GitHub Release build, formatter verification (zero files changed), diff check,
 XAML parsing, localization-key uniqueness, and documentation links passed.
 The compilation performed during the full test run still emitted existing
 warnings outside the changed files; no unrelated warning cleanup was included.
+
+Follow-up output-device regression checks add ten cases covering all render
+roles while the multimedia default remains unchanged, lookup failure fallback,
+empty-ID reset, disabled-state notifications, and capture-event isolation. The
+49 visualizer cases pass with:
+
+```powershell
+dotnet test tests/FluentFlyoutWPF.Tests/FluentFlyoutWPF.Tests.csproj -c "GitHub Release" -p:Platform=x64 --filter "FullyQualifiedName~Visualizer"
+```
+
+These use injected endpoint lookups and the production audio engine; actual
+Windows Console/Multimedia default divergence has not been reproduced manually.
 
 A temporary console probe outside the repository exercised the production
 engine and WASAPI adapter against the host's real default endpoints, without

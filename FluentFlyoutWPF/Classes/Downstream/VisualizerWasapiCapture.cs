@@ -11,10 +11,12 @@ internal sealed class VisualizerWasapiCapture : IVisualizerCapture
     private readonly MMDevice _device;
     private readonly WasapiCapture _capture;
 
-    public VisualizerWasapiCapture(int source)
+    public VisualizerWasapiCapture(int source, VisualizerOutputDeviceSelection? outputDevice = null)
     {
-        _device = (source == 0 ? AudioDeviceMonitor.Instance.GetDefaultRenderDevice()
-            : AudioDeviceMonitor.Instance.GetDefaultCaptureDevice())
+        var monitor = AudioDeviceMonitor.Instance;
+        _device = (source == 0 ? outputDevice == null ? monitor.GetDefaultRenderDevice()
+            : outputDevice.Select(monitor.GetDeviceById, monitor.GetDefaultRenderDevice)
+            : monitor.GetDefaultCaptureDevice())
             ?? throw new InvalidOperationException("No default audio endpoint is available.");
         try
         {

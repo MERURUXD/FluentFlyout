@@ -22,13 +22,15 @@ namespace FluentFlyoutWPF.Classes
         private static Visualizer? _currentInstance;
         private float[] _barValues = new float[10];
         private WriteableBitmap? _bitmap;
-        private readonly VisualizerAudioEngine _audio = new(source => new VisualizerWasapiCapture(source));
+        private readonly VisualizerOutputDeviceSelection _outputDevice = new();
+        private readonly VisualizerAudioEngine _audio;
         private bool _disposed;
 
         public WriteableBitmap? Bitmap => _bitmap;
 
         public Visualizer()
         {
+            _audio = new(source => new VisualizerWasapiCapture(source, _outputDevice));
             _currentInstance = this;
             Application.Current.Dispatcher.Invoke(() =>
                 _bitmap = new WriteableBitmap(ImageWidth, ImageHeight, 96, 96, PixelFormats.Bgra32, null));
@@ -69,7 +71,8 @@ namespace FluentFlyoutWPF.Classes
                 settings.TaskbarVisualizerAudioSensitivity, settings.TaskbarVisualizerAudioPeakLevel);
         }
 
-        private void OnDefaultDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e) => _ = _audio.Restart(0);
+        private void OnDefaultDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e)
+            => _ = _outputDevice.OnDefaultDeviceChanged(e, () => _audio.Restart(0));
         private void OnDefaultCaptureDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e) => _ = _audio.Restart(1);
 
         private void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
