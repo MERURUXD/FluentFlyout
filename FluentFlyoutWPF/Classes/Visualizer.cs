@@ -5,9 +5,6 @@ using FluentFlyout.Classes.Settings;
 using FluentFlyout.Classes.Utils;
 using FluentFlyoutWPF.Classes.Downstream;
 using Microsoft.Win32;
-using NAudio.CoreAudioApi;
-using NAudio.Dsp;
-using NAudio.Wave;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -17,625 +14,125 @@ namespace FluentFlyoutWPF.Classes
     public class Visualizer : IDisposable
     {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-
         public static int BarCount = 10;
-
-        // Keep at 2: only an exact 2:1 minification turns WPF's default Linear
-        // filter into a true box average. Other factors discard the supersampling.
         private const int Supersample = 2;
         private readonly int ImageWidth = 76 * Supersample;
         private readonly int ImageHeight = 32 * Supersample;
         private readonly int BarSpacing = 2 * Supersample;
-
         private static Visualizer? _currentInstance;
-        private float[] _barValues = [];
-        private float[] _currentBars = [];
+        private float[] _barValues = new float[10];
         private WriteableBitmap? _bitmap;
-        private readonly object _lock = new();
-        private readonly object _captureCleanupLock = new();
-        private readonly ResourceLifecycle<CaptureResources> _captureLifecycle = new();
+        private readonly VisualizerAudioEngine _audio = new(source => new VisualizerWasapiCapture(source));
+        private bool _disposed;
 
-        private readonly int _fftLength = 4096;
-        private int _fftPos = 0;
-        private readonly Complex[] _fftBuffer;
-
-        private readonly int _targetFps = 30;
-        private DateTime _lastUpdateTime = DateTime.MinValue;
-
-        private DateTime _lastDataAvailableUtc = DateTime.MinValue;
-        private int _restartInProgress; // 0=false, 1=true (Interlocked)
-        private string? _deviceId; // track current device ID for restart logic
-
-        private sealed class CaptureResources(
-            WasapiLoopbackCapture capture,
-            MMDevice renderDevice,
-            System.Timers.Timer watchdog,
-            int generation)
-        {
-            private readonly CallbackDrain _callbacks = new();
-
-            public WasapiLoopbackCapture Capture { get; } = capture;
-            public MMDevice RenderDevice { get; } = renderDevice;
-            public System.Timers.Timer Watchdog { get; } = watchdog;
-            public int Generation { get; } = generation;
-
-            public bool TryEnterCallback() => _callbacks.TryEnter();
-
-            public void ExitCallback() => _callbacks.Exit();
-
-            public void StopAndWaitForCallbacks() => _callbacks.StopAndWait();
-        }
-
-        private readonly struct BarGeometry
-        {
-            public readonly float Left, Right, Top, Bottom;
-            public readonly float InnerLeft, InnerRight, InnerTop, InnerBottom;
-
-            public BarGeometry(int x, int width, int y, int endY, float radius)
-            {
-                Left = x;
-                Right = x + width;
-                Top = y;
-                Bottom = endY;
-
-                InnerLeft = Left + radius;
-                InnerRight = Right - radius;
-                InnerTop = Top + radius;
-                InnerBottom = Bottom - radius;
-            }
-        }
-
-        public WriteableBitmap? Bitmap
-        {
-            get
-            {
-                lock (_lock)
-                {
-                    return _bitmap;
-                }
-            }
-        }
+        public WriteableBitmap? Bitmap => _bitmap;
 
         public Visualizer()
         {
             _currentInstance = this;
-            InitializeBitmap();
-
-            _fftBuffer = new Complex[_fftLength];
-
-            ResizeBarList(SettingsManager.Current.TaskbarVisualizerBarCount);
+            Application.Current.Dispatcher.Invoke(() =>
+                _bitmap = new WriteableBitmap(ImageWidth, ImageHeight, 96, 96, PixelFormats.Bgra32, null));
+            _audio.FrameReady += OnFrameReady;
             AudioDeviceMonitor.Instance.DefaultDeviceChanged += OnDefaultDeviceChanged;
-            TryRegisterSystemEvents();
-        }
-
-        private void TryRegisterSystemEvents()
-        {
+            AudioDeviceMonitor.Instance.DefaultCaptureDeviceChanged += OnDefaultCaptureDeviceChanged;
             try
             {
                 SystemEvents.SessionSwitch += OnSessionSwitch;
                 SystemEvents.PowerModeChanged += OnPowerModeChanged;
             }
-            catch (Exception ex)
-            {
-                // On some environments (e.g. non-interactive sessions), SystemEvents may not be available.
-                Logger.Warn(ex, "Failed to register SystemEvents handlers for visualizer auto-restart");
-            }
-        }
-
-        private void TryUnregisterSystemEvents()
-        {
-            try
-            {
-                SystemEvents.SessionSwitch -= OnSessionSwitch;
-                SystemEvents.PowerModeChanged -= OnPowerModeChanged;
-            }
-            catch (Exception ex)
-            {
-                Logger.Warn(ex, "Failed to unregister SystemEvents handlers for visualizer auto-restart");
-            }
-        }
-
-        private void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
-        {
-            if (!SettingsManager.Current.TaskbarVisualizerEnabled)
-                return;
-
-            // When unlocking after device disconnect (e.g. Bluetooth earbuds), WASAPI loopback can get stuck.
-            // Restart capture on unlock / logon to recover without user action.
-            if (e.Reason == SessionSwitchReason.SessionUnlock || e.Reason == SessionSwitchReason.SessionLogon)
-            {
-                RequestRestart($"session switch: {e.Reason}");
-            }
-        }
-
-        private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
-        {
-            if (!SettingsManager.Current.TaskbarVisualizerEnabled)
-                return;
-
-            if (e.Mode == PowerModes.Resume)
-            {
-                RequestRestart("power resume");
-            }
-        }
-
-        private void InitializeBitmap()
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                lock (_lock)
-                {
-                    _bitmap = new WriteableBitmap(ImageWidth, ImageHeight, 96, 96, PixelFormats.Bgra32, null);
-                }
-            });
-        }
-
-        private void OnDefaultDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e)
-        {
-            _deviceId = e.DeviceId;
-
-            // Even if capture isn't currently running (e.g. restart attempt failed while the device was reconfiguring),
-            // we still want to try restarting as soon as Windows reports a usable default endpoint again.
-            if (!SettingsManager.Current.TaskbarVisualizerEnabled)
-                return;
-            RequestRestart("default audio output device changed");
-        }
-
-        private void RequestRestart(string reason)
-        {
-            if (_captureLifecycle.IsDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
-                return;
-
-            if (Interlocked.Exchange(ref _restartInProgress, 1) == 1)
-                return;
-
-            Logger.Info($"Restarting visualizer ({reason})");
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    if (_captureLifecycle.IsDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
-                        return;
-
-                    Stop();
-
-                    for (int attempt = 0; attempt < 5; attempt++)
-                    {
-                        if (_captureLifecycle.IsDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
-                            return;
-
-                        await Task.Delay(500);
-
-                        if (_captureLifecycle.IsDisposed || !SettingsManager.Current.TaskbarVisualizerEnabled)
-                            return;
-
-                        Start();
-                        if (_captureLifecycle.IsRunning)
-                            return;
-                        Logger.Warn($"Visualizer restart attempt {attempt + 1} failed, retrying...");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex, "Visualizer restart failed");
-                }
-                finally
-                {
-                    Interlocked.Exchange(ref _restartInProgress, 0);
-                }
-            });
-        }
-
-        public static void ResizeBarList(int newBarCount)
-        {
-            BarCount = newBarCount;
-            _currentInstance?.ResizeBarListCore(newBarCount);
-        }
-
-        private void ResizeBarListCore(int newBarCount)
-        {
-            _barValues = new float[newBarCount];
-            _currentBars = new float[newBarCount];
+            catch (Exception ex) { Logger.Warn(ex, "Failed to register visualizer system events"); }
         }
 
         public void Start()
         {
-            if (!SettingsManager.Current.TaskbarVisualizerEnabled
-                || !_captureLifecycle.TryBeginStart(out var startToken))
-                return;
-
-            ResizeBarListCore(BarCount >= 0 ? BarCount : 8);
-
-            MMDevice? renderDevice = null;
-            WasapiLoopbackCapture? capture = null;
-            System.Timers.Timer? watchdog = null;
-            CaptureResources? candidate = null;
-
-            try
-            {
-                // Explicitly bind to the current default render endpoint.
-                // Using the parameterless capture can throw transient COM errors when the default endpoint is
-                // reconfiguring (e.g. Bluetooth earbuds disconnect/reconnect around lock/unlock).
-                renderDevice = string.IsNullOrWhiteSpace(_deviceId)
-                     ? AudioDeviceMonitor.Instance.GetDefaultRenderDevice()
-                     : AudioDeviceMonitor.Instance.GetDeviceById(_deviceId) ?? AudioDeviceMonitor.Instance.GetDefaultRenderDevice();
-
-                if (renderDevice == null)
-                {
-                    _captureLifecycle.CancelStart(startToken);
-                    return;
-                }
-
-                capture = new WasapiLoopbackCapture(renderDevice);
-                capture.DataAvailable += OnDataAvailable;
-                capture.RecordingStopped += OnRecordingStopped;
-                capture.StartRecording();
-
-                // automatic update timer in case audio data is not updated
-                watchdog = new(500)
-                {
-                    AutoReset = false
-                };
-                int generation = startToken.Generation;
-                watchdog.Elapsed += (sender, _) =>
-                {
-                    var resources = _captureLifecycle.Current;
-                    if (resources == null
-                        || resources.Generation != generation
-                        || !ReferenceEquals(sender, resources.Watchdog)
-                        || !resources.TryEnterCallback())
-                        return;
-
-                    try
-                    {
-                        if (!_captureLifecycle.IsRunning || _captureLifecycle.Generation != generation)
-                            return;
-
-                        for (int i = 0; i < _barValues.Length; i++)
-                        {
-                            _barValues[i] = 0;
-                        }
-                        UpdateBitmap(generation);
-
-                        if (!SettingsManager.Current.TaskbarVisualizerBaseline || SettingsManager.Current.TaskbarVisualizerBaselineAutoHide) // if baseline is enabled and autohide is off, condition is false
-                            SettingsManager.Current.TaskbarVisualizerHasContent = false;
-
-                        // If we stop receiving loopback callbacks entirely (common after lock/unlock + device changes),
-                        // the timer fires once and then never again. Use it as a recovery trigger.
-                        var silenceFor = DateTime.UtcNow - _lastDataAvailableUtc;
-                        if (silenceFor > TimeSpan.FromSeconds(2))
-                        {
-                            RequestRestart($"no audio callbacks for {silenceFor.TotalSeconds:0.0}s");
-                        }
-                    }
-                    finally
-                    {
-                        resources.ExitCallback();
-                    }
-                };
-
-                candidate = new CaptureResources(capture, renderDevice, watchdog, generation);
-                capture = null;
-                renderDevice = null;
-                watchdog = null;
-
-                if (!_captureLifecycle.TryPublish(startToken, candidate, out var rejected))
-                {
-                    candidate = null;
-                    DisposeCaptureResources(rejected ?? throw new InvalidOperationException("Rejected visualizer resources were not returned."));
-                    return;
-                }
-
-                candidate = null;
-                _lastDataAvailableUtc = DateTime.UtcNow;
-            }
-            catch (Exception ex)
-            {
-                _captureLifecycle.CancelStart(startToken);
-                if (candidate != null)
-                    DisposeCaptureResources(candidate);
-                else
-                    DisposePartialCapture(capture, renderDevice, watchdog);
-                Logger.Error(ex, "Failed to start visualizer");
-            }
-            finally
-            {
-                _captureLifecycle.CompleteStart(startToken);
-            }
+            RefreshSpectrumSettings();
+            _ = _audio.Configure(SettingsManager.Current.TaskbarVisualizerEnabled,
+                SettingsManager.Current.TaskbarVisualizerAudioSource);
         }
 
-        public void Stop()
+        public void Stop() => _audio.Configure(false, SettingsManager.Current.TaskbarVisualizerAudioSource).GetAwaiter().GetResult();
+
+        public static void ChangeAudioSource()
         {
-            lock (_captureCleanupLock)
-            {
-                try
-                {
-                    var resources = _captureLifecycle.Stop();
-                    if (resources != null)
-                        DisposeCaptureResources(resources);
-                }
-                finally
-                {
-                    _captureLifecycle.CompleteStop();
-                }
-            }
+            var instance = _currentInstance;
+            if (instance != null)
+                _ = instance._audio.Configure(SettingsManager.Current.TaskbarVisualizerEnabled,
+                    SettingsManager.Current.TaskbarVisualizerAudioSource);
         }
 
-        private void DisposeCaptureResources(CaptureResources resources)
-        {
-            try
-            {
-                resources.Watchdog.Stop();
-            }
-            catch (Exception ex)
-            {
-                Logger.Debug(ex, "Visualizer watchdog was already stopped");
-            }
+        public static void ResizeBarList(int newBarCount) => RefreshSpectrumSettings();
 
-            try
-            {
-                resources.StopAndWaitForCallbacks();
-                resources.Capture.DataAvailable -= OnDataAvailable;
-                resources.Capture.RecordingStopped -= OnRecordingStopped;
-                try
-                {
-                    resources.Capture.StopRecording();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Debug(ex, "Visualizer capture was already stopped");
-                }
-            }
-            finally
-            {
-                DisposeSafely(resources.Capture, "visualizer capture");
-                DisposeSafely(resources.Watchdog, "visualizer watchdog");
-                DisposeSafely(resources.RenderDevice, "visualizer render device");
-            }
+        public static void RefreshSpectrumSettings()
+        {
+            var settings = SettingsManager.Current;
+            _currentInstance?._audio.SetSpectrum(settings.TaskbarVisualizerBarCount,
+                settings.TaskbarVisualizerAudioSensitivity, settings.TaskbarVisualizerAudioPeakLevel);
         }
 
-        private void DisposePartialCapture(
-            WasapiLoopbackCapture? capture,
-            MMDevice? renderDevice,
-            System.Timers.Timer? watchdog)
+        private void OnDefaultDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e) => _ = _audio.Restart(0);
+        private void OnDefaultCaptureDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e) => _ = _audio.Restart(1);
+
+        private void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
         {
-            if (watchdog != null)
-            {
-                try
-                {
-                    watchdog.Stop();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Debug(ex, "Visualizer watchdog was already stopped");
-                }
-            }
-
-            if (capture != null)
-            {
-                capture.DataAvailable -= OnDataAvailable;
-                capture.RecordingStopped -= OnRecordingStopped;
-                try
-                {
-                    capture.StopRecording();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Debug(ex, "Visualizer capture was already stopped");
-                }
-
-                DisposeSafely(capture, "partial visualizer capture");
-            }
-
-            DisposeSafely(renderDevice, "partial visualizer render device");
-            DisposeSafely(watchdog, "partial visualizer watchdog");
+            if (e.Reason is SessionSwitchReason.SessionUnlock or SessionSwitchReason.SessionLogon)
+                RestartSources();
         }
 
-        private void DisposeSafely(IDisposable? resource, string name)
+        private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            try
-            {
-                resource?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Logger.Debug(ex, $"Failed to dispose {name}");
-            }
+            if (e.Mode == PowerModes.Resume)
+                RestartSources();
         }
 
-        private void OnDataAvailable(object? sender, WaveInEventArgs e)
+        private void RestartSources()
         {
-            var resources = _captureLifecycle.Current;
-            if (resources == null
-                || !ReferenceEquals(sender, resources.Capture)
-                || e.BytesRecorded == 0
-                || !resources.TryEnterCallback())
-                return;
-
-            try
-            {
-                var capture = resources.Capture;
-                _lastDataAvailableUtc = DateTime.UtcNow;
-
-                resources.Watchdog.Stop();
-                resources.Watchdog.Start();
-
-                int bytesPerSample = capture.WaveFormat.BitsPerSample / 8;
-                int samplesRecorded = e.BytesRecorded / bytesPerSample;
-
-                for (int i = 0; i < samplesRecorded; i++)
-                {
-                    float sampleValue = 0;
-                    if (bytesPerSample == 4)
-                    {
-                        sampleValue = BitConverter.ToSingle(e.Buffer, i * 4);
-                    }
-                    else if (bytesPerSample == 2)
-                    {
-                        sampleValue = BitConverter.ToInt16(e.Buffer, i * 2) / 32768f;
-                    }
-
-                    _fftBuffer[_fftPos].X = (float)(sampleValue * FastFourierTransform.HammingWindow(_fftPos, _fftLength));
-                    _fftBuffer[_fftPos].Y = 0;
-                    _fftPos++;
-
-                    // When buffer isn't full, skip processing and continue filling
-                    if (_fftPos < _fftLength)
-                        continue;
-
-                    // perform FFT
-                    _fftPos = 0;
-                    ProcessFftData(capture);
-
-                    // Update UI with frame rate limiting
-                    DateTime now = DateTime.UtcNow;
-                    double minFrameTime = 1000.0 / _targetFps;
-                    double timeSinceLastUpdate = (now - _lastUpdateTime).TotalMilliseconds;
-
-                    if (timeSinceLastUpdate < minFrameTime)
-                        continue;
-
-                    _lastUpdateTime = now;
-                    SettingsManager.Current.TaskbarVisualizerHasContent = true;
-
-                    if (SettingsManager.Current.TaskbarVisualizerBaseline && !SettingsManager.Current.TaskbarVisualizerBaselineAutoHide)
-                    {
-                        // if baseline is enabled and autohide is off, we want to keep showing the bars even when they are all zero
-                        UpdateBitmap(resources.Generation);
-                        break;
-                    }
-
-                    // check if bars are all zero, if so set has content to false to disable hover effect
-                    bool allZero = true;
-                    for (int j = 0; j < BarCount; j++)
-                    {
-                        if (_barValues[j] > 0.01f)
-                        {
-                            allZero = false;
-                            break;
-                        }
-                    }
-
-                    // update bars if they have content
-                    if (!allZero)
-                        UpdateBitmap(resources.Generation);
-                    else
-                        SettingsManager.Current.TaskbarVisualizerHasContent = false;
-                }
-            }
-            finally
-            {
-                resources.ExitCallback();
-            }
+            _ = _audio.Restart(0);
+            _ = _audio.Restart(1);
         }
 
-        private void ProcessFftData(WasapiLoopbackCapture capture)
+        private void OnFrameReady(VisualizerAudioFrame frame)
         {
-            FastFourierTransform.FFT(true, (int)Math.Log(_fftLength, 2.0), _fftBuffer);
-
-            int sampleRate = capture.WaveFormat.SampleRate;
-            double frequencyPerBin = (double)sampleRate / _fftLength;
-
-            double minFreq = 40;   // Hz
-            double maxFreq = 8000; // Hz
-            //double minFreq = 40;  // Hz // could be a setting to be bass only
-            //double maxFreq = 120; // Hz
-            float minDb = (SettingsManager.Current.TaskbarVisualizerAudioSensitivity * -10f) - 30f;
-            float maxDb = (SettingsManager.Current.TaskbarVisualizerAudioPeakLevel * 10f) - 30f;
-
-            for (int i = 0; i < BarCount; i++)
-            {
-                double startFreq = minFreq * Math.Pow(maxFreq / minFreq, (double)i / BarCount);
-                double endFreq = minFreq * Math.Pow(maxFreq / minFreq, (double)(i + 1) / BarCount);
-
-                int startBin = (int)(startFreq / frequencyPerBin);
-                int endBin = (int)(endFreq / frequencyPerBin);
-
-                if (endBin <= startBin) endBin = startBin + 1;
-                if (endBin >= _fftBuffer.Length / 2) endBin = _fftBuffer.Length / 2 - 1;
-
-                float maxAmplitude = 0;
-
-                // Find max amplitude
-                for (int j = startBin; j < endBin; j++)
-                {
-                    float amplitude = (float)Math.Sqrt(_fftBuffer[j].X * _fftBuffer[j].X + _fftBuffer[j].Y * _fftBuffer[j].Y);
-                    if (amplitude > maxAmplitude)
-                        maxAmplitude = amplitude;
-                }
-
-                float progress = (float)i / BarCount;
-                float linearBoost = 1.0f + (progress * 75.0f);
-                maxAmplitude *= linearBoost;
-
-                if (maxAmplitude < 0.001f) maxAmplitude = 0.001f;
-
-                float db = 20f * (float)Math.Log10(maxAmplitude);
-
-                float intensity = (db - minDb) / (maxDb - minDb);
-                intensity = Math.Clamp(intensity, 0f, 1f);
-
-                _currentBars[i] = intensity;
-            }
-
-            for (int i = 0; i < BarCount; i++)
-            {
-                if (_currentBars[i] > _barValues[i])
-                {
-                    // Jump up quickly
-                    _barValues[i] = _currentBars[i];
-                }
-                else
-                {
-                    // Fall down slowly
-                    //_barValues[i] = (_barValues[i] * 0.9f) + (_currentBars[i] * 0.1f);
-                    _barValues[i] = (_barValues[i] * 0.8f) + (_currentBars[i] * 0.2f);
-                    //_barValues[i] = (_barValues[i] * 0.7f) + (_currentBars[i] * 0.3f); // could be options for smoothening
-                    //_barValues[i] = (_barValues[i] * 0.6f) + (_currentBars[i] * 0.4f);
-                }
-            }
-        }
-
-        private void UpdateBitmap(int generation)
-        {
-            if (_bitmap == null)
-                return;
-
             Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                lock (_lock)
+                if (_disposed || !ReferenceEquals(_currentInstance, this) || !_audio.IsCurrent(frame.Revision) || _bitmap == null)
+                    return;
+                var settings = SettingsManager.Current;
+                settings.TaskbarVisualizerSourceStatus = string.Join(" · ", new[]
                 {
-                    if (_bitmap == null
-                        || !_captureLifecycle.IsRunning
-                        || _captureLifecycle.Generation != generation)
-                        return;
-
-                    _bitmap.Lock();
-
-                    try
+                    SourceStatusText("VisualizerSourceDesktop", frame.Desktop),
+                    SourceStatusText("VisualizerSourceMicrophone", frame.Microphone)
+                }.Where(text => text.Length > 0));
+                _barValues = frame.Bars;
+                BarCount = frame.Bars.Length;
+                settings.TaskbarVisualizerHasContent = frame.Bars.Any(value => value > 0.01f)
+                    || settings.TaskbarVisualizerBaseline && !settings.TaskbarVisualizerBaselineAutoHide;
+                _bitmap.Lock();
+                try
+                {
+                    unsafe
                     {
-                        unsafe
-                        {
-                            IntPtr pBackBuffer = _bitmap.BackBuffer;
-                            int stride = _bitmap.BackBufferStride;
-                            int bufferSize = stride * ImageHeight;
-
-                            Span<byte> buffer = new Span<byte>(pBackBuffer.ToPointer(), bufferSize);
-
-                            buffer.Clear();
-
-                            DrawBars(stride, buffer);
-                        }
-
-                        _bitmap.AddDirtyRect(new Int32Rect(0, 0, ImageWidth, ImageHeight));
+                        int stride = _bitmap.BackBufferStride;
+                        var buffer = new Span<byte>(_bitmap.BackBuffer.ToPointer(), stride * ImageHeight);
+                        buffer.Clear();
+                        DrawBars(stride, buffer);
                     }
-                    finally
-                    {
-                        _bitmap.Unlock();
-                    }
+                    _bitmap.AddDirtyRect(new Int32Rect(0, 0, ImageWidth, ImageHeight));
                 }
+                finally { _bitmap.Unlock(); }
             }, System.Windows.Threading.DispatcherPriority.Render);
+        }
+
+        private static string SourceStatusText(string sourceKey, VisualizerSourceStatus status)
+        {
+            if (status == VisualizerSourceStatus.Off)
+                return string.Empty;
+            string key = status switch
+            {
+                VisualizerSourceStatus.Active => "VisualizerSourceActive",
+                VisualizerSourceStatus.Starting => "VisualizerSourceStarting",
+                _ => "VisualizerSourceUnavailable"
+            };
+            return $"{Application.Current.TryFindResource(sourceKey)}: {Application.Current.TryFindResource(key)}";
         }
 
         private unsafe void DrawBars(int stride, Span<byte> buffer)
@@ -827,29 +324,32 @@ namespace FluentFlyoutWPF.Classes
             buffer[index + 3] = a;
         }
 
-        private void OnRecordingStopped(object? sender, StoppedEventArgs e)
-        {
-            if (e.Exception != null)
-            {
-                Logger.Error(e.Exception, "Visualizer recording stopped due to an error");
-            }
-        }
-
         public void Dispose()
         {
-            lock (_captureCleanupLock)
-            {
-                var resources = _captureLifecycle.Dispose();
-                if (resources != null)
-                    DisposeCaptureResources(resources);
-            }
-
+            if (_disposed)
+                return;
+            _disposed = true;
             AudioDeviceMonitor.Instance.DefaultDeviceChanged -= OnDefaultDeviceChanged;
-            TryUnregisterSystemEvents();
-
+            AudioDeviceMonitor.Instance.DefaultCaptureDeviceChanged -= OnDefaultCaptureDeviceChanged;
+            try
+            {
+                SystemEvents.SessionSwitch -= OnSessionSwitch;
+                SystemEvents.PowerModeChanged -= OnPowerModeChanged;
+            }
+            catch (Exception ex) { Logger.Warn(ex, "Failed to unregister visualizer system events"); }
+            _audio.FrameReady -= OnFrameReady;
+            _audio.Dispose();
             if (ReferenceEquals(_currentInstance, this))
+            {
                 _currentInstance = null;
-
+                Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (_currentInstance != null)
+                        return;
+                    SettingsManager.Current.TaskbarVisualizerSourceStatus = string.Empty;
+                    SettingsManager.Current.TaskbarVisualizerHasContent = false;
+                });
+            }
             GC.SuppressFinalize(this);
         }
     }

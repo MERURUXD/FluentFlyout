@@ -141,8 +141,13 @@ same-ID session restart must not move selected UI backward.
   access is available. Its positioning timer exists only with that window;
   disabling or closing the widget closes the window and stops the timer.
 - The taskbar visualizer owns a nullable visualizer instance. It allocates audio
-  capture, buffers, watchdog work, and system subscriptions only while enabled,
-  drains in-flight callbacks on disable/dispose, and rejects stale restarts.
+  capture, buffers, one-shot inactivity timers, and system subscriptions only
+  while enabled. `VisualizerAudioEngine` independently owns desktop loopback and
+  default-microphone capture, drains callbacks on disable/dispose, and rejects
+  stale starts and Dispatcher frames. Both-source mode merges the stronger
+  amplitude in each frequency band before shared smoothing. See
+  [visualizer audio sources](visualizer-audio.md) for settings, failure behavior,
+  validation evidence, and the remaining manual checks.
 - Next Up remains lazy and keeps only its own short-lived origin-session token.
 - The seekbar `System.Threading.Timer` is active only when the seekbar is
   visible, supported, enabled, and the selected session is playing. The display
